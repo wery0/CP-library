@@ -1,0 +1,31 @@
+template<typename T>
+struct sparse_table {
+    int K, G;
+    vec<vec<T>> m;
+
+    inline T merge(T x, T y) {
+        return min(x, y);
+    }
+
+    sparse_table(vec<T> &n) {
+        init_table(n);
+    }
+
+    void init_table(vec<T> &n) {
+        G = n.size();
+        K = __lg(G) + 1;
+        m = vec<vec<T>>(K);
+        for (int q = 0; q < K; q++) m[q] = vec<T>(max(0, G - (1 << q) + 1));
+        for (int q = 0; q < G; q++) m[0][q] = n[q];
+        for (int q = 1; q < K; q++) {
+            for (int w = 0; w + (1 << q) <= G; w++) {
+                m[q][w] = merge(m[q - 1][w], m[q - 1][w + (1 << (q - 1))]);
+            }
+        }
+    }
+
+    T query(int l, int r, const int index = 0) {
+        int u = __lg(r - l + 1);
+        return merge(m[u][l - index], m[u][r - index - (1 << u) + 1]);
+    }
+};

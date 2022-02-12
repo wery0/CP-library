@@ -1,0 +1,8 @@
+ll manak(str t){
+    int a = t.size();
+    vec<int> m(a);
+    ll o = 0;
+    for(int q=0, l=0, r=0; q<a; o+=m[q], l = q+m[q]-1>r ? q-m[q]+1 : l, r = max(r, q+m[q]-1), q++) for(m[q] = max(0, min(r-q, m[r-q+l])); q+m[q]<a && q-m[q]>=0 && t[q-m[q]]==t[q+m[q]];) m[q]++;
+    for(int q=1, l=0, r=0; q<a; o+=m[q], l = q+m[q]>r ? q-m[q]-1 : l, r = max(r, q+m[q]), q++) for(m[q] = max(0, min(r-q, m[r-q+l+1])); q+m[q]<a && q-m[q]>=1 && t[q-m[q]-1]==t[q+m[q]];) m[q]++;
+    return o;
+}

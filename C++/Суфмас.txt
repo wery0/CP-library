@@ -1,0 +1,20 @@
+vec<int> sufmas(str &t){
+    int a = t.size(), cnt[a], cl[a], pcl[a], kek[256];
+    memset(kek, 0, sizeof(kek));
+    memset(cnt, 0, sizeof(cnt));
+    for(char c : t) kek[c] = 1;
+    for(int q=0, i=0; q<256; q++) if(kek[q]) kek[q] = i++;
+    for(int q=0; q<a; q++) cl[q] = kek[t[q]], cnt[cl[q]]++;
+    pair<pii, int> ncl[a];
+    for(int d=1; d<a; d*=2){
+        for(int q=1; q<a; q++) cnt[q]+=cnt[q-1];
+        for(int q=0; q<a; q++) pcl[--cnt[cl[(q+d)%a]]] = q;
+        for(int q : pcl) ncl[cnt[cl[q]]++] = {{cl[q], cl[(q+d)%a]}, q};
+        for(int q=0; q<a; q++) cl[ncl[q].S] = q ? cl[ncl[q-1].S]+(ncl[q-1].F!=ncl[q].F) : 0;
+        memset(cnt, 0, sizeof(cnt));
+        for(int i : cl) cnt[i]++;
+    }
+    vec<int> suf(a);
+    for(int q=0; q<a; q++) suf[cl[q]] = q;
+    return suf;
+}

@@ -1,0 +1,363 @@
+#pragma GCC optimize("Ofast")
+// #pragma GCC target("avx,avx2,fma")
+
+#include<bits/stdc++.h>
+
+#define F first
+#define S second
+#define vec vector
+#define pb push_back
+#define cld complex<ld>
+#define pll pair<ll, ll>
+#define pdd pair<ld, ld>
+#define umap unordered_map
+#define uset unordered_set
+#define pii pair<int, int>
+#define pnn pair<Node*, Node*>
+#define all(m) m.begin(), m.end()
+#define uid uniform_int_distribution
+#define init(m, x) memset(m, x, sizeof(m));
+#define pripii(p) cout << "{" << p.F << ", " << p.S << "} "
+#define FILE ifstream in("input.txt"); ofstream out("output.txt");
+#define fast cin.tie(0); cout.tie(0); cin.sync_with_stdio(0); cout.sync_with_stdio(0);
+using namespace std;
+typedef string str;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned int uint;
+typedef unsigned long long ull;
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+
+ll inf = 1e15 + 7;
+
+struct Node {
+    Node *m[2] = {0, 0};
+    Node *p = 0, *pp = 0;
+    ll num = -1;
+    ll x = -1, sz = 0, rev = 0;
+    ll sm = 0;
+
+    Node() {}
+
+    Node(ll X, ll N) {
+        x = X;
+        num = N;
+        sm = X;
+        sz = 1;
+    }
+};
+
+ll gsz(Node *n) {return n ? n->sz : 0;}
+ll gsm(Node *n) {return n ? n->sm : 0;}
+
+void push(Node *n) {
+    if (!n) return;
+    if (n->rev) {
+        if (n->m[0]) n->m[0]->rev ^= 1;
+        if (n->m[1]) n->m[1]->rev ^= 1;
+        swap(n->m[0], n->m[1]);
+    }
+    n->rev = 0;
+}
+
+void print(Node *n) {
+    if (!n) return;
+    push(n);
+    print(n->m[0]);
+    if (n->num == -1) {
+        cout << "W" << n->x << " ";
+    } else {
+        cout << "N" << n->num + 1 << " ";
+    }
+    print(n->m[1]);
+}
+
+void upd(Node *n) {
+    if (!n) return;
+    push(n->m[0]);
+    push(n->m[1]);
+    n->sz = gsz(n->m[0]) + 1 + gsz(n->m[1]);
+    n->sm = gsm(n->m[0]) + n->x + gsm(n->m[1]);
+}
+
+void set_path_parent(Node *n, Node *pp) {
+    assert(!n->pp);
+    n->pp = pp;
+}
+
+void del_path_parent(Node *n) {
+    if (!n->pp) return;
+    n->pp = 0;
+}
+
+void SUPER_PUSH(Node *n) {
+    if (n->p) SUPER_PUSH(n->p);
+    push(n);
+}
+
+int dir(Node *x, Node *par) {
+    return par->m[1] == x;
+}
+
+void connect(Node *x, Node *par, int d) {
+    if (x) x->p = par;
+    par->m[d] = x;
+    upd(par);
+}
+
+void disconnect(Node *par, int d) {
+    if (par->m[d]) par->m[d]->p = 0;
+    par->m[d] = 0;
+    upd(par);
+}
+
+void rotate(Node *x) {
+    if (!x->p) return;
+    Node *p = x->p, *g = p->p;
+    int d = dir(x, p);
+    if (g) {
+        connect(x, g, dir(p, g));
+    } else {
+        x->p = 0;
+    }
+    connect(x->m[d ^ 1], p, d);
+    connect(p, x, d ^ 1);
+}
+
+Node* get_root_of_splay_tree(Node *n) {
+    if (n->p) return get_root_of_splay_tree(n->p);
+    return n;
+}
+
+void splay(Node *n) {
+    if (!n) return;
+    SUPER_PUSH(n);
+    if (!n->p) return;
+    Node *rt = get_root_of_splay_tree(n);
+    for (; n->p;) {
+        if (n->p->p) rotate(dir(n, n->p) == dir(n->p, n->p->p) ? n->p : n);
+        rotate(n);
+    }
+    set_path_parent(n, rt->pp);
+    del_path_parent(rt);
+}
+
+Node* merge(Node *l, Node *r) {
+    if (!l) return r;
+    if (!r) return l;
+    push(l);
+    for (; l->m[1]; ) {
+        l = l->m[1];
+        push(l);
+    }
+    splay(l);
+    connect(r, l, 1);
+    return l;
+}
+
+Node* access_by_pos(Node *n, int ps) { //1-index
+    push(n);
+    if (ps <= gsz(n->m[0])) return access_by_pos(n->m[0], ps);
+    if (ps > gsz(n->m[0]) + 1) return access_by_pos(n->m[1], ps - gsz(n->m[0]) - 1);
+    Node *rt = get_root_of_splay_tree(n);
+    splay(n);
+    splay(rt);
+    return n;
+}
+
+pnn splitSz(Node *n, int k) {
+    if (!k) return {0, n};
+    n = access_by_pos(n, k);
+    Node *R = n->m[1];
+    if (R) disconnect(n, 1);
+    return {n, R};
+}
+
+Node* rem_by_pos(Node *n, int pos) {
+    pnn p1 = splitSz(n, pos - 1), p2 = splitSz(p1.S, 1);
+    return merge(p1.F, p2.S);
+}
+
+int get_val(Node *&n, int pos) {
+    n = access_by_pos(n, pos);
+    return n->x;
+}
+
+void seg_rev(Node *&n, int l, int r) {
+    pnn p = splitSz(n, l - 1), p1 = splitSz(p.S, r - l + 1);
+    p1.F->rev ^= 1;
+    n = merge(p.F, merge(p1.F, p1.S));
+}
+
+void expose(Node *n) {
+    splay(n);
+    if (n->m[1]) {
+        set_path_parent(n->m[1], n);
+        disconnect(n, 1);
+    }
+    for (; n->pp;) {
+        Node *u = n->pp;
+        del_path_parent(n);
+        splay(u);
+        if (u->m[1]) {
+            set_path_parent(u->m[1], u);
+            disconnect(u, 1);
+        }
+        connect(n, u, 1);
+        splay(n);
+    }
+}
+
+Node* get_root_of_LCT(Node *n) {
+    expose(n);
+    return access_by_pos(n, 1);
+}
+
+int is_connected(Node *x, Node *y) {
+    return get_root_of_LCT(x) == get_root_of_LCT(y);
+}
+
+int depth(Node *x) {
+    expose(x);
+    return gsz(x);
+}
+
+void link(Node* x, Node* y) {
+    if (is_connected(x, y)) return;
+    expose(x);
+    x->rev ^= 1;
+    set_path_parent(x, y);
+}
+
+void cut(Node *x, Node *y) {
+    if (depth(x) < depth(y)) swap(x, y);
+    expose(y);
+    splay(x);
+    del_path_parent(x);
+}
+
+
+void cut(Node *x) {
+    expose(x);
+    if (x->m[0]) disconnect(x, 0);
+}
+
+Node* lca(Node *x, Node *y) {
+    if (x == y) return x;
+    if (depth(x) < depth(y)) swap(x, y);
+    expose(x);
+    expose(y);
+    return x->pp;
+}
+
+void reroot(Node *n) {
+    expose(n);
+    n->rev ^= 1;
+}
+
+const int G = 200005;
+int a, Z, root = -1;
+Node* m[G];
+
+ll get_dst_from_root(Node *n) {
+    Node *rt = get_root_of_LCT(n);
+    expose(n);
+    ll ans = n->sm;
+    reroot(rt);
+    return ans;
+}
+
+ll get_dst_between_vertexes(Node *x, Node *y) {
+    Node *lc = lca(x, y);
+    return get_dst_from_root(x) + get_dst_from_root(y) - get_dst_from_root(lc) * 2;
+}
+
+ll examine_edge(Node *rt, Node *n, ll en, ll wei) { //0-index
+    Node *y = access_by_pos(n, 1);
+    Node *x = access_by_pos(n, gsz(n));
+    ll u = en * 2 + 2;
+    Node *A = access_by_pos(n, u - 1);
+    Node *B = access_by_pos(n, u + 1);
+    ll W = access_by_pos(n, u)->x;
+    ll da = get_dst_between_vertexes(rt, A);
+    ll db = get_dst_between_vertexes(rt, x) + wei + get_dst_between_vertexes(y, B);
+    return db + W <= da;
+}
+
+int main() {
+    fast;
+    cin >> a >> Z;
+    for (int q = 0; q < a; q++) {
+        m[q] = new Node(0, q);
+    }
+    multiset<pll> s;
+    for (; Z--;) {
+        ll ty, x, y; cin >> ty >> x >> y; x--, y--;
+        if (ty == 1) {
+            if (!s.count({min(x, y), max(x, y)})) continue;
+            s.erase(s.find({min(x, y), max(x, y)}));
+            Node *rt = get_root_of_LCT(m[x]);
+            reroot(m[x]);
+            expose(m[y]);
+            Node *C = access_by_pos(m[y], 2);
+            cut(C);
+            cut(m[y]);
+            reroot(rt);
+            if (get_root_of_LCT(m[x]) == rt) {
+                reroot(m[y]);
+            } else {
+                reroot(m[x]);
+            }
+        } else if (ty == 2) {
+            s.insert({min(x, y), max(x, y)});
+            ll w; cin >> w;
+            Node *nw = new Node(w, -1);
+            Node *rt = get_root_of_LCT(m[x]);
+            if (get_root_of_LCT(m[x]) != get_root_of_LCT(m[y])) {
+                link(m[y], nw);
+                link(m[x], nw);
+                reroot(rt);
+            } else {
+                ll dx = get_dst_from_root(m[x]);
+                ll dy = get_dst_from_root(m[y]);
+                if (dx > dy) swap(x, y), swap(dx, dy);
+                if (dx + w > dy) {
+                    s.erase(s.find({min(x, y), max(x, y)}));
+                    continue;
+                }
+                Node *rt = get_root_of_LCT(m[x]);
+                reroot(m[y]);
+                expose(m[x]);
+                ll sz = gsz(m[x]), edg = sz / 2, v = sz - edg;
+                ll l = -1, r = edg - 1;
+                for (; l + 1 < r;) {
+                    ll k = (l + r) >> 1;
+                    if (!examine_edge(rt,  m[x], k, w)) {
+                        r = k;
+                    } else {
+                        l = k;
+                    }
+                    expose(m[x]);
+                }
+                expose(m[x]);
+                ll en = r * 2 + 2;
+                Node *u = access_by_pos(m[x], en);
+                Node *A = access_by_pos(m[x], en - 1);
+                Node *B = access_by_pos(m[x], en + 1);
+                pii P = {min(A->num, B->num), max(A->num, B->num)};
+                s.erase(s.find(P));
+                cut(u);
+                cut(B);
+                link(m[x], nw);
+                link(m[y], nw);
+                reroot(rt);
+            }
+        } else {
+            if (get_root_of_LCT(m[x]) != get_root_of_LCT(m[y])) {
+                cout << "-1\n";
+            } else {
+                cout << get_dst_between_vertexes(m[x], m[y]) << "\n";
+            }
+        }
+    }
+}

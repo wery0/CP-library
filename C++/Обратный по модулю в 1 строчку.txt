@@ -1,0 +1,5 @@
+ll inv(ll x, ll m) {
+    return x == 1 ? x : (1 - inv(m % x, x) * m) / x + m;
+}
+
+//Be careful with overflow

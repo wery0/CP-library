@@ -1,0 +1,31 @@
+inline ll mul(ll x, ll y, ll mod){
+    __int128 cx = x;
+    return cx*y%mod;
+}
+
+inline ll binpow(ll x, ll k, ll mod){
+    ll o = 1;
+    for(; k; k>>=1){
+        if(k&1) o = mul(o, x, mod);
+        x = mul(x, x, mod);
+    }
+    return o;
+}
+
+int miller_rabin(ll p){
+    if(p==1) return 0;
+    static ll A[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};    //enough for all <= 2^64 nums
+    ll k = __builtin_ctzll(p-1), d = (p-1)>>k;
+    for(ll a : A){
+        if(a>=p) break;
+        ll c = binpow(a, d, p);
+        if(c==1) continue;
+        int fl = 0;
+        for(int q=0; q<k && !fl; q++){
+            fl |= c==p-1;
+            c = mul(c, c, p);
+        }
+        if(!fl) return 0;
+    }
+    return 1;
+}

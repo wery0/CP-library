@@ -1,0 +1,34 @@
+template<typename T>
+struct disjoint_sparse_table {
+    int K, G;
+    vec<vec<T>> m;
+
+    T merge(T x, T y) {
+        return min(x, y);
+    }
+
+    disjoint_sparse_table(vec<T> &n) {
+        init_table(n);
+    }
+
+    void init_table(vec<T> &n) {
+        G = n.size();
+        K = __lg(G) + 1 + (!!(G & (G - 1)));
+        m = vec<vec<T>>(K - 1, vec<T>(G));
+        for (int q = 1; q < K; q++) {
+            for (int l = 0, md = (1 << q) / 2, r = (1 << q); md < G; l += 1 << q, md += 1 << q, r += 1 << q) {
+                m[q - 1][md - 1] = n[md - 1];
+                m[q - 1][md] = n[md];
+                for (int w = md - 2; w >= l; w--) m[q - 1][w] = merge(m[q - 1][w + 1], n[w]);
+                const int gr = min(G, r);
+                for (int w = md + 1; w < gr; w++) m[q - 1][w] = merge(m[q - 1][w - 1], n[w]);
+            }
+        }
+    }
+
+    T query(int l, int r, const int index = 0) {
+        l -= index, r -= index;
+        const int u = l == r ? 0 : __lg(l ^ r);
+        return l == r ? m[0][l] : merge(m[u][l], m[u][r]);
+    }
+};

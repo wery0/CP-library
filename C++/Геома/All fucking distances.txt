@@ -1,0 +1,235 @@
+#pragma GCC optimize("Ofast")
+// #pragma GCC target("avx,avx2,fma")
+
+#include<bits/stdc++.h>
+
+#define F first
+#define S second
+#define vec vector
+#define pb push_back
+#define cld complex<ld>
+#define pll pair<ll, ll>
+#define pdd pair<ld, ld>
+#define umap unordered_map
+#define uset unordered_set
+#define pii pair<int, int>
+#define pnn pair<Node*, Node*>
+#define all(m) m.begin(), m.end()
+#define uid uniform_int_distribution
+#define init(m, x) memset(m, x, sizeof(m));
+#define pripii(p) cout << "{" << p.F << ", " << p.S << "} "
+#define FILE ifstream in("input.txt"); ofstream out("output.txt");
+#define fast cin.tie(0); cout.tie(0); cin.sync_with_stdio(0); cout.sync_with_stdio(0);
+using namespace std;
+typedef string str;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned int uint;
+typedef unsigned long long ull;
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+
+const ld EPS = 1e-9;
+
+struct pt {
+    ld x = 0, y = 0;
+
+    pt() {}
+
+    pt(ld a, ld b) {
+        x = a, y = b;
+    }
+
+    pt operator+(const pt &p) { return {x + p.x, y + p.y}; }
+
+    pt operator-(const pt &p) { return {x - p.x, y - p.y}; }
+
+    pt operator*(const ld c) { return {x * c, y * c}; }
+
+    pt operator/(const ld c) { return {x / c, y / c}; }
+
+    void operator+=(const pt &p) { x += p.x, y += p.y; }
+
+    void operator-=(const pt &p) { x -= p.x, y -= p.y; }
+
+    void operator*=(const ld c) { x *= c, y *= c; }
+
+    void operator/=(const ld c) { x /= c, y /= c; }
+
+    ld dst(const pt &p) { return sqrtl((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y)); }
+
+    ld dot(const pt &p) { return x * p.x + y * p.y; }
+
+    ld cross(const pt &p) { return x * p.y - y * p.x; }
+};
+
+struct line {
+    ld A, B, C;
+
+    int dst_pt(pt &p) {
+        normalize();
+        return abs(A * p.x + B * p.y + C);
+    }
+
+    line(pt a, pt b) {
+        A = a.y - b.y;
+        B = b.x - a.x;
+        C = a.cross(b);
+        normalize();
+    }
+
+    void normalize() {
+        ld u = sqrtl(A * A + B * B);
+        A /= u, B /= u, C /= u;
+    }
+
+    void make_normal(pt &p) {
+        pt p2 = p + pt(A, B);
+        line nw = line(p, p2);
+        A = nw.A;
+        B = nw.B;
+        C = nw.C;
+    }
+
+    pt intersect(const line &l) {
+        assert(abs(A - l.A) + abs(B - l.B) > EPS);
+        ld x = (l.C * B - C * l.B) / (A * l.B - l.A * B);
+        ld y = (l.A * C - A * l.C) / (A * l.B - l.A * B);
+        return {x, y};
+    }
+
+    int is_parallel(line &l) {
+        return abs(l.A - A) + abs(l.B - B) < EPS;
+    }
+};
+
+ld dst_pp(pt p1, pt p2) {
+    return p1.dst(p2);
+}
+
+int pis(pt p, pt p1, pt p2) {
+    ld lx = min(p1.x, p2.x);
+    ld rx = max(p1.x, p2.x);
+    ld ly = min(p1.y, p2.y);
+    ld ry = max(p1.y, p2.y);
+    return lx - EPS <= p.x && p.x <= rx + EPS
+           && ly - EPS <= p.y && p.y <= ry + EPS;
+}
+
+int pir(pt p, pt p1, pt p2) {
+    line l = line(p1, p2);
+    if (l.dst_pt(p) > EPS) return 0;
+    pt n1 = p2 - p1;
+    pt n2 = p - p1;
+    if (n1.dot(n2) >= -EPS) return 1;
+    return 0;
+}
+
+ld dst_ps(pt p, pt p1, pt p2) {
+    line l = line(p1, p2);
+    line u = line(p1, p2);
+    u.make_normal(p);
+    pt i = l.intersect(u);
+    if (pis(i, p1, p2)) return dst_pp(p, i);
+    return min(dst_pp(p, p1), dst_pp(p, p2));
+}
+
+ld dst_pl(pt p, pt p1, pt p2) {
+    line l = line(p1, p2);
+    return abs(l.A * p.x + l.B * p.y + l.C);
+}
+
+ld dst_ss(pt p1, pt p2, pt p3, pt p4) {
+    ld xyu = min({dst_ps(p1, p3, p4), dst_ps(p2, p3, p4),
+                  dst_ps(p3, p1, p2), dst_ps(p4, p1, p2)});
+    line l1 = line(p1, p2);
+    line l2 = line(p3, p4);
+    if (l1.is_parallel(l2)) return xyu;
+    pt i = l1.intersect(l2);
+    if (pis(i, p1, p2) && pis(i, p3, p4)) return 0;
+    return xyu;
+}
+
+ld dst_pr(pt p, pt p1, pt p2) {
+    line l = line(p1, p2);
+    line i = line(p1, p2);
+    i.make_normal(p);
+    pt c = l.intersect(i);
+    if (pir(c, p1, p2)) return dst_pl(p, p1, p2);
+    return dst_pp(p, p1);
+}
+
+ld dst_sr(pt p1, pt p2, pt p3, pt p4) {
+    ld xyu = min(dst_pr(p1, p3, p4), dst_pr(p2, p3, p4));
+    xyu = min(xyu, dst_ps(p3, p1, p2));
+    line l1 = line(p1, p2);
+    line l2 = line(p3, p4);
+    if (l1.is_parallel(l2)) return xyu;
+    pt p = l1.intersect(l2);
+    if (pis(p, p1, p2) && pir(p, p3, p4)) return 0;
+    return xyu;
+}
+
+ld dst_sl(pt p1, pt p2, pt p3, pt p4) {
+    ld d1 = dst_sr(p1, p2, p3, p4);
+    ld d2 = dst_sr(p1, p2, p3, p3 - (p4 - p3));
+    return min(d1, d2);
+}
+
+ld dst_rr(pt p1, pt p2, pt p3, pt p4) {
+    ld xyu = min(dst_pr(p1, p3, p4), dst_pr(p3, p1, p2));
+    line l1 = line(p1, p2);
+    line l2 = line(p3, p4);
+    if (l1.is_parallel(l2)) return xyu;
+    pt p = l1.intersect(l2);
+    if (pir(p, p1, p2) && pir(p, p3, p4)) return 0;
+    return xyu;
+}
+
+ld dst_rl(pt p1, pt p2, pt p3, pt p4) {
+    ld d1 = dst_rr(p1, p2, p3, p4);
+    ld d2 = dst_rr(p1, p2, p3, p3 - (p4 - p3));
+    return min(d1, d2);
+}
+
+ld dst_ll(pt p1, pt p2, pt p3, pt p4) {
+    ld d1 = dst_rl(p1, p2, p3, p4);
+    ld d2 = dst_rl(p1, p1 - (p2 - p1), p3, p4);
+    return min(d1, d2);
+}
+
+int main() {
+    fast;
+    cout.precision(12);
+    cout << fixed;
+    ll x1, y1, x2, y2, x3, y3, x4, y4;
+    cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
+    pll m[] = {{x1, y1},
+               {x2, y2},
+               {x3, y3},
+               {x4, y4}};
+    assert(m[0] != m[1]);
+    assert(m[2] != m[3]);
+    pt a = {(ld) x1, (ld) y1};
+    pt b = {(ld) x2, (ld) y2};
+    pt c = {(ld) x3, (ld) y3};
+    pt d = {(ld) x4, (ld) y4};
+    cout << dst_pp(a, c) << "\n";
+    cout << dst_ps(a, c, d) << "\n";
+    cout << dst_pr(a, c, d) << "\n";
+    cout << dst_pl(a, c, d) << "\n";
+    // cout << "\n";
+    cout << dst_ps(c, a, b) << "\n";
+    cout << dst_ss(a, b, c, d) << "\n";
+    cout << dst_sr(a, b, c, d) << "\n";
+    cout << dst_sl(a, b, c, d) << "\n";
+    // cout << "\n";
+    cout << dst_pr(c, a, b) << "\n";
+    cout << dst_sr(c, d, a, b) << "\n";
+    cout << dst_rr(a, b, c, d) << "\n";
+    cout << dst_rl(a, b, c, d) << "\n";
+    // cout << "\n";
+    cout << dst_pl(c, a, b) << "\n";
+    cout << dst_sl(c, d, a, b) << "\n";
+    cout << dst_rl(c, d, a, b) << "\n";
+    cout << dst_ll(a, b, c, d) << "\n";
+}

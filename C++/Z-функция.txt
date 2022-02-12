@@ -1,0 +1,7 @@
+vec<int> Z(str t){
+    int a = t.size();
+    vec<int> m(a);
+    for(int q=1, l=0, r=0; q<a; l = q+m[q]>r ? q : l, r = max(r, q+m[q]), q++) 
+        for(m[q] = max(0, min(r-q, m[q-l])); q+m[q]<a && t[m[q]]==t[m[q]+q];) m[q]++;
+    return m;
+}

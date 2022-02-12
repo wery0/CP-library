@@ -1,0 +1,66 @@
+inline ull mul(unsigned __int128 x, ull y, ull mod){
+    return x*y%mod;
+}
+
+inline ull binpow(ull x, ull k, ull mod){
+    ull o = 1;
+    for(; k; k>>=1){
+        if(k&1) o = mul(o, x, mod);
+        x = mul(x, x, mod);
+    }
+    return o;
+}
+
+int miller_rabin(ull p){
+    if(p==1) return 0;
+    static ull A[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+    ull k = __builtin_ctzll(p-1), d = (p-1)>>k;
+    for(ull a : A){
+        if(a>=p) break;
+        ull c = binpow(a, d, p);
+        if(c==1) continue;
+        int fl = 0;
+        for(int q=0; q<k && !fl; q++){
+            fl |= c==p-1;
+            c = mul(c, c, p);
+        }
+        if(!fl) return 0;
+    }
+    return 1;
+}
+
+inline ull func(unsigned __int128 x, ull mod){
+    return (x*x+1)%mod;
+}
+
+inline ull gcd(ull x, ull y){
+    for(; x && y;){
+        y%=x;
+        swap(x, y);
+    }
+    return x+y;
+}
+
+ll pollard(ull n, ull seed = rnd()){
+    if(n==1 || miller_rabin(n)) return n;
+    if(n%2==0) return 2;
+    if(n%5==0) return 5;
+    int IT = 200000;
+    ull x = seed, y = seed, divisor = 1;
+    for(int q=0; divisor==1 || divisor==n; q++){
+        if(q==IT) return -1;
+        x = func(x, n);
+        y = func(func(y, n), n);
+        divisor = gcd(n, x<y ? y-x : x-y);
+    }
+    return divisor;
+}
+
+vec<ull> factorize(ull x){
+    ll d = pollard(x);
+    for(; d==-1;) d = pollard(x);
+    if(d==x) return {x};
+    vec<ull> ans = factorize(d);
+    for(ull i : factorize(x/d)) ans.pb(i);
+    return ans;
+}

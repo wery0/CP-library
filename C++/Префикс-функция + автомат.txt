@@ -1,0 +1,21 @@
+vec<int> pref_func(str &t) {
+    int a = t.size();
+    vec<int> m(a);
+    for (int q = 1; q < a; m[q] += !m[q] && t[q] == t[0], q++) for (int w = m[q - 1]; w && !m[q]; w = m[w - 1]) if (t[q] == t[w]) m[q] = w + 1;
+    return m;
+}
+
+vec<vec<int>> pref_func_auto(str &t) {
+    int a = t.size();
+    auto pf = pref_func(t);
+    vec<vec<int>> m(a + 1, vec<int>(26));
+    m[0][t[0] - 'a'] = 1;
+    for (int q = 1; q <= a; q++) {
+        for (int w = 0; w < 26; w++) {
+            char c = 'a' + w;
+            m[q][w] = t[q] == c ? q + 1 : m[pf[q - 1]][w];
+        }
+    }
+    for (int w = 0; w < 26; w++) m[a][w] = m[pf[a - 1]][w];
+    return m;
+}
