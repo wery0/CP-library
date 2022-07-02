@@ -1,0 +1,16 @@
+#define vi vec<int>
+#define vl vec<ll>
+#define vvi vec<vec<int>>
+#define vvvi vec<vec<vec<int>>>
+#define vvl vec<vec<ll>>
+#define vpi vec<pii>
+#define vpl vec<pll>
+#define vs vec<str>
+#define vvs vec<vec<str>>
+const int dx[] = { -1, 0, 1, 0};
+const int dy[] = {0, 1, 0, -1};
+template<typename I> auto array_cnt(I f, I l) {umap(typename iterator_traits<I>::value_type, int) mp; while (f != l) ++mp[*f], ++f; return mp;}
+template<typename I> auto subset_sum(I f, I l) {int a = l - f; vec<typename iterator_traits<I>::value_type> o(1 << a); for (int q = 1; q < (1 << a); ++q) {const int i = __builtin_ctz(q); o[q] = *(f + i) + o[q ^ (1 << i)];} return o;}
+template<typename T> struct static_sum_query {vec<T> m; template<typename I>static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) *it = *(it - 1) + *f;} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
+vec<str> split(str &s, char c, bool ignore_empty = false) {vec<str> o; str u; for (int q = 0; q < s.size(); q++) {if (s[q] == c) {if (!u.empty() || !ignore_empty) o.pb(u); u.clear();} else u += s[q];} if (!u.empty() || !ignore_empty) o.pb(u); return o;}
+str join(vec<str> &m, char c) {str o; for (str &s : m) o += s + c; if (o.size()) o.pop_back(); return o;}

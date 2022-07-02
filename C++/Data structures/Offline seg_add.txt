@@ -1,0 +1,38 @@
+template<typename T>
+struct offline_seg_add {
+
+    int a;
+    vec<T> m;
+
+    offline_seg_add() {}
+
+    offline_seg_add(int _a) {
+        a = _a;
+        m.resize(a + 1);
+    }
+
+    void add(int l, int r, T val) {
+        m[l] += val;
+        m[r + 1] -= val;
+    }
+
+    void clear() {
+        fill(all(m), 0);
+    }
+
+    void get_result(vec<T> &n, int pref = -1) {
+        if (pref == -1) pref = a;
+        assert(pref <= a);assert(pref <= n.size());
+        n[0] = m[0];
+        for (int q = 1; q < pref; ++q) {
+            n[q] = n[q - 1] + m[q];
+        }
+    }
+
+    vec<T> get_result(int pref = -1) {
+        if (pref == -1) pref = a;
+        vec<T> n(pref);
+        get_result(n, pref);
+        return n;
+    }
+};

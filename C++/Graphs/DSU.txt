@@ -1,0 +1,33 @@
+struct dsu {
+    int a;
+    vec<int> pr;
+    vec<int> sz;
+
+    dsu() {}
+
+    dsu(int x) {
+        a = x;
+        sz = vec<int>(a, 1);
+        pr = vec<int>(a);
+        iota(all(pr), 0);
+    }
+
+    void clear() {
+        fill(all(sz), 1);
+        iota(all(pr), 0);
+    }
+
+    int find(int x) { return x == pr[x] ? x : pr[x] = find(pr[x]); }
+
+    int unite(int x, int y) {
+        int px = find(x);
+        int py = find(y);
+        if (px == py) return 0;
+        if (sz[px] > sz[py]) {
+            swap(px, py);
+        }
+        pr[px] = py;
+        sz[py] += sz[px];
+        return 1;
+    }
+};

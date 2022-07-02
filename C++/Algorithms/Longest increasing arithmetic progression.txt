@@ -1,0 +1,50 @@
+namespace longest_increasing_arithmetic_progression {
+
+    const int C = 1 << 17;   //change, if need
+    vec<pii> lol[C];
+
+    vec<int> solve(vec<int> m) {
+        int a = m.size(), na = 0;
+        vec<pii> stm(a);
+        vec<int> ps(a);
+        for (int q = 0; q < a; ++q) stm[q] = {m[q], q};
+        sort(all(stm));
+        for (int q = 0; q < a; q++) {
+            if (q && stm[q].F == stm[q - 1].F) continue;
+            m[na] = stm[q].F;
+            lol[m[na] & (C - 1)].pb({m[na], na});
+            ps[na++] = stm[q].S;
+        }
+        auto get = [&](int x) {
+            for (pii p : lol[x & (C - 1)]) if (p.F == x) return p.S;
+            return -1;
+        };
+        int o = 1, st = m[0], bd = 1;
+        //vec<int> poss(na); iota(all(poss), 0);shuffle(all(poss), rnd);
+        for (int qq = 0; qq < na; qq++) {
+            //const int q = poss[qq];
+            const int q = qq;
+            for (int w = q + 1; w + o <= na; w++) {
+                int d = m[w] - m[q], cnt = 2;
+                ll nd = m[q] + 1LL * d * o;
+                if (nd > m[na - 1]) break;
+                int pos = get(nd);
+                if (pos - q + 1 <= o) continue;
+                for (int c = m[w] + d; ; c += d) {
+                    int u = get(c);
+                    if (u == -1 || u + (o - cnt) >= na) break;
+                    cnt++;
+                }
+                if (chmax(o, cnt)) st = m[q], bd = d;
+            }
+        }
+        vec<int> ans(o);
+        for (int c = st, i = 0; i < o; ++i, c += bd) {
+            ans[i] = ps[get(c)];
+        }
+        for (int q = 0; q < C; ++q) lol[q].clear(); 
+        return ans;
+    }
+};
+//returns positions of progression element's
+//https://acm.timus.ru/problem.aspx?space=1&num=1395

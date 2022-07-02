@@ -1,0 +1,44 @@
+template<typename K, typename V, const int N>
+struct hash_map_chain {
+
+    vec<pair<K, V>> table[N];
+
+    hash_map_chain() {}
+
+    constexpr inline int hsh(const K& key) const {
+        if constexpr(is_integral<K>::value) {
+            return key % N;
+        } else {
+            return hash<K> {}(key) % N;
+        }
+    }
+
+    inline V operator[](const K& key) const {
+        for (const auto &[k, v] : table[hsh(key)]) {
+            if (k == key) return v;
+        }
+        return 0;
+    }
+
+    inline bool contains(const K& key) const {
+        for (const auto &[k, v] : table[hsh(key)]) {
+            if (k == key) return true;
+        }
+        return false;
+    }
+
+    inline void add(const K& key, const V& val) {
+        int pos = hsh(key);
+        for (auto &[k, v] : table[pos]) {
+            if (k == key) {
+                v = val;
+                return;
+            }
+        }
+        table[pos].pb({key, val});
+    }
+
+    inline void add_unchecked(const K& key, const V& val) {
+        table[hsh(key)].pb({key, val});
+    }
+};

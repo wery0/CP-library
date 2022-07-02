@@ -1,3 +1,5 @@
+//Онлайн добавляем рёбра в граф и отвечаем на запрос веса миностова.
+
 #pragma GCC optimize("Ofast")
 // #pragma GCC target("avx,avx2,fma")
 

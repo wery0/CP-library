@@ -1,0 +1,38 @@
+template<typename Iterator>
+void inline_compress(Iterator first, Iterator last, int first_val = 0) {
+    vec n(first, last);
+    sort(all(n));
+    for (; first != last;) {
+        (*first) = first_val + lower_bound(all(n), *first) - n.begin();
+        ++first;
+    }
+}
+
+template<typename T>
+vec<int> compress(vec<T> &m, int first_val = 0) {
+    const int a = m.size();
+    vec<T> n = m;
+    sort(all(n));
+    vec<int> ans(a);
+    for (int q = 0; q < a; ++q) {
+        ans[q] = first_val + lower_bound(all(n), m[q]) - n.begin();
+    }
+    return ans;
+}
+
+template<typename T>
+vec<pii> compress(vec<pair<T, T>> &m, int first_val = 0) {
+    const int a = m.size();
+    vec<T> n(a << 1);
+    for (int q = 0; q < a; ++q) {
+        n[q << 1] = m[q].F;
+        n[q << 1 | 1] = m[q].S;
+    }
+    sort(all(n));
+    vec<pii> ans(a);
+    for (int q = 0; q < m.size(); ++q) {
+        ans[q].F = first_val + lower_bound(all(n), m[q].F) - n.begin();
+        ans[q].S = first_val + lower_bound(all(n), m[q].S) - n.begin();
+    }
+    return ans;
+}

@@ -1,0 +1,46 @@
+template<typename K, typename V, const int N>
+struct hash_map_open_addressing {
+
+    pair<K, V> store[N];
+    bool is_occupied[N] = {0};
+
+    constexpr inline void next_pos(int &pos) const {
+        pos = (pos + 1) % N;
+    }
+
+    constexpr inline int hsh(const K& key) const {
+        if constexpr(is_integral<K>::value) {
+            return key % N;
+        } else {
+            return hash<K> {}(key) % N;
+        }
+    }
+
+    inline V operator[](const K& key) const {
+        int pos = hsh(key);
+        for (; is_occupied[pos]; next_pos(pos)) {
+            if (store[pos].F == key) return store[pos].S;
+        }
+        return 0;
+    }
+
+    inline bool contains(const K& key) const {
+        int pos = hsh(key);
+        for (; is_occupied[pos]; next_pos(pos)) {
+            if (store[pos].F == key) return true;
+        }
+        return false;
+    }
+
+    inline void add(const K& key, const V& val) {
+        int pos = hsh(key);
+        for (; is_occupied[pos]; next_pos(pos)) {
+            if (store[pos].F == key) {
+                store[pos].S = val;
+                return;
+            }
+        }
+        store[pos] = {key, val};
+        is_occupied[pos] = true;
+    }
+};

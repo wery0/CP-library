@@ -1,0 +1,212 @@
+template<typename K, typename V>
+struct treap {
+    static const V inf = std::numeric_limits<V>::max();
+    static const V UNDEF = 0;
+    struct Node {
+        Node *l = 0;
+        Node *r = 0;
+        K x;
+        ll y;
+        V val;
+        V mnv;
+        V mxv;
+        V smv;
+        ll sz = 0;
+
+        Node(K _x, V _val = UNDEF) {
+            x = _x;
+            y = rnd();
+            sz = 1;
+            val = _val;
+            mnv = _val;
+            mxv = _val;
+            smv = _val;
+        }
+    };
+    Node *root = 0;
+
+    treap() {}
+
+    template<typename Iterator>
+    treap(Iterator first, Iterator last) {
+        root = build(first, last);
+    }
+
+    void print(str _end = "") {
+        print(root);
+        cout << _end;
+    }
+
+    V gmnv(Node *n) const {return n ? n->mnv : inf;}
+    V gmxv(Node *n) const {return n ? n->mxv : -inf;}
+    V gsmv(Node *n) const {return n ? n->smv : 0;}
+    ll gsz(Node *n) const {return n ? n->sz : 0;}
+
+    void upd(Node *n) {
+        n->mnv = min({gmnv(n->l), n->val, gmnv(n->r)});
+        n->mxv = max({gmxv(n->l), n->val, gmxv(n->r)});
+        n->smv = gsmv(n->l) + n->val + gsmv(n->r);
+        n->sz = gsz(n->l) + 1 + gsz(n->r);
+    }
+
+    Node* merge(Node *l, Node *r) {
+        if (!l || !r) return l ? l : r;
+        if (l->y > r->y) {
+            l->r = merge(l->r, r); upd(l);
+            return l;
+        }
+        r->l = merge(l, r->l); upd(r);
+        return r;
+    }
+
+    pnn splitSz(Node *n, ll k) {
+        if (!n) return {0, 0};
+        if (k <= gsz(n->l)) {
+            pnn p = splitSz(n->l, k);
+            n->l = p.S; upd(n);
+            p.S = n;
+            return p;
+        }
+        pnn p = splitSz(n->r, k - gsz(n->l) - 1);
+        n->r = p.F; upd(n);
+        p.F = n;
+        return p;
+    }
+
+    pnn splitKey(Node *n, K k) {
+        if (!n) return {0, 0};
+        if (k < n->x) {
+            pnn p = splitKey(n->l, k);
+            n->l = p.S; upd(n);
+            p.S = n;
+            return p;
+        }
+        pnn p = splitKey(n->r, k);
+        n->r = p.F; upd(n);
+        p.F = n;
+        return p;
+    }
+
+    K operator[](ll pos) {
+        Node *n = root;
+        assert(0 <= pos && pos < gsz(n));
+        for (;;) {
+            const int szl = gsz(n->l);
+            if (pos == szl) return n->x;
+            if (pos < szl) n = n->l;
+            else {
+                pos -= szl + 1;
+                n = n->r;
+            }
+        }
+        assert(0);
+        return -1;
+    }
+
+    void get_keys_on_subsegment(int l, int len, vec<K> &res) {
+        get_keys_on_subsegment(root, l, len, res);
+    }
+
+    ll size() const {return gsz(root);}
+    bool empty() const {return root == 0;}
+
+    K last_erased;
+    void erase_pos(ll pos) {root = erase_pos(root, pos);}
+    K extract_pos(ll pos) {erase_pos(pos); return last_erased;}
+    void erase_key(K x) {root = erase_key(root, x);}
+    void remove_seg(int l, int len) {
+        pnn p1 = splitSz(root, l);
+        pnn p2 = splitSz(p1.S, len);
+        root = merge(p1.F, p2.S);
+    }
+
+    template<typename Iterator>
+    void insert_array(int pos, Iterator first, Iterator last) {
+        pnn p = splitSz(root, pos);
+        root = merge(merge(p.F, build(first, last)), p.S);
+    }
+
+    void insert_array(int pos, vec<K> arr) {
+        pnn p = splitSz(root, pos);
+        root = merge(merge(p.F, build(all(arr))), p.S);
+    }
+
+    void insert_pos(ll pos, K x, V val = UNDEF) {
+        pnn p = splitSz(root, pos);
+        root = merge(merge(p.F, new Node(x, val)), p.S);
+    }
+    void insert_key(K x, V val = UNDEF) {root = insert_node(root, new Node(x, val));}
+    void update_val_at_pos(int pos, V new_val) {update_val_at_pos(root, pos, new_val);}
+
+private:
+
+    template<typename Iterator>
+    Node* build(Iterator first, Iterator last) {
+        if (first >= last) return 0;
+        Iterator md = first + (last - first) / 2;
+        Node *n = new Node(*md);
+        n->l = build(first, md);
+        n->r = build(md + 1, last);
+        upd(n);
+        return n;
+    }
+
+    void update_val_at_pos(Node *n, int pos, V new_val) {
+        if (pos == gsz(n->l)) {
+            n->val = new_val;
+            return;
+        }
+        if (pos < gsz(n->l)) update_val_at_pos(n->l, pos, new_val);
+        else update_val_at_pos(n->r, pos - gsz(n->l) - 1, new_val);
+        upd(n);
+    }
+
+    Node* erase_pos(Node *n, ll pos) {
+        if (gsz(n->l) == pos) {
+            last_erased = n->x;
+            return merge(n->l, n->r);
+        }
+        if (pos < gsz(n->l)) n->l = erase_pos(n->l, pos);
+        else n->r = erase_pos(n->r, pos - gsz(n->l) - 1);
+        upd(n);
+        return n;
+    }
+
+    Node* insert_node(Node *n, Node *nw) {
+        if (!n || nw->y > n->y) {
+            pnn p = splitKey(n, nw->x);
+            nw->l = p.F;
+            nw->r = p.S;
+            upd(nw);
+            return nw;
+        }
+        if (nw->x < n->x) n->l = insert_node(n->l, nw);
+        else n->r = insert_node(n->r, nw);
+        upd(n);
+        return n;
+    }
+
+    Node* erase_key(Node *n, K x) {
+        if (n->x == x) {
+            return merge(n->l, n->r);
+        }
+        if (x < n->x) n->l = erase_key(n->l, x);
+        else n->r = erase_key(n->r, x);
+        upd(n);
+        return n;
+    }
+
+    void get_keys_on_subsegment(Node *n, int l, int &len, vec<K> &res) {
+        if (!n || len <= 0) return;
+        if (l < gsz(n->l)) get_keys_on_subsegment(n -> l, l, len, res);
+        if (l <= gsz(n->l) && len) res.pb(n->x), --len;
+        get_keys_on_subsegment(n->r, max(0LL, l - gsz(n->l) - 1), len, res);
+    }
+
+    void print(Node *n) {
+        if (!n) return;
+        print(n->l);
+        cout << n->x << " ";
+        print(n->r);
+    }
+}; // 0 - index

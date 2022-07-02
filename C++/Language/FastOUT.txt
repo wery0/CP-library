@@ -1,0 +1,43 @@
+inline void putChar(int c) {
+    static char buf[1 << 16];
+    static int pos = 0;
+    if (c == EOF || pos == 1 << 16) {
+        fwrite(buf, sizeof(buf[0]), pos, stdout);
+        pos = 0;
+    }
+    if (c == EOF) return;
+    buf[pos++] = c;
+}
+
+inline void putChar(int c) {
+    static char buf[1 << 16];
+    static int pos = 0;
+    if (c == EOF || pos == 1 << 16) {
+        fwrite(buf, sizeof(buf[0]), pos, stdout);
+        pos = 0;
+    }
+    if (c == EOF) return;
+    buf[pos++] = c;
+}
+
+inline void printInt(int val) {
+    static char buf[12];
+    int pos = 0, sign = val < 0 ? -1 : 1;
+    val = abs(val);
+    buf[pos++] = '\n';
+    if (val == 0) buf[pos++] = 48;
+    for (; val; val /= 10) buf[pos++] = 48 + val % 10;
+    if (sign == -1) buf[pos++] = '-';
+    for (; --pos >= 0;) putChar(buf[pos]);
+}
+
+inline void printLong(ll val) {
+    static char buf[21];
+    int pos = 0, sign = val < 0 ? -1 : 1;
+    val = abs(val);
+    buf[pos++] = '\n';
+    if (val == 0) buf[pos++] = 48;
+    for (; val; val /= 10) buf[pos++] = 48 + val % 10;
+    if (sign == -1) buf[pos++] = '-';
+    for (; --pos >= 0;) putChar(buf[pos]);
+}
