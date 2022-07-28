@@ -19,9 +19,10 @@ struct segtree_point_upd {
             if (is_neutral(r)) {res = l; return;}
             res.lc = l.lc;
             res.rc = r.rc;
-            res.dl = l.dl + (l.dl == l.sz && r.lc == l.lc ? r.dl : 0);
-            res.dr = r.dr + (r.dr == r.sz && l.rc == r.rc ? l.dr : 0);
+            res.dl = l.dl + (l.dl == l.sz && l.rc == r.lc ? r.dl : 0);
+            res.dr = r.dr + (r.dr == r.sz && l.rc == r.lc ? l.dr : 0);
             res.mxd = max({l.mxd, r.mxd, (l.rc == r.lc ? l.dr + r.dl : 0)});
+            res.sz = l.sz + r.sz;
         }
 
         friend inline tag merge(const tag &l, const tag &r) {
@@ -33,19 +34,19 @@ struct segtree_point_upd {
         friend inline void merge_to_left(tag &l, const tag &r) {
             if (is_neutral(l)) {l = r; return;}
             if (is_neutral(r)) return;
-            l.rc = r.rc;
-            l.dl += l.dl == l.sz && r.lc == l.lc ? r.dl : 0;
-            l.dr = r.dr + (r.dr == r.sz && l.rc == r.rc ? l.dr : 0);
             chmax(l.mxd, max(r.mxd, (l.rc == r.lc ? l.dr + r.dl : 0)));
+            l.dl += l.dl == l.sz && r.lc == l.lc ? r.dl : 0;
+            l.dr = r.dr + (r.dr == r.sz && l.rc == r.lc ? l.dr : 0);
+            l.rc = r.rc;
         }
 
         friend inline void merge_to_right(const tag &l, tag &r) {
             if (is_neutral(l)) return;
             if (is_neutral(r)) {r = l; return;}
-            r.lc = l.lc;
-            r.dl = l.dl + (l.dl == l.sz && r.lc == l.lc ? r.dl : 0);
-            r.dr += r.dr == r.sz && l.rc == r.rc ? l.dr : 0;
             chmax(r.mxd, max(l.mxd, (l.rc == r.lc ? l.dr + r.dl : 0)));
+            r.dl = l.dl + (l.dl == l.sz && r.lc == l.rc ? r.dl : 0);
+            r.dr += r.dr == r.sz && l.rc == r.lc ? l.dr : 0;
+            r.lc = l.lc;
         }
     };
 
@@ -68,7 +69,6 @@ struct segtree_point_upd {
         for (uint q = U; --q;) {
             const tag &l = m[q << 1], &r = m[q << 1 | 1];
             merge(l, r, m[q]);
-            m[q].sz = l.sz + r.sz;
         }
     }
 
@@ -81,8 +81,8 @@ struct segtree_point_upd {
         tag lt = neutral_tag;
         tag rt = neutral_tag;
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            // if (ql & 1) lt = merge(lt, m[ql]);
-            // if (~qr & 1) rt = merge(m[qr], rt);
+            //if (ql & 1) lt = merge(lt, m[ql]);
+            //if (~qr & 1) rt = merge(m[qr], rt);
             if (ql & 1) merge_to_left(lt, m[ql]);
             if (~qr & 1) merge_to_right(m[qr], rt);
         }

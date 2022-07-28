@@ -1,12 +1,15 @@
 namespace MO {
-    struct query {
-        int l, r;
-        int n;
-    };
 
+    //edit, if need
     const int MAXN = 300000;
     const int MAXQ = 300000;
     const int BLOCK_SIZE = 512;
+
+    struct query {
+        int l, r, n;
+        //add needed params
+    };
+
     query qarr[MAXQ];
     int qsz = 0;
     ll ans[MAXQ];
@@ -46,7 +49,7 @@ namespace MO {
             while (cl > i.l) addL(--cl);
             while (cr > i.r) remR(cr--);
             while (cl < i.l) remL(cl++);
-
+            //edit
             ans[i.n] = 998244353;
         }
     }

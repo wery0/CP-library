@@ -11,7 +11,7 @@ struct offline_seg_add {
         m.resize(a + 1);
     }
 
-    void add(int l, int r, T val) {
+    void seg_add(int l, int r, T val) {
         m[l] += val;
         m[r + 1] -= val;
     }
@@ -20,19 +20,17 @@ struct offline_seg_add {
         fill(all(m), 0);
     }
 
-    void get_result(vec<T> &n, int pref = -1) {
-        if (pref == -1) pref = a;
-        assert(pref <= a);assert(pref <= n.size());
+    void get_result(vec<T> &n) {
+        assert(a <= n.size());
         n[0] = m[0];
-        for (int q = 1; q < pref; ++q) {
+        for (int q = 1; q < a; ++q) {
             n[q] = n[q - 1] + m[q];
         }
     }
 
-    vec<T> get_result(int pref = -1) {
-        if (pref == -1) pref = a;
-        vec<T> n(pref);
-        get_result(n, pref);
+    vec<T> get_result() {
+        vec<T> n(a);
+        get_result(n);
         return n;
     }
 };

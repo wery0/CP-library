@@ -1,0 +1,80 @@
+struct segtree_point_upd {
+
+    struct tag {
+
+        tag() {}
+
+        friend inline bool is_neutral(const tag &t) {
+            //write neutral if need, or remove it
+            return false;
+        }
+
+        friend inline void merge(const tag &l, const tag &r, tag &res) {
+            if (is_neutral(l)) {res = r; return;}if (is_neutral(r)) {res = l; return;}
+            //write merge
+        }
+
+        friend inline tag merge(const tag &l, const tag &r) {
+            tag res;
+            merge(l, r, res);
+            return res;
+        }
+
+//        friend inline void merge_to_left(tag &l, const tag &r) {
+//            if (is_neutral(l)) {l = r; return;}if (is_neutral(r)) return;
+//
+//        }
+//
+//        friend inline void merge_to_right(const tag &l, tag &r) {
+//            if (is_neutral(l)) return;if (is_neutral(r)) {r = l; return;}
+//
+//        }
+    };
+
+    tag neutral_tag;
+
+    uint a, U;
+    vec<tag> m;
+    segtree_point_upd() {}
+
+    segtree_point_upd(uint _a) {
+        a = _a;
+        U = geq_pow2(a);
+        m.resize(U * 2);
+        for (uint q = 0; q < a; ++q) {
+            tag &t = m[U + q];
+            //write init of last layer
+        }
+        for (uint q = U; --q;) {
+            const tag &l = m[q << 1], &r = m[q << 1 | 1];
+            merge(l, r, m[q]);
+        }
+    }
+
+    inline void upd(uint v) {
+        merge(m[v << 1], m[v << 1 | 1], m[v]);
+    }
+
+    inline tag seg_statistic(uint ql, uint qr) {
+        ql += U, qr += U;
+        tag lt = neutral_tag;
+        tag rt = neutral_tag;
+        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
+            if (ql & 1) lt = merge(lt, m[ql]);
+            if (~qr & 1) rt = merge(m[qr], rt);
+//            if (ql & 1) merge_to_left(lt, m[ql]);
+//            if (~qr & 1) merge_to_right(m[qr], rt);
+        }
+        return merge(lt, rt);
+    }
+
+    inline void change(uint p, tag t) {
+        p += U;
+        m[p] = t;
+        for (p >>= 1; p; p >>= 1) {
+            upd(p);
+        }
+    }
+};
+//0-indexed bottom-up segtree
+//Supports only point updates

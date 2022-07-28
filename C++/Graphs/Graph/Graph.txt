@@ -1,0 +1,99 @@
+template<typename Data>
+struct edge {
+    int to;
+    Data data;
+
+    edge() {}
+
+    edge(int _to) : to(_to) {}
+    edge(int _to, Data _data) : to(_to), data(_data) {}
+
+    bool operator<(const edge &other) const {
+        return to < other.to;
+    }
+
+    bool operator==(const edge &other) const {
+        return to == other.to;
+    }
+};
+
+template<>
+struct edge<void> {
+    int to;
+
+    edge() {}
+
+    edge(int _to) : to(_to) {}
+
+    bool operator<(const edge &other) const {
+        return to < other.to;
+    }
+
+    bool operator==(const edge &other) const {
+        return to == other.to;
+    }
+};
+
+template<typename Edge>
+struct graph {
+
+    int V = -1, E;
+    vec<Edge> store;
+    vec<int> fir;
+    vec<pair<int, Edge>> acc_edge;
+    bool is_prepared = 0;
+
+    graph() = default;
+    graph(int V) : V(V) {}
+    graph(int V, int E) : V(V) { if (E != -1) acc_edge.reserve(E); }
+
+    void prepare() {
+        assert(V != -1);
+        E = acc_edge.size();
+        store.resize(E);
+        vec<int> deg_cnt(V + 1);
+        for (const auto &p : acc_edge) ++deg_cnt[p.F + 1];
+        partial_sum(all(deg_cnt), deg_cnt.begin());
+        fir = deg_cnt;
+        for (const auto &p : acc_edge) store[deg_cnt[p.F]++] = p.S;
+        acc_edge.clear();
+        acc_edge.shrink_to_fit();
+        is_prepared = 1;
+    }
+
+    inline void add_edge(int x, Edge e, const bool is_dir) {
+        acc_edge.pb({x, e});
+        if (!is_dir) {
+            swap(x, e.to);
+            acc_edge.pb({x, e});
+        }
+    }
+
+    struct edge_range {
+        __gnu_cxx::__normal_iterator<const Edge *, vector<Edge>> first, last;
+        [[nodiscard]] auto begin() const { return first; }
+        [[nodiscard]] auto end() const { return last; }
+    };
+
+    edge_range operator[](const int v) const {assert(is_prepared); return {store.begin() + fir[v], store.begin() + fir[v + 1]};}
+
+    [[nodiscard]] inline int deg(const int v) const {assert(is_prepared); return fir[v + 1] - fir[v];}
+    vec<int> get_nums_of_inv_edges() const {assert(is_prepared); vec<int> ans(E, -1); vec<bool> us(V); umap<ll, int> mp(E); for (int v = 0; v < V; ++v) {for (int i = fir[v]; i < fir[v + 1]; ++i) {const auto& e = store[i]; ll hs = 1ll * v * V + e.to; ll ihs = 1ll * e.to * V + v; if (mp.count(ihs)) {int ips = mp[ihs]; mp.erase(ihs); ans[i] = ips; ans[ips] = i;} else mp[hs] = i;}} assert(mp.empty()); assert(count(all(ans), -1) == 0); return ans;}
+    bool is_bipartite() const {assert(is_prepared); vec<int> col(V, -1); bool fl = 1; auto dfs = [&](auto && dfs, int v, int c) -> void {col[v] = c; for (const auto &h : (*this)[v]) {if (col[h.to] == -1) dfs(dfs, h.to, c ^ 1); else fl &= col[h.to] != c;}}; for (int q = 0; q < V; ++q) if (col[q] == -1) dfs(dfs, q, 0); return fl;}
+    int count_connected_components() const {assert(is_prepared); vec<bool> us(V); auto dfs = [&](auto && dfs, int v) -> void {us[v] = 1; for (const auto &h : (*this)[v]) if (!us[h.to]) dfs(dfs, h.to);}; int ans = 0; for (int q = 0; q < V; ++q) if (!us[q]) dfs(dfs, q), ++ans; return ans;}
+    bool is_connected() const {return count_connected_components() == 1;}
+    bool is_tree() const {return E == V - 1 && is_connected();}
+    vec<int> get_cutpoints() const {assert(is_prepared); vec<bool> us(V); vec<int> is_cp(V), tin(V), fup(V); auto dfs = [&](auto && dfs, int v, int p = -1) -> void {static int T = 0; us[v] = 1; tin[v] = fup[v] = T++; int chd = 0; for (const auto &h : (*this)[v]) {if (h.to == p) continue; if (!us[h.to]) {++chd; dfs(dfs, h.to, v); chmin(fup[v], fup[h.to]); is_cp[v] |= p == -1 ? chd > 1 : fup[h.to] >= tin[v];} else chmin(fup[v], tin[h.to]);}}; for (int q = 0; q < V; ++q) if (!us[q]) dfs(dfs, q); vec<int> ans; for (int q = 0; q < V; ++q) if (is_cp[q]) ans.pb(q); return ans;}
+    vec<vec<int>> get_edge_biconnected_components() const {assert(is_prepared); vec<bool> is_bridge(E), us(V); vec<int> tin(V), fup(V); auto dfs = [&](auto dfs, int v, int p = -1) -> int {static int T = 0; us[v] = 1; tin[v] = fup[v] = T++; int cnt_par = 0, ie = -1; for (int i = fir[v]; i < fir[v + 1]; ++i) {const auto& h = store[i]; if (h.to == p) {if (++cnt_par > 1) {chmin(fup[v], tin[h.to]);} else ie = i;} else if (!us[h.to]) {int inv_edge = dfs(dfs, h.to, v); chmin(fup[v], fup[h.to]); is_bridge[i] = is_bridge[inv_edge] = fup[h.to] > tin[v];} else chmin(fup[v], tin[h.to]);} return ie;}; int cnt_cmp = 0; for (int q = 0; q < V; ++q) if (!us[q]) dfs(dfs, q), ++cnt_cmp; int cnt_bridges = count(all(is_bridge), true) / 2; int cnt_tec_cmp = cnt_cmp + cnt_bridges; vec<vec<int>> ans(cnt_tec_cmp); fill(all(us), false); auto go = [&](auto && go, int v, int nc) -> void {us[v] = 1; assert(nc < cnt_tec_cmp); ans[nc].pb(v); for (int i = fir[v]; i < fir[v + 1]; ++i) {const auto& h = store[i]; if (!us[h.to] && !is_bridge[i]) go(go, h.to, nc);}}; for (int q = 0, nc = 0; q < V; ++q) if (!us[q]) go(go, q, nc++); return ans;}
+    vec<int> get_bridges_nums() const {assert(is_prepared); vec<bool> is_bridge(E), us(V); vec<int> tin(V), fup(V); auto dfs = [&](auto dfs, int v, int p = -1) -> int {static int T = 0; us[v] = 1; tin[v] = fup[v] = T++; int cnt_par = 0, ie = -1; for (int i = fir[v]; i < fir[v + 1]; ++i) {const auto& h = store[i]; if (h.to == p) {if (++cnt_par > 1) {chmin(fup[v], tin[h.to]);} else ie = i;} else if (!us[h.to]) {int inv_edge = dfs(dfs, h.to, v); chmin(fup[v], fup[h.to]); is_bridge[i] = is_bridge[inv_edge] = fup[h.to] > tin[v];} else chmin(fup[v], tin[h.to]);} return ie;}; for (int q = 0; q < V; ++q) if (!us[q]) dfs(dfs, q); int cnt_bridges = count(all(is_bridge), true) / 2; vec<int> ans(cnt_bridges); for (int q = 0, j = 0; q < V; ++q) {for (int i = fir[q]; i < fir[q + 1]; ++i) {const auto &h = store[i]; if (is_bridge[i] && q < h.to) ans[j++] = h.data;}} return ans;}
+
+    bool has_self_edges() const {assert(is_prepared); for (int v = 0; v < V; ++v) {for (const auto &h : (*this)[v]) {if (v == h.to) return true;}} return false;}
+    bool has_multiple_edges() const {assert(is_prepared); for (int v = 0; v < V; ++v) {uset<int> s(deg(v)); for (const auto &h : (*this)[v]) {if (s.count(h.to)) return true; s.insert(h.to);}} return false;}
+    bool is_simple() const {return !has_self_edges() && !has_multiple_edges();}
+
+    bool is_acyclic_dir() const {assert(is_prepared); vec<int> state(V); auto dfs = [&](auto && dfs, int v) -> bool{state[v] = 1; for (const auto &h : (*this)[v]) {if (state[h.to] == 1) return false; if (state[h.to] == 0 && !dfs(dfs, h.to)) return false;} state[v] = 2; return true;}; for (int q = 0; q < V; ++q) {if (state[q] == 0 && !dfs(dfs, q)) return false;} return true;}
+    bool is_acyclic_undir() const {assert(is_prepared); vec<int> state(V); auto dfs = [&](auto && dfs, int v, int p = -1) -> bool{state[v] = 1; int cnt_par = 0; for (const auto &h : (*this)[v]) {if (h.to == p) {if (++cnt_par == 1) continue;} if (state[h.to] == 1) return false; if (state[h.to] == 0 && !dfs(dfs, h.to, v)) return false;} state[v] = 2; return true;}; for (int q = 0; q < V; ++q) if (state[q] == 0 && !dfs(dfs, q)) return false; return true;}
+    vec<int> get_any_dir_cycle_vertex_nums() const {assert(is_prepared); assert(!is_acyclic_dir()); vec<int> state(V), ans; auto dfs = [&](auto && dfs, int v) -> int{state[v] = 1; int ret = -1; for (const auto &h : (*this)[v]) {if (state[h.to] == 1) return h.to; int res = dfs(dfs, h.to); if (res == -1) continue; if (res == -2) {ret = -2; break;} ans.pb(h.to); if (v == res) ans.pb(v); return v != res ? res : -2;} state[v] = 2; return ret;}; for (int q = 0; q < V && ans.empty(); ++q) if (state[q] == 0) dfs(dfs, q); assert(!ans.empty()); reverse(all(ans)); return ans;}
+    vec<int> get_any_dir_cycle_edge_nums() const {assert(is_prepared); assert(!is_acyclic_dir()); vec<int> state(V), ans; auto dfs = [&](auto && dfs, int v) -> int{state[v] = 1; int ret = -1; for (const auto &h : (*this)[v]) {if (state[h.to] == 1) {ans.pb(h.data); return h.to;} int res = dfs(dfs, h.to); if (res == -1) continue; if (res == -2) {ret = -2; break;} ans.pb(h.data); return v != res ? res : -2;} state[v] = 2; return ret;}; for (int q = 0; q < V && ans.empty(); ++q) if (state[q] == 0) dfs(dfs, q); assert(!ans.empty()); reverse(all(ans)); return ans;}
+    vec<vec<int>> get_vertex_biconnected_components() const {assert(is_prepared); vec<bool> us(V); vec<int> tin(V), fup(V), stq; vec<vec<int>> ans; ans.reserve(V); stq.reserve(V); auto dfs = [&](auto && dfs, int v, int p = -1) -> void {static int T = 0; stq.pb(v); us[v] = 1; tin[v] = fup[v] = T++; int chd = 0; for (const auto &h : (*this)[v]) {if (h.to == p) continue; if (!us[h.to]) {++chd; int stop_sz = stq.size(); dfs(dfs, h.to, v); chmin(fup[v], fup[h.to]); if ((p == -1 && chd > 1) || (p != -1 && fup[h.to] >= tin[v])) {ans.pb({v}); ans.back().reserve(stq.size() - stop_sz + 1); for (; stq.size() > stop_sz;) {ans.back().pb(stq.back()); stq.pop_back();}}} else chmin(fup[v], tin[h.to]);}}; for (int q = 0; q < V; ++q) {if (!us[q]) {dfs(dfs, q); ans.pb(stq); stq.clear();}} return ans;}
+};

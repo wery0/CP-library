@@ -7,8 +7,7 @@ ld SUPERternarka(ld L, ld R) {
             R = p2;
             p2 = p1, v2 = v1;
             p1 = L + (R - L) / (FI + 1), v1 = FUNC(p1);
-        }
-        else {
+        } else {
             L = p1;
             p1 = p2, v1 = v2;
             p2 = R - (R - L) / (FI + 1), v2 = FUNC(p2);
@@ -17,4 +16,4 @@ ld SUPERternarka(ld L, ld R) {
     return (L + R) / 2;
 }
 
-//faster than usual ternarka in 2log_{1.5}(FI) ~ 2.37 times.
+//faster than usual ternary search in 2log_{1.5}(FI) ~ 2.37 times.

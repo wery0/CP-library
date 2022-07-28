@@ -1,0 +1,41 @@
+//returns set of points of minimal size, generating CH, sorted in counter-clockwise order.
+template<typename T>
+vec<pair<T, T>> convex_hull(vec<pair<T, T>> m) {
+    constexpr T inf = numeric_limits<T>::max();
+    T min_y = inf, min_x = inf;
+    for (auto &[x, y] : m) {
+        if (y < min_y || (y == min_y && x < min_x)) {
+            min_x = x;
+            min_y = y;
+        }
+    }
+    for (auto &[x, y] : m) {
+        x -= min_x;
+        y -= min_y;
+    }
+    sort(all(m), [](const auto & p1, const auto & p2) {
+        if (p1 == p2) return false;
+        if (p1.F == 0 && p1.S == 0) return true;
+        if (p2.F == 0 && p2.S == 0) return false;
+        ll cross = 1ll * p1.F * p2.S - 1ll * p1.S * p2.F;
+        return cross != 0 ? cross > 0 : abs(p1.F) + abs(p1.S) < abs(p2.F) + abs(p2.S);
+    });
+    vec<pair<T, T>> o;
+    for (int q = 0; q < m.size(); ++q) {
+        for (; o.size() > 1;) {
+            pair<T, T> p1 = o[o.size() - 2];
+            pair<T, T> p2 = o[o.size() - 1];
+            pair<T, T> p3 = m[q];
+            p3.F -= p2.F, p3.S -= p2.S;
+            p2.F -= p1.F, p2.S -= p1.S;
+            if (p2.F * p3.S - p2.S * p3.F > 0) break;
+            o.pop_back();
+        }
+        o.pb(m[q]);
+    }
+    for (auto &[x, y] : o) {
+        x += min_x;
+        y += min_y;
+    }
+    return o;
+};

@@ -8,9 +8,9 @@ struct Bitset {
 
     void init() {
         for (int i = 0; i < 64; i++) {
-            o[i][i] = 1ull<<i;
+            o[i][i] = 1ull << i;
             z[i][i] = allBits ^ o[i][i];
-            for (int j = i+1; j < 64; j++) {
+            for (int j = i + 1; j < 64; j++) {
                 o[i][j] = o[i][j - 1] | (1ull << j);
                 z[i][j] = allBits ^ o[i][j];
             }
@@ -18,42 +18,42 @@ struct Bitset {
     }
 
     Bitset() {
-        if(cnt==0) init();
+        if (cnt == 0) init();
         ++cnt;
         memset(a, 0, sizeof a);
     }
 
-    bool operator[](const int i) {
-        return (bool) (a[i / 64] & (1ull << (i & 63)));
+    inline bool operator[](const int i) {
+        return a[i >> 6] >> (i & 63) & 1;
     }
 
-    void set(int i) {
+    inline void set(int i) {
         a[i / 64] |= (1ull << (i & 63));
     }
 
-    void set() {
+    inline void set() {
         for (int i = 0; i < sz; i++) a[i] = allBits;
     }
 
-    void reset(int i) {
+    inline void reset(int i) {
         a[i / 64] &= (allBits ^ (1ull << (i & 63)));
     }
 
-    void reset() {
+    inline void reset() {
         memset(a, 0, sizeof a);
     }
 
-    void flip(int i) {
+    inline void flip(int i) {
         a[i / 64] ^= (1ull << (i & 63));
     }
 
-    int count() {
+    inline int count() {
         int ans = 0;
         for (int i = 0; i < sz; i++) ans += __builtin_popcountll(a[i]);
         return ans;
     }
 
-    void set(int l, int r) {
+    inline void set(int l, int r) {
         if (l / 64 == r / 64) {
             a[l / 64] |= o[l & 63][r & 63];
             return;
@@ -63,7 +63,7 @@ struct Bitset {
         for (int i = l / 64 + 1; i < r / 64; i++) a[i] = allBits;
     }
 
-    void reset(int l, int r) {
+    inline void reset(int l, int r) {
         if (l / 64 == r / 64) {
             a[l / 64] &= z[l & 63][r & 63];
             return;
@@ -73,7 +73,7 @@ struct Bitset {
         for (int i = l / 64 + 1; i < r / 64; i++) a[i] = 0;
     }
 
-    void flip(int l, int r) {
+    inline void flip(int l, int r) {
         if (l / 64 == r / 64) {
             a[l / 64] ^= o[l & 63][r & 63];
             return;
@@ -143,16 +143,18 @@ struct Bitset {
         return ans;
     }
 
-    int _Find_first() {
+    inline int _Find_first() const {
         for (int i = 0, ans = 0; i < sz; i++, ans += 64) {
             if (a[i]) return ans + __builtin_ctzll(a[i]);
         }
         return N;
     }
 
-    int _Find_next(int k) {
-        int id = k / 64;
-        for (int i = (k & 63) + 1; i < 64; i++) if ((a[id] >> i) & 1) return id * 64 + i;
+    inline int _Find_next(int k) const {
+        const int id = k >> 6, rem = k & 63;
+        if (a[id] && __lg(a[id]) > rem) {
+            return id * 64 + rem + (__builtin_ctzll(a[id] >> (rem + 1))) + 1;
+        }
         for (int i = id + 1, ans = (id + 1) * 64; i < sz; i++, ans += 64) {
             if (a[i]) return ans + __builtin_ctzll(a[i]);
         }

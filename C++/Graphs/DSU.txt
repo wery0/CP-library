@@ -2,6 +2,7 @@ struct dsu {
     int a;
     vec<int> pr;
     vec<int> sz;
+    //vec<vec<int>> vrt;
 
     dsu() {}
 
@@ -9,6 +10,7 @@ struct dsu {
         a = x;
         sz = vec<int>(a, 1);
         pr = vec<int>(a);
+        //vrt.resize(a); for (int q = 0; q < a; ++q) vrt[q] = {q};
         iota(all(pr), 0);
     }
 
@@ -28,6 +30,7 @@ struct dsu {
         }
         pr[px] = py;
         sz[py] += sz[px];
+        //for(int v : vrt[px]) vrt[py].pb(v); vrt[px].clear(); vrt[px].shrink_to_fit();
         return 1;
     }
 };

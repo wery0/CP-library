@@ -33,8 +33,9 @@ struct hasher {
 };
 
 struct multiple_hasher {
-    static constexpr ll mod[2] = {1'000'000'009, 2'000'000'011};
-    static constexpr ll p[2] = {666667, 997};
+    static constexpr int SZ = 2;
+    static constexpr ll mod[SZ] = {1'000'000'009, 2'000'000'011};
+    static constexpr ll p[SZ] = {666'667, 997};
     hasher<mod[0], p[0]> h0;
     hasher<mod[1], p[1]> h1;
 
@@ -50,5 +51,9 @@ struct multiple_hasher {
     bool is_substrings_equal(int l1, int r1, int l2, int r2) {
         return h0.is_substrings_equal(l1, r1, l2, r2) &&
                h1.is_substrings_equal(l1, r1, l2, r2);
+    }
+
+    array<ll, SZ> calc_hash(int l, int r) {
+        return {h0.calc_hash(l, r), h1.calc_hash(l, r)};
     }
 };

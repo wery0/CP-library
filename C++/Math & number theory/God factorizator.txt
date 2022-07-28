@@ -1,0 +1,1288 @@
+namespace god_factorizator {
+#define bend(a) (a).begin(), (a).end()
+#define D 120
+using u8 = uint8_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using u128 = __uint128_t;
+
+    __inline uint64_t mulredcx(uint64_t x, uint64_t y, uint64_t n, uint64_t nhat)
+    {
+        if (n & 0x8000000000000000)
+        {
+            __asm__(
+                "mulx %2, %%r10, %%r11  \n\t"
+                "movq %%r10, %%rax      \n\t"
+                "xorq %%r8, %%r8 \n\t"
+                "xorq %%r12, %%r12 \n\t"
+                "mulq %3 \n\t"
+                "mulq %4 \n\t"
+                "addq %%r10, %%rax \n\t"
+                "adcq %%r11, %%rdx \n\t"
+                "cmovae %4, %%r12 \n\t"
+                "subq %4, %%rdx \n\t"
+                "cmovc %%r12, %%r8 \n\t"
+                "addq %%r8, %%rdx \n\t"
+                : "=&d"(x)
+                : "0"(x), "r"(y), "r"(nhat), "r"(n)
+                : "rax", "r8", "r10", "r11", "r12", "cc");
+        }
+        else
+        {
+            __asm__(
+                "mulx %2, %%r10, %%r11  \n\t"
+                "movq %3, %%rax     \n\t"
+                "xorq %%r8, %%r8 \n\t"
+                "mulq %%r10 \n\t"
+                "mulq %4 \n\t"
+                "addq %%r10, %%rax \n\t"
+                "adcq %%r11, %%rdx \n\t"
+                "subq %4, %%rdx \n\t"
+                "cmovc %4, %%r8 \n\t"
+                "addq %%r8, %%rdx \n\t"
+                : "=d"(x)
+                : "0"(x), "r"(y), "r"(nhat), "r"(n)
+                : "rax", "r8", "r10", "r11", "cc");
+
+        }
+        return x;
+    }
+
+    __inline uint64_t sqrredcx(uint64_t x, uint64_t n, uint64_t nhat)
+    {
+        if (n & 0x8000000000000000)
+        {
+            __asm__(
+                "mulx %1, %%r10, %%r11  \n\t"
+                "movq %%r10, %%rax      \n\t"
+                "xorq %%r8, %%r8 \n\t"
+                "xorq %%r12, %%r12 \n\t"
+                "mulq %2 \n\t"
+                "mulq %3 \n\t"
+                "addq %%r10, %%rax \n\t"
+                "adcq %%r11, %%rdx \n\t"
+                "cmovae %3, %%r12 \n\t"
+                "subq %3, %%rdx \n\t"
+                "cmovc %%r12, %%r8 \n\t"
+                "addq %%r8, %%rdx \n\t"
+                : "=&d"(x)
+                : "0"(x), "r"(nhat), "r"(n)
+                : "rax", "r8", "r10", "r11", "r12", "cc");
+        }
+        else
+        {
+            __asm__(
+                "mulx %1, %%r10, %%r11  \n\t"
+                "movq %2, %%rax     \n\t"
+                "xorq %%r8, %%r8 \n\t"
+                "mulq %%r10 \n\t"
+                "mulq %3 \n\t"
+                "addq %%r10, %%rax \n\t"
+                "adcq %%r11, %%rdx \n\t"
+                "subq %3, %%rdx \n\t"
+                "cmovc %3, %%r8 \n\t"
+                "addq %%r8, %%rdx \n\t"
+                : "=d"(x)
+                : "0"(x), "r"(nhat), "r"(n)
+                : "rax", "r8", "r10", "r11", "cc");
+
+        }
+        return x;
+    }
+
+    __inline uint64_t mulredc63x(uint64_t x, uint64_t y, uint64_t n, uint64_t nhat)
+    {
+        __asm__(
+            "mulx %2, %%r10, %%r11  \n\t"
+            "movq %3, %%rax     \n\t"
+            "xorq %%r8, %%r8 \n\t"
+            "mulq %%r10 \n\t"
+            "mulq %4 \n\t"
+            "addq %%r10, %%rax \n\t"
+            "adcq %%r11, %%rdx \n\t"
+            "subq %4, %%rdx \n\t"
+            "cmovc %4, %%r8 \n\t"
+            "addq %%r8, %%rdx \n\t"
+            : "=d"(x)
+            : "0"(x), "r"(y), "r"(nhat), "r"(n)
+            : "rax", "r8", "r10", "r11", "cc");
+
+        return x;
+    }
+
+    __inline uint64_t sqrredc63x(uint64_t x, uint64_t n, uint64_t nhat)
+    {
+        __asm__(
+            "mulx %1, %%r10, %%r11  \n\t"
+            "movq %2, %%rax     \n\t"
+            "xorq %%r8, %%r8 \n\t"
+            "mulq %%r10 \n\t"
+            "mulq %3 \n\t"
+            "addq %%r10, %%rax \n\t"
+            "adcq %%r11, %%rdx \n\t"
+            "subq %3, %%rdx \n\t"
+            "cmovc %3, %%r8 \n\t"
+            "addq %%r8, %%rdx \n\t"
+            : "=d"(x)
+            : "0"(x), "r"(nhat), "r"(n)
+            : "rax", "r8", "r10", "r11", "cc");
+
+        return x;
+    }
+
+
+    typedef struct
+    {
+        uint64_t X;
+        uint64_t Z;
+    } ecm_pt;
+
+    typedef struct
+    {
+        uint64_t sum1;
+        uint64_t diff1;
+        uint64_t sum2;
+        uint64_t diff2;
+        uint64_t tt1;
+        uint64_t tt2;
+        uint64_t tt3;
+        uint64_t tt4;
+        uint64_t tt5;
+        uint64_t s;
+        uint64_t n;
+        ecm_pt pt1;
+        ecm_pt pt2;
+        ecm_pt pt3;
+        ecm_pt pt4;
+        ecm_pt pt5;
+        uint32_t sigma;
+
+        ecm_pt Pa;
+        ecm_pt Pd;
+        ecm_pt Pad;
+        ecm_pt Pb[20];
+        uint64_t Paprod;
+        uint64_t Pbprod[20];
+
+        uint64_t stg2acc;
+        uint64_t A;
+        uint32_t last_pid;
+        uint32_t stg1_max;
+        uint32_t stg2_max;
+
+    } ecm_work;
+
+    static const uint32_t map[61] = {
+        0, 1, 2, 0, 0, 0, 0, 3, 0, 0,
+        0, 4, 0, 5, 0, 0, 0, 6, 0, 7,
+        0, 0, 0, 8, 0, 0, 0, 0, 0, 9,
+        0, 10, 0, 0, 0, 0, 0, 11, 0, 0,
+        0, 12, 0, 13, 0, 0, 0, 14, 0, 15,
+        0, 0, 0, 16, 0, 0, 0, 0, 0, 17,
+        18
+    };
+
+#define NUMP 801
+    static const uint32_t primes[NUMP] = {
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,
+        37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
+        79, 83, 89, 97, 101, 103, 107, 109, 113, 127,
+        131, 137, 139, 149, 151, 157, 163, 167, 173, 179,
+        181, 191, 193, 197, 199, 211, 223, 227, 229, 233,
+        239, 241, 251, 257, 263, 269, 271, 277, 281, 283,
+        293, 307, 311, 313, 317, 331, 337, 347, 349, 353,
+        359, 367, 373, 379, 383, 389, 397, 401, 409, 419,
+        421, 431, 433, 439, 443, 449, 457, 461, 463, 467,
+        479, 487, 491, 499, 503, 509, 521, 523, 541, 547,
+        557, 563, 569, 571, 577, 587, 593, 599, 601, 607,
+        613, 617, 619, 631, 641, 643, 647, 653, 659, 661,
+        673, 677, 683, 691, 701, 709, 719, 727, 733, 739,
+        743, 751, 757, 761, 769, 773, 787, 797, 809, 811,
+        821, 823, 827, 829, 839, 853, 857, 859, 863, 877,
+        881, 883, 887, 907, 911, 919, 929, 937, 941, 947,
+        953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019,
+        1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087,
+        1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153,
+        1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223, 1229,
+        1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297,
+        1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381,
+        1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453,
+        1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511, 1523,
+        1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597,
+        1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663,
+        1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741,
+        1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811, 1823,
+        1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901,
+        1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987, 1993,
+        1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063,
+        2069, 2081, 2083, 2087, 2089, 2099, 2111, 2113, 2129, 2131,
+        2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 2213, 2221,
+        2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281, 2287, 2293,
+        2297, 2309, 2311, 2333, 2339, 2341, 2347, 2351, 2357, 2371,
+        2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417, 2423, 2437,
+        2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539,
+        2543, 2549, 2551, 2557, 2579, 2591, 2593, 2609, 2617, 2621,
+        2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687, 2689,
+        2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731, 2741, 2749,
+        2753, 2767, 2777, 2789, 2791, 2797, 2801, 2803, 2819, 2833,
+        2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897, 2903, 2909,
+        2917, 2927, 2939, 2953, 2957, 2963, 2969, 2971, 2999, 3001,
+        3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067, 3079, 3083,
+        3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181, 3187,
+        3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253, 3257, 3259,
+        3271, 3299, 3301, 3307, 3313, 3319, 3323, 3329, 3331, 3343,
+        3347, 3359, 3361, 3371, 3373, 3389, 3391, 3407, 3413, 3433,
+        3449, 3457, 3461, 3463, 3467, 3469, 3491, 3499, 3511, 3517,
+        3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571, 3581,
+        3583, 3593, 3607, 3613, 3617, 3623, 3631, 3637, 3643, 3659,
+        3671, 3673, 3677, 3691, 3697, 3701, 3709, 3719, 3727, 3733,
+        3739, 3761, 3767, 3769, 3779, 3793, 3797, 3803, 3821, 3823,
+        3833, 3847, 3851, 3853, 3863, 3877, 3881, 3889, 3907, 3911,
+        3917, 3919, 3923, 3929, 3931, 3943, 3947, 3967, 3989, 4001,
+        4003, 4007, 4013, 4019, 4021, 4027, 4049, 4051, 4057, 4073,
+        4079, 4091, 4093, 4099, 4111, 4127, 4129, 4133, 4139, 4153,
+        4157, 4159, 4177, 4201, 4211, 4217, 4219, 4229, 4231, 4241,
+        4243, 4253, 4259, 4261, 4271, 4273, 4283, 4289, 4297, 4327,
+        4337, 4339, 4349, 4357, 4363, 4373, 4391, 4397, 4409, 4421,
+        4423, 4441, 4447, 4451, 4457, 4463, 4481, 4483, 4493, 4507,
+        4513, 4517, 4519, 4523, 4547, 4549, 4561, 4567, 4583, 4591,
+        4597, 4603, 4621, 4637, 4639, 4643, 4649, 4651, 4657, 4663,
+        4673, 4679, 4691, 4703, 4721, 4723, 4729, 4733, 4751, 4759,
+        4783, 4787, 4789, 4793, 4799, 4801, 4813, 4817, 4831, 4861,
+        4871, 4877, 4889, 4903, 4909, 4919, 4931, 4933, 4937, 4943,
+        4951, 4957, 4967, 4969, 4973, 4987, 4993, 4999, 5003, 5009,
+        5011, 5021, 5023, 5039, 5051, 5059, 5077, 5081, 5087, 5099,
+        5101, 5107, 5113, 5119, 5147, 5153, 5167, 5171, 5179, 5189,
+        5197, 5209, 5227, 5231, 5233, 5237, 5261, 5273, 5279, 5281,
+        5297, 5303, 5309, 5323, 5333, 5347, 5351, 5381, 5387, 5393,
+        5399, 5407, 5413, 5417, 5419, 5431, 5437, 5441, 5443, 5449,
+        5471, 5477, 5479, 5483, 5501, 5503, 5507, 5519, 5521, 5527,
+        5531, 5557, 5563, 5569, 5573, 5581, 5591, 5623, 5639, 5641,
+        5647, 5651, 5653, 5657, 5659, 5669, 5683, 5689, 5693, 5701,
+        5711, 5717, 5737, 5741, 5743, 5749, 5779, 5783, 5791, 5801,
+        5807, 5813, 5821, 5827, 5839, 5843, 5849, 5851, 5857, 5861,
+        5867, 5869, 5879, 5881, 5897, 5903, 5923, 5927, 5939, 5953,
+        5981, 5987, 6007, 6011, 6029, 6037, 6043, 6047, 6053, 6067,
+        6073, 6079, 6089, 6091, 6101, 6113, 6121, 6131, 6133, 6143,
+    };
+
+// local functions
+    void add(uint64_t rho, ecm_work *work, ecm_pt *P1, ecm_pt *p2,
+             ecm_pt *Pin, ecm_pt *Pout);
+    void dup(uint64_t rho, ecm_work *work, uint64_t insum, uint64_t indiff, ecm_pt *P);
+    void prac(uint64_t rho, ecm_work *work, ecm_pt *P, uint64_t c, double v);
+    int check_factor(uint64_t Z, uint64_t n, uint64_t * f);
+    void build(ecm_pt *P, uint64_t rho, ecm_work *work, uint32_t sigma);
+
+    void ecm_stage1(uint64_t rho, ecm_work *work, ecm_pt *P);
+    void ecm_stage2(ecm_pt *P, uint64_t rho, ecm_work *work);
+
+    __inline uint64_t submod(uint64_t a, uint64_t b, uint64_t n)
+    {
+        __asm__(
+            "xorq %%r8, %%r8 \n\t"
+            "subq %1, %0 \n\t"
+            "cmovc %2, %%r8 \n\t"
+            "addq %%r8, %0 \n\t"
+            : "+r"(a)
+            : "r"(b), "r"(n)
+            : "r8", "cc");
+
+        return a;
+    }
+
+    __inline uint64_t addmod(uint64_t x, uint64_t y, uint64_t n)
+    {
+        uint64_t t = x - n;
+        x += y;
+        asm("add %2, %1\n\t"
+            "cmovc %1, %0\n\t"
+            :"+r" (x), "+&r" (t)
+            : "r" (y)
+            : "cc"
+           );
+        return x;
+    }
+
+    __inline uint64_t u64div(uint64_t c, uint64_t n)
+    {
+        __asm__("divq %4"
+                : "=a"(c), "=d"(n)
+                : "1"(c), "0"(0), "r"(n));
+
+        return n;
+    }
+
+    uint64_t spDivide(uint64_t *q, uint64_t *r, uint64_t u[2], uint64_t v)
+    {
+        *r = u[1];
+        *q = u[0];
+        __asm__("divq %4"
+                : "=a"(*q), "=d"(*r)
+                : "1"(*r), "0"(*q), "r"(v));
+
+        return 0;
+    }
+
+    void spMultiply(uint64_t u, uint64_t v, uint64_t *product, uint64_t *carry)
+    {
+        *product = v;
+        *carry = u;
+
+        __asm__("movq %2, %%rax \n\t"
+                "mulq %3    \n\t"
+                "movq %%rax, %0     \n\t"
+                "movq %%rdx, %1     \n\t"
+                : "=r"(*product), "=r"(*carry)
+                : "1"(*carry), "0"(*product)
+                : "rax", "rdx", "cc");
+
+        return;
+    }
+
+    void spMulMod(uint64_t u, uint64_t v, uint64_t m, uint64_t *w)
+    {
+        uint64_t p[2];
+        uint64_t q;
+
+        spMultiply(u, v, &p[0], &p[1]);
+        spDivide(&q, w, p, m);
+
+        return;
+    }
+
+    uint64_t spGCD(uint64_t x, uint64_t y)
+    {
+        uint64_t a, b, c;
+        a = x; b = y;
+        while (b != 0)
+        {
+            c = a % b;
+            a = b;
+            b = c;
+        }
+        return a;
+    }
+
+    uint64_t LCGSTATE;
+    uint32_t spRand(uint32_t lower, uint32_t upper)
+    {
+        // advance the state of the LCG and return the appropriate result
+        LCGSTATE = 6364136223846793005ULL * LCGSTATE + 1442695040888963407ULL;
+        return lower + (uint32_t)(
+                   (double)(upper - lower) * (double)(LCGSTATE >> 32) / 4294967296.0);
+    }
+
+    void add(uint64_t rho, ecm_work *work, ecm_pt *P1, ecm_pt *P2,
+             ecm_pt *Pin, ecm_pt *Pout)
+    {
+        // compute:
+        //x+ = z- * [(x1-z1)(x2+z2) + (x1+z1)(x2-z2)]^2
+        //z+ = x- * [(x1-z1)(x2+z2) - (x1+z1)(x2-z2)]^2
+        // where:
+        //x- = original x
+        //z- = original z
+        // given the sums and differences of the original points (stored in work structure).
+        work->diff1 = submod(P1->X, P1->Z, work->n);
+        work->sum1 = addmod(P1->X, P1->Z, work->n);
+        work->diff2 = submod(P2->X, P2->Z, work->n);
+        work->sum2 = addmod(P2->X, P2->Z, work->n);
+
+        work->tt1 = mulredcx(work->diff1, work->sum2, work->n, rho);    //U
+        work->tt2 = mulredcx(work->sum1, work->diff2, work->n, rho);    //V
+
+        work->tt3 = addmod(work->tt1, work->tt2, work->n);
+        work->tt4 = submod(work->tt1, work->tt2, work->n);
+        work->tt1 = sqrredcx(work->tt3, work->n, rho);  //(U + V)^2
+        work->tt2 = sqrredcx(work->tt4, work->n, rho);  //(U - V)^2
+
+        if (Pin == Pout)
+        {
+            uint64_t tmp;
+            Pout->Z = mulredcx(work->tt1, Pin->Z, work->n, rho);        //Z * (U + V)^2
+            Pout->X = mulredcx(work->tt2, Pin->X, work->n, rho);        //x * (U - V)^2
+            tmp = Pout->Z;
+            Pout->Z = Pout->X;
+            Pout->X = tmp;
+        }
+        else
+        {
+            Pout->X = mulredcx(work->tt1, Pin->Z, work->n, rho);        //Z * (U + V)^2
+            Pout->Z = mulredcx(work->tt2, Pin->X, work->n, rho);        //x * (U - V)^2
+        }
+        return;
+    }
+
+    void dup(uint64_t rho, ecm_work *work,
+             uint64_t insum, uint64_t indiff, ecm_pt *P)
+    {
+        work->tt1 = sqrredcx(indiff, work->n, rho);         // U=(x1 - z1)^2
+        work->tt2 = sqrredcx(insum, work->n, rho);          // V=(x1 + z1)^2
+        P->X = mulredcx(work->tt1, work->tt2, work->n, rho);            // x=U*V
+
+        work->tt3 = submod(work->tt2, work->tt1, work->n);          // w = V-U
+        work->tt2 = mulredcx(work->tt3, work->s, work->n, rho);     // w = (A+2)/4 * w
+        work->tt2 = addmod(work->tt2, work->tt1, work->n);          // w = w + U
+        P->Z = mulredcx(work->tt2, work->tt3, work->n, rho);            // Z = w*(V-U)
+        return;
+    }
+
+    void prac70(uint64_t rho, ecm_work *work, ecm_pt *P)
+    {
+        uint64_t s1, s2, d1, d2;
+        uint64_t swp;
+        int i;
+        static const uint8_t steps[116] = {
+            0, 6, 0, 6, 0, 6, 0, 4, 6, 0, 4, 6, 0, 4, 4, 6,
+            0, 4, 4, 6, 0, 5, 4, 6, 0, 3, 3, 4, 6, 0, 3, 5,
+            4, 6, 0, 3, 4, 3, 4, 6, 0, 5, 5, 4, 6, 0, 5, 3,
+            3, 4, 6, 0, 3, 3, 4, 3, 4, 6, 0, 5, 3, 3, 3, 3,
+            3, 3, 3, 3, 4, 3, 3, 4, 6, 0, 5, 4, 3, 3, 4, 6,
+            0, 3, 4, 3, 5, 4, 6, 0, 5, 3, 3, 3, 4, 6, 0, 5,
+            4, 3, 5, 4, 6, 0, 5, 5, 3, 3, 4, 6, 0, 4, 3, 3,
+            3, 5, 4, 6
+        };
+
+        for (i = 0; i < 116; i++)
+        {
+            if (steps[i] == 0)
+            {
+                work->pt1.X = work->pt2.X = work->pt3.X = P->X;
+                work->pt1.Z = work->pt2.Z = work->pt3.Z = P->Z;
+
+                d1 = submod(work->pt1.X, work->pt1.Z, work->n);
+                s1 = addmod(work->pt1.X, work->pt1.Z, work->n);
+                dup(rho, work, s1, d1, &work->pt1);
+            }
+            else if (steps[i] == 3)
+            {
+                // integrate step 4 followed by swap(1,2)
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt4);     // T = B + A (C)
+
+                swp = work->pt1.X;
+                work->pt1.X = work->pt4.X;
+                work->pt4.X = work->pt3.X;
+                work->pt3.X = work->pt2.X;
+                work->pt2.X = swp;
+                swp = work->pt1.Z;
+                work->pt1.Z = work->pt4.Z;
+                work->pt4.Z = work->pt3.Z;
+                work->pt3.Z = work->pt2.Z;
+                work->pt2.Z = swp;
+            }
+            else if (steps[i] == 4)
+            {
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt4);     // T = B + A (C)
+
+                swp = work->pt2.X;
+                work->pt2.X = work->pt4.X;
+                work->pt4.X = work->pt3.X;
+                work->pt3.X = swp;
+                swp = work->pt2.Z;
+                work->pt2.Z = work->pt4.Z;
+                work->pt4.Z = work->pt3.Z;
+                work->pt3.Z = swp;
+            }
+            else if (steps[i] == 5)
+            {
+                d2 = submod(work->pt1.X, work->pt1.Z, work->n);
+                s2 = addmod(work->pt1.X, work->pt1.Z, work->n);
+
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt2);     // B = B + A (C)
+                dup(rho, work, s2, d2, &work->pt1);     // A = 2A
+            }
+            else if (steps[i] == 6)
+            {
+                add(rho, work, &work->pt1, &work->pt2, &work->pt3, P);      // A = A + B (C)
+            }
+
+        }
+
+        return;
+
+    }
+
+    void prac85(uint64_t rho, ecm_work *work, ecm_pt *P)
+    {
+        uint64_t s1, s2, d1, d2;
+        uint64_t swp;
+        int i;
+        static const uint8_t steps[146] = {
+            0, 6, 0, 6, 0, 6, 0, 6, 0, 4,
+            6, 0, 4, 6, 0, 4, 4, 6, 0, 4,
+            4, 6, 0, 5, 4, 6, 0, 3, 3, 4,
+            6, 0, 3, 5, 4, 6, 0, 3, 4, 3,
+            4, 6, 0, 5, 5, 4, 6, 0, 5, 3,
+            3, 4, 6, 0, 3, 3, 4, 3, 4, 6,
+            0, 4, 3, 4, 3, 5, 3, 3, 3, 3,
+            3, 3, 3, 3, 4, 6, 0, 3, 3, 3,
+            3, 3, 3, 3, 3, 3, 4, 3, 4, 3,
+            4, 6, 0, 3, 4, 3, 5, 4, 6, 0,
+            5, 3, 3, 3, 4, 6, 0, 5, 4, 3,
+            5, 4, 6, 0, 4, 3, 3, 3, 5, 4,
+            6, 0, 4, 3, 5, 3, 3, 4, 6, 0,
+            3, 3, 3, 3, 5, 4, 6, 0, 3, 3,
+            3, 4, 3, 3, 4, 6
+        };
+
+        for (i = 0; i < 146; i++)
+        {
+            if (steps[i] == 0)
+            {
+                work->pt1.X = work->pt2.X = work->pt3.X = P->X;
+                work->pt1.Z = work->pt2.Z = work->pt3.Z = P->Z;
+
+                d1 = submod(work->pt1.X, work->pt1.Z, work->n);
+                s1 = addmod(work->pt1.X, work->pt1.Z, work->n);
+                dup(rho, work, s1, d1, &work->pt1);
+            }
+            else if (steps[i] == 3)
+            {
+                // integrate step 4 followed by swap(1,2)
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt4);     // T = B + A (C)
+
+                swp = work->pt1.X;
+                work->pt1.X = work->pt4.X;
+                work->pt4.X = work->pt3.X;
+                work->pt3.X = work->pt2.X;
+                work->pt2.X = swp;
+                swp = work->pt1.Z;
+                work->pt1.Z = work->pt4.Z;
+                work->pt4.Z = work->pt3.Z;
+                work->pt3.Z = work->pt2.Z;
+                work->pt2.Z = swp;
+            }
+            else if (steps[i] == 4)
+            {
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt4);     // T = B + A (C)
+
+                swp = work->pt2.X;
+                work->pt2.X = work->pt4.X;
+                work->pt4.X = work->pt3.X;
+                work->pt3.X = swp;
+                swp = work->pt2.Z;
+                work->pt2.Z = work->pt4.Z;
+                work->pt4.Z = work->pt3.Z;
+                work->pt3.Z = swp;
+            }
+            else if (steps[i] == 5)
+            {
+                d2 = submod(work->pt1.X, work->pt1.Z, work->n);
+                s2 = addmod(work->pt1.X, work->pt1.Z, work->n);
+
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt2);     // B = B + A (C)
+                dup(rho, work, s2, d2, &work->pt1);     // A = 2A
+            }
+            else if (steps[i] == 6)
+            {
+                add(rho, work, &work->pt1, &work->pt2, &work->pt3, P);      // A = A + B (C)
+            }
+
+        }
+
+        return;
+
+    }
+
+    void prac(uint64_t rho, ecm_work *work, ecm_pt *P, uint64_t c, double v)
+    {
+        uint64_t d, e, r;
+        int i;
+        uint64_t s1, s2, d1, d2;
+        uint64_t swp;
+
+        d = c;
+        r = (uint64_t)((double)d * v + 0.5);
+
+        s1 = work->sum1;
+        s2 = work->sum2;
+        d1 = work->diff1;
+        d2 = work->diff2;
+
+        d = c - r;
+        e = 2 * r - c;
+
+        // the first one is always a doubling
+        // point1 is [1]P
+        work->pt1.X = work->pt2.X = work->pt3.X = P->X;
+        work->pt1.Z = work->pt2.Z = work->pt3.Z = P->Z;
+
+        d1 = submod(work->pt1.X, work->pt1.Z, work->n);
+        s1 = addmod(work->pt1.X, work->pt1.Z, work->n);
+
+        // point2 is [2]P
+        dup(rho, work, s1, d1, &work->pt1);
+
+        while (d != e)
+        {
+            if (d < e)
+            {
+                r = d;
+                d = e;
+                e = r;
+                swp = work->pt1.X;
+                work->pt1.X = work->pt2.X;
+                work->pt2.X = swp;
+                swp = work->pt1.Z;
+                work->pt1.Z = work->pt2.Z;
+                work->pt2.Z = swp;
+            }
+
+            if ((d + 3) / 4 <= e)
+            {
+                d -= e;
+
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt4);     // T = B + A (C)
+
+                swp = work->pt2.X;
+                work->pt2.X = work->pt4.X;
+                work->pt4.X = work->pt3.X;
+                work->pt3.X = swp;
+                swp = work->pt2.Z;
+                work->pt2.Z = work->pt4.Z;
+                work->pt4.Z = work->pt3.Z;
+                work->pt3.Z = swp;
+            }
+            else if ((d + e) % 2 == 0)
+            {
+                d = (d - e) / 2;
+
+                d2 = submod(work->pt1.X, work->pt1.Z, work->n);
+                s2 = addmod(work->pt1.X, work->pt1.Z, work->n);
+
+                add(rho, work, &work->pt2, &work->pt1, &work->pt3, &work->pt2);     // B = B + A (C)
+                dup(rho, work, s2, d2, &work->pt1);     // A = 2A
+            }
+            else
+            {
+                // empirically, tiny B1 values only need the above prac cases.
+                // just in case, fall back on this.
+                printf("unhandled case in prac\n");
+                exit(1);
+            }
+        }
+
+        add(rho, work, &work->pt1, &work->pt2, &work->pt3, P);      // A = A + B (C)
+
+        return;
+
+    }
+
+    uint64_t modinv_64(uint64_t a, uint64_t p) {
+
+        uint64_t ps1, ps2, parity, dividend, divisor, rem, q, t;
+
+        q = 1;
+        rem = a;
+        dividend = p;
+        divisor = a;
+        ps1 = 1;
+        ps2 = 0;
+        parity = 0;
+
+        while (divisor > 1) {
+            rem = dividend - divisor;
+            t = rem - divisor;
+            if (rem >= divisor) {
+                q += ps1; rem = t; t -= divisor;
+                if (rem >= divisor) {
+                    q += ps1; rem = t; t -= divisor;
+                    if (rem >= divisor) {
+                        q += ps1; rem = t; t -= divisor;
+                        if (rem >= divisor) {
+                            q += ps1; rem = t; t -= divisor;
+                            if (rem >= divisor) {
+                                q += ps1; rem = t; t -= divisor;
+                                if (rem >= divisor) {
+                                    q += ps1; rem = t; t -= divisor;
+                                    if (rem >= divisor) {
+                                        q += ps1; rem = t; t -= divisor;
+                                        if (rem >= divisor) {
+                                            q += ps1; rem = t;
+                                            if (rem >= divisor) {
+                                                q = dividend / divisor;
+                                                rem = dividend % divisor;
+                                                q *= ps1;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            q += ps2;
+            parity = ~parity;
+            dividend = divisor;
+            divisor = rem;
+            ps2 = ps1;
+            ps1 = q;
+        }
+
+        if (parity == 0)
+            return ps1;
+        else
+            return p - ps1;
+    }
+
+    void build(ecm_pt *P, uint64_t rho, ecm_work *work, uint32_t sigma)
+    {
+        uint64_t t1, t2, t3, t4, t5, s[3];
+        uint64_t u, v, n;
+        n = work->n;
+
+        if (sigma == 0)
+        {
+            work->sigma = spRand(7, (uint32_t) - 1);
+        }
+        else
+        {
+            work->sigma = sigma;
+        }
+        sigma = work->sigma;
+
+        u = sigma;
+        u = u64div(u, n);
+
+        t1 = 4;
+        t1 = u64div(t1, n);
+
+        v = mulredcx(u, t1, n, rho);        // v = 4*sigma
+
+        u = mulredcx(u, u, n, rho);
+        t1 = 5;
+        t1 = u64div(t1, n);
+        u = submod(u, t1, n);           // u = sigma^2 - 5
+
+        t1 = mulredcx(u, u, n, rho);
+        P->X = mulredcx(t1, u, n, rho); // x = u^3
+
+        t1 = mulredcx(v, v, n, rho);
+        P->Z = mulredcx(t1, v, n, rho); // z = v^3
+
+        //compute parameter A
+        t1 = submod(v, u, n);           // (v - u)
+        t2 = mulredcx(t1, t1, n, rho);
+        t4 = mulredcx(t2, t1, n, rho);  // (v - u)^3
+
+        t1 = 3;
+        t1 = u64div(t1, n);
+        t2 = mulredcx(t1, u, n, rho);   // 3u
+        t3 = addmod(t2, v, n);          // 3u + v
+
+        t1 = mulredcx(t3, t4, n, rho);  // a = (v-u)^3 * (3u + v)
+
+        t2 = 16;
+        t2 = u64div(t2, n);
+        t3 = mulredcx(P->X, t2, n, rho);    // 16*u^3
+        t4 = mulredcx(t3, v, n, rho);   // 16*u^3*v
+
+        // u holds the denom, t1 holds the numer
+        // accomplish the division by multiplying by the modular inverse
+        t2 = 1;
+        t4 = mulredcx(t4, t2, n, rho);  // take t4 out of monty rep
+        t1 = mulredcx(t1, t2, n, rho);  // take t1 out of monty rep
+
+        t3 = modinv_64(t4, n);
+        spMulMod(t3, t1, n, &work->s);
+        work->s = u64div(work->s, n);
+
+        return;
+    }
+
+    int tinyecm(uint64_t n, uint64_t *f, uint32_t B1, uint32_t curves)
+    {
+        //attempt to factor n with the elliptic curve method
+        //following brent and montgomery's papers, and CP's book
+        int i, j;
+        int curve;
+        int result;
+        ecm_work work;
+        ecm_pt P;
+        uint32_t sigma;
+        uint64_t rho, x, tmp1;
+
+        x = (((n + 2) & 4) << 1) + n; // here x*a==1 mod 2**4
+        x *= 2 - n * x;               // here x*a==1 mod 2**8
+        x *= 2 - n * x;               // here x*a==1 mod 2**16
+        x *= 2 - n * x;               // here x*a==1 mod 2**32
+        x *= 2 - n * x;               // here x*a==1 mod 2**64
+        rho = (uint64_t)0 - x;
+        work.n = n;
+
+        work.stg1_max = B1;
+        // pre-paired sequences have been prepared for this B2, so it is not an input
+        work.stg2_max = 25 * B1;
+
+        *f = 1;
+        for (curve = 0; curve < curves; curve++)
+        {
+            uint64_t p;
+
+            work.last_pid = 0;
+            sigma = 0;
+            build(&P, rho, &work, sigma);
+
+            ecm_stage1(rho, &work, &P);
+            result = check_factor(P.Z, n, &tmp1);
+
+            if (result == 1)
+            {
+                *f = tmp1;
+                return curve + 1;
+            }
+
+            ecm_stage2(&P, rho, &work);
+            result = check_factor(work.stg2acc, n, &tmp1);
+
+            if (result == 1)
+            {
+                *f = tmp1;
+                return curve + 1;
+            }
+
+        }
+
+        return curve;
+    }
+
+    void ecm_stage1(uint64_t rho, ecm_work *work, ecm_pt *P)
+    {
+        int i;
+        uint64_t q;
+        uint64_t stg1 = (uint64_t)work->stg1_max;
+
+        // handle the only even case
+        q = 2;
+        while (q < stg1)
+        {
+            work->diff1 = submod(P->X, P->Z, work->n);
+            work->sum1 = addmod(P->X, P->Z, work->n);
+            dup(rho, work, work->sum1, work->diff1, P);
+            q *= 2;
+        }
+
+        if (stg1 == 70)
+        {
+            prac70(rho, work, P);
+            i = 19;
+        }
+        else if (stg1 >= 85)
+        {
+            // call prac with best ratios found by a deep search.
+            // some composites are cheaper than their
+            // constituent primes.
+            prac85(rho, work, P);
+            if (stg1 < 100)
+            {
+                // paired into a composite for larger bounds
+                prac(rho, work, P, 61, 0.522786351415446049);
+            }
+            i = 23;
+
+            if (stg1 >= 125)
+            {
+                prac(rho, work, P, 5, 0.618033988749894903);
+                prac(rho, work, P, 11, 0.580178728295464130);
+                prac(rho, work, P, 61, 0.522786351415446049);
+                prac(rho, work, P, 89, 0.618033988749894903);
+                prac(rho, work, P, 97, 0.723606797749978936);
+                prac(rho, work, P, 101, 0.556250337855490828);
+                prac(rho, work, P, 107, 0.580178728295464130);
+                prac(rho, work, P, 109, 0.548409048446403258);
+                prac(rho, work, P, 113, 0.618033988749894903);
+                if (stg1 < 130) prac(rho, work, P, 103, 0.632839806088706269);
+                i = 30;
+            }
+
+            if (stg1 >= 165)
+            {
+                prac(rho, work, P, 7747, 0.552188778811121); // 61 x 127
+                prac(rho, work, P, 131, 0.618033988749894903);
+                prac(rho, work, P, 14111, 0.632839806088706);   // 103 x 137
+                prac(rho, work, P, 20989, 0.620181980807415);   // 139 x 151
+                prac(rho, work, P, 157, 0.640157392785047019);
+                prac(rho, work, P, 163, 0.551390822543526449);
+                if (stg1 < 200) prac(rho, work, P, 149, 0.580178728295464130);
+                i = 38;
+            }
+
+            if (stg1 >= 205)
+            {
+                prac(rho, work, P, 13, 0.618033988749894903);
+                prac(rho, work, P, 167, 0.580178728295464130);
+                prac(rho, work, P, 173, 0.612429949509495031);
+                prac(rho, work, P, 179, 0.618033988749894903);
+                prac(rho, work, P, 181, 0.551390822543526449);
+                prac(rho, work, P, 191, 0.618033988749894903);
+                prac(rho, work, P, 193, 0.618033988749894903);
+                prac(rho, work, P, 29353, 0.580178728295464);   // 149 x 197
+                prac(rho, work, P, 199, 0.551390822543526449);
+                i = 46;
+            }
+        }
+
+        work->last_pid = i;
+        return;
+    }
+
+// pre-paired sequences for various B1 and B2 = 25*B1
+    static const int numb1_70 = 186;
+    static uint8_t b1_70[186] = { 53, 49, 47, 43, 41, 37, 23, 19, 13, 11, 1, 7, 17, 29, 31, 0, 59, 47, 43, 41, 37, 31, 29, 19, 13, 7, 1, 11, 23, 0, 59, 53, 43, 41, 37, 31, 23, 17, 11, 7, 1, 19, 29, 49, 0, 53, 49, 47, 43, 31, 23, 19, 11, 7, 1, 13, 37, 59, 0, 59, 53, 43, 37, 31, 29, 23, 17, 13, 11, 1, 47, 0, 59, 49, 41, 31, 23, 17, 11, 7, 1, 19, 37, 47, 0, 59, 49, 47, 43, 41, 31, 17, 13, 11, 7, 37, 0, 53, 49, 43, 37, 23, 19, 13, 7, 1, 29, 31, 41, 59, 0, 59, 49, 47, 41, 23, 19, 17, 13, 7, 1, 43, 53, 0, 59, 49, 43, 37, 29, 17, 13, 7, 1, 19, 47, 53, 0, 59, 53, 49, 47, 43, 31, 29, 23, 11, 17, 0, 47, 43, 41, 37, 31, 23, 19, 17, 11, 1, 13, 29, 53, 0, 59, 47, 41, 37, 31, 23, 19, 11, 7, 17, 29, 0, 53, 47, 43, 41, 17, 13, 11, 1, 23, 31, 37, 49 };
+
+    static const int numb1_85 = 225;
+    static uint8_t b1_85[225] = { 61, 53, 49, 47, 43, 41, 37, 23, 19, 13, 11, 1, 7, 17, 29, 31, 0, 59, 47, 43, 41, 37, 31, 29, 19, 13, 7, 1, 11, 23, 0, 59, 53, 43, 41, 37, 31, 23, 17, 11, 7, 1, 19, 29, 49, 0, 53, 49, 47, 43, 31, 23, 19, 11, 7, 1, 13, 37, 59, 0, 59, 53, 43, 37, 31, 29, 23, 17, 13, 11, 1, 47, 0, 59, 49, 41, 31, 23, 17, 11, 7, 1, 19, 37, 47, 0, 59, 49, 47, 43, 41, 31, 17, 13, 11, 7, 37, 0, 53, 49, 43, 37, 23, 19, 13, 7, 1, 29, 31, 41, 59, 0, 59, 49, 47, 41, 23, 19, 17, 13, 7, 1, 43, 53, 0, 59, 49, 43, 37, 29, 17, 13, 7, 1, 19, 47, 53, 0, 59, 53, 49, 47, 43, 31, 29, 23, 11, 17, 0, 47, 43, 41, 37, 31, 23, 19, 17, 11, 1, 13, 29, 53, 0, 59, 47, 41, 37, 31, 23, 19, 11, 7, 17, 29, 0, 53, 47, 43, 41, 17, 13, 11, 1, 23, 31, 37, 49, 0, 53, 47, 43, 41, 29, 19, 7, 1, 17, 31, 37, 49, 59, 0, 49, 43, 37, 19, 17, 1, 23, 29, 47, 53, 0, 59, 53, 43, 41, 31, 17, 7, 1, 11, 13, 19, 29 };
+
+    static const int numb1_125 = 319;
+    static uint8_t b1_125[319] = { 23, 19, 13, 11, 1, 7, 17, 29, 31, 0, 59, 47, 43, 41, 37, 31, 29, 19, 13, 7, 1, 11, 23, 0, 59, 53, 43, 41, 37, 31, 23, 17, 11, 7, 1, 19, 29, 49, 0, 53, 49, 47, 43, 31, 23, 19, 11, 7, 1, 13, 37, 59, 0, 59, 53, 43, 37, 31, 29, 23, 17, 13, 11, 1, 47, 0, 59, 49, 41, 31, 23, 17, 11, 7, 1, 19, 37, 47, 0, 59, 49, 47, 43, 41, 31, 17, 13, 11, 7, 37, 0, 53, 49, 43, 37, 23, 19, 13, 7, 1, 29, 31, 41, 59, 0, 59, 49, 47, 41, 23, 19, 17, 13, 7, 1, 43, 53, 0, 59, 49, 43, 37, 29, 17, 13, 7, 1, 19, 47, 53, 0, 59, 53, 49, 47, 43, 31, 29, 23, 11, 17, 0, 47, 43, 41, 37, 31, 23, 19, 17, 11, 1, 13, 29, 53, 0, 59, 47, 41, 37, 31, 23, 19, 11, 7, 17, 29, 0, 53, 47, 43, 41, 17, 13, 11, 1, 23, 31, 37, 49, 0, 53, 47, 43, 41, 29, 19, 7, 1, 17, 31, 37, 49, 59, 0, 49, 43, 37, 19, 17, 1, 23, 29, 47, 53, 0, 59, 53, 43, 41, 31, 17, 7, 1, 11, 13, 19, 29, 0, 59, 53, 49, 47, 37, 29, 11, 13, 17, 23, 31, 0, 59, 43, 41, 37, 29, 23, 17, 13, 1, 31, 47, 0, 59, 53, 49, 47, 41, 37, 31, 19, 13, 7, 11, 17, 29, 43, 0, 47, 29, 19, 11, 7, 1, 41, 43, 59, 0, 53, 49, 37, 23, 13, 11, 7, 1, 17, 19, 29, 41, 43, 59, 0, 59, 49, 41, 37, 23, 13, 1, 7, 11, 29, 43, 47, 53, 0, 59, 53, 49, 31, 23, 13, 7, 1, 17, 29, 43, 47, 0, 59, 31, 29, 19, 11, 7, 37, 49, 53 };
+
+    static const int numb1_165 = 425;
+    static uint8_t b1_165[425] = { 13, 7, 1, 11, 19, 47, 59, 0, 59, 49, 43, 37, 31, 29, 23, 19, 17, 7, 11, 13, 47, 53, 0, 53, 47, 41, 37, 31, 23, 19, 11, 1, 13, 29, 43, 59, 0, 53, 49, 41, 37, 31, 19, 17, 1, 7, 23, 29, 47, 59, 0, 59, 53, 47, 43, 41, 29, 19, 17, 13, 7, 1, 23, 31, 49, 0, 53, 47, 41, 37, 29, 23, 19, 11, 7, 17, 31, 43, 49, 59, 0, 47, 43, 41, 37, 23, 19, 17, 13, 7, 11, 29, 53, 0, 53, 49, 43, 37, 29, 23, 11, 7, 1, 13, 19, 31, 41, 0, 53, 49, 47, 43, 37, 31, 23, 17, 11, 13, 41, 0, 59, 47, 43, 37, 31, 29, 23, 11, 1, 17, 19, 41, 0, 59, 53, 19, 13, 7, 1, 29, 43, 47, 49, 0, 53, 49, 47, 41, 29, 19, 17, 13, 11, 7, 1, 23, 31, 43, 59, 0, 53, 49, 41, 37, 23, 19, 13, 11, 7, 1, 17, 43, 47, 0, 47, 43, 41, 31, 19, 17, 7, 1, 13, 37, 49, 0, 59, 49, 37, 29, 13, 1, 7, 11, 17, 19, 41, 47, 53, 0, 49, 47, 31, 29, 7, 1, 13, 17, 19, 23, 37, 59, 0, 47, 37, 31, 19, 17, 13, 11, 1, 29, 41, 43, 53, 0, 59, 41, 17, 13, 7, 1, 19, 23, 31, 47, 49, 53, 0, 59, 53, 47, 43, 31, 29, 7, 1, 11, 17, 37, 41, 49, 0, 49, 43, 37, 23, 19, 13, 1, 7, 17, 0, 59, 49, 41, 37, 31, 29, 23, 1, 11, 13, 53, 0, 53, 43, 41, 37, 29, 23, 17, 13, 11, 7, 1, 19, 31, 49, 0, 53, 43, 31, 29, 23, 19, 17, 1, 13, 37, 41, 59, 0, 53, 43, 37, 31, 23, 13, 1, 17, 29, 59, 0, 59, 49, 41, 37, 23, 19, 11, 1, 7, 29, 0, 59, 43, 17, 13, 11, 1, 7, 23, 29, 37, 41, 49, 0, 49, 47, 43, 41, 29, 1, 7, 13, 19, 23, 31, 59, 0, 59, 49, 47, 31, 29, 13, 7, 37, 41, 43, 0, 49, 41, 29, 23, 13, 11, 7, 1, 17, 19, 31, 43, 53, 0, 53, 47, 43, 37, 29, 23, 17, 1, 11, 13, 31, 41, 49, 59, 0, 53, 47, 41, 19, 13, 11, 1, 17, 23, 43, 0, 53, 49, 47, 37, 23, 19, 11, 7, 17, 29, 31, 43, 0, 53, 31, 19, 17, 13, 7, 1, 29, 37, 59 };
+
+    static const int numb1_205 = 511;
+    static uint8_t b1_205[511] = { 1, 23, 41, 0, 59, 53, 49, 47, 37, 23, 19, 17, 13, 1, 7, 29, 43, 0, 53, 49, 41, 31, 29, 19, 17, 11, 7, 1, 13, 37, 59, 0, 49, 47, 29, 23, 13, 7, 1, 17, 31, 37, 43, 0, 59, 49, 47, 43, 37, 31, 29, 17, 13, 7, 1, 11, 19, 53, 0, 59, 53, 49, 41, 37, 23, 13, 1, 11, 17, 19, 29, 43, 47, 0, 53, 49, 47, 43, 23, 19, 11, 1, 7, 17, 37, 41, 0, 59, 53, 41, 37, 31, 29, 19, 17, 11, 1, 13, 43, 47, 0, 53, 47, 41, 19, 17, 7, 1, 11, 23, 31, 43, 59, 0, 59, 53, 41, 31, 13, 11, 7, 1, 17, 29, 37, 0, 49, 43, 37, 29, 11, 1, 13, 17, 19, 23, 41, 0, 59, 49, 47, 43, 41, 37, 31, 19, 7, 1, 13, 23, 29, 53, 0, 53, 49, 43, 41, 37, 31, 29, 23, 13, 7, 17, 19, 47, 59, 0, 49, 47, 37, 29, 23, 17, 11, 7, 13, 19, 31, 41, 53, 0, 59, 43, 29, 23, 19, 17, 13, 11, 1, 41, 0, 59, 37, 31, 23, 17, 13, 11, 7, 1, 19, 29, 43, 53, 0, 49, 47, 43, 41, 31, 19, 17, 1, 7, 11, 13, 23, 0, 47, 43, 37, 29, 13, 11, 7, 1, 17, 19, 23, 31, 59, 0, 59, 37, 31, 29, 23, 19, 13, 1, 7, 11, 41, 47, 53, 0, 53, 49, 43, 31, 23, 17, 13, 41, 59, 0, 59, 53, 31, 19, 17, 1, 7, 11, 23, 37, 47, 49, 0, 59, 53, 47, 43, 41, 37, 31, 23, 19, 17, 11, 1, 0, 59, 53, 49, 47, 31, 17, 13, 7, 1, 11, 29, 37, 0, 53, 43, 31, 17, 13, 7, 1, 29, 41, 49, 0, 53, 49, 41, 29, 23, 11, 7, 1, 19, 31, 47, 0, 47, 43, 41, 29, 23, 19, 7, 1, 11, 49, 0, 59, 31, 29, 23, 17, 11, 7, 1, 13, 41, 43, 0, 59, 43, 37, 17, 1, 7, 11, 13, 19, 41, 49, 0, 59, 53, 43, 41, 37, 31, 29, 23, 13, 11, 1, 47, 0, 59, 53, 47, 31, 19, 17, 13, 1, 7, 11, 29, 37, 43, 49, 0, 49, 43, 41, 31, 17, 13, 7, 11, 23, 37, 53, 0, 53, 49, 41, 23, 19, 13, 11, 7, 1, 17, 37, 59, 0, 49, 47, 43, 37, 31, 29, 23, 1, 7, 41, 0, 59, 43, 41, 37, 31, 17, 13, 11, 7, 47, 49, 0, 59, 49, 47, 37, 31, 29, 19, 17, 7, 1, 0, 53, 47, 37, 19, 13, 1, 11, 31, 41, 0, 49, 47, 37, 23, 17, 13, 11, 7, 19, 31, 53, 0, 59, 53, 47, 29, 13, 11, 7, 1, 23, 41, 0, 49, 47, 41, 37, 19, 11, 13, 17, 23, 29, 31, 43, 0, 59, 29, 19, 13, 1, 41, 43, 47, 53, 0, 59, 53, 43, 41, 37, 23, 17, 11, 7, 1, 13, 29, 49 };
+
+    void ecm_stage2(ecm_pt *P, uint64_t rho, ecm_work *work)
+    {
+        int b;
+        int i, j, k, m;
+        ecm_pt *Pa = &work->Pa;
+        ecm_pt *Pb = work->Pb;
+        ecm_pt *Pd;
+        uint64_t acc = work->stg2acc;
+        uint8_t *barray;
+        uint32_t numb;
+
+        //stage 2 init
+        //Q = P = result of stage 1
+        //compute [d]Q for 0 < d <= D
+        Pd = &Pb[map[60]];
+
+        // [1]Q
+        Pb[1].Z = P->Z;
+        Pb[1].X = P->X;
+        work->Pbprod[1] = mulredcx(Pb[1].X, Pb[1].Z, work->n, rho);
+
+        // [2]Q
+        Pb[2].Z = P->Z;
+        Pb[2].X = P->X;
+        work->diff1 = submod(P->X, P->Z, work->n);
+        work->sum1 = addmod(P->X, P->Z, work->n);
+        dup(rho, work, work->sum1, work->diff1, &Pb[2]);
+        work->Pbprod[2] = mulredcx(Pb[2].X, Pb[2].Z, work->n, rho);
+
+        // Calculate all Pb: the following is specialized for D=60
+        // [2]Q + [1]Q([1]Q) = [3]Q
+        add(rho, work, &Pb[1], &Pb[2], &Pb[1], &Pb[3]);     // <-- temporary
+
+        // 2*[3]Q = [6]Q
+        work->diff1 = submod(Pb[3].X, Pb[3].Z, work->n);
+        work->sum1 = addmod(Pb[3].X, Pb[3].Z, work->n);
+        dup(rho, work, work->sum1, work->diff1, &work->pt3);    // pt3 = [6]Q
+
+        // [3]Q + [2]Q([1]Q) = [5]Q
+        add(rho, work, &Pb[3], &Pb[2], &Pb[1], &work->pt1); // <-- pt1 = [5]Q
+        Pb[3].X = work->pt1.X;
+        Pb[3].Z = work->pt1.Z;
+
+        // [6]Q + [5]Q([1]Q) = [11]Q
+        add(rho, work, &work->pt3, &work->pt1, &Pb[1], &Pb[4]); // <-- [11]Q
+
+        i = 3;
+        k = 4;
+        j = 5;
+        while ((j + 12) < (60))
+        {
+            // [j+6]Q + [6]Q([j]Q) = [j+12]Q
+            add(rho, work, &work->pt3, &Pb[k], &Pb[i], &Pb[map[j + 12]]);
+            i = k;
+            k = map[j + 12];
+            j += 6;
+        }
+
+        // [6]Q + [1]Q([5]Q) = [7]Q
+        add(rho, work, &work->pt3, &Pb[1], &work->pt1, &Pb[3]); // <-- [7]Q
+        i = 1;
+        k = 3;
+        j = 1;
+        while ((j + 12) < (60))
+        {
+            // [j+6]Q + [6]Q([j]Q) = [j+12]Q
+            add(rho, work, &work->pt3, &Pb[k], &Pb[i], &Pb[map[j + 12]]);
+            i = k;
+            k = map[j + 12];
+            j += 6;
+        }
+
+        // Pd = [2w]Q
+        // [31]Q + [29]Q([2]Q) = [60]Q
+        add(rho, work, &Pb[9], &Pb[10], &Pb[2], Pd);    // <-- [60]Q
+
+        // make all of the Pbprod's
+        for (i = 3; i < 19; i++)
+        {
+            work->Pbprod[i] = mulredcx(Pb[i].X, Pb[i].Z, work->n, rho);
+        }
+
+        //initialize info needed for giant step
+        // temporary - make [4]Q
+        work->diff1 = submod(Pb[2].X, Pb[2].Z, work->n);
+        work->sum1 = addmod(Pb[2].X, Pb[2].Z, work->n);
+        dup(rho, work, work->sum1, work->diff1, &work->pt3);    // pt3 = [4]Q
+
+        // Pd = [w]Q
+        // [17]Q + [13]Q([4]Q) = [30]Q
+        add(rho, work, &Pb[map[17]], &Pb[map[13]], &work->pt3, &work->Pad); // <-- [30]Q
+
+        // [60]Q + [30]Q([30]Q) = [90]Q
+        add(rho, work, Pd, &work->Pad, &work->Pad, Pa);
+        work->pt1.X = Pa->X;
+        work->pt1.Z = Pa->Z;
+
+        // [90]Q + [30]Q([60]Q) = [120]Q
+        add(rho, work, Pa, &work->Pad, Pd, Pa);
+        Pd->X = Pa->X;
+        Pd->Z = Pa->Z;
+
+        // [120]Q + [30]Q([90]Q) = [150]Q
+        add(rho, work, Pa, &work->Pad, &work->pt1, Pa);
+
+        // adjustment of Pa and Pad for larger B1.
+        // Currently we have Pa=150, Pd=120, Pad=30
+        if (work->stg1_max == 165)
+        {
+            // need Pa = 180, Pad = 60
+            // [150]Q + [30]Q([120]Q) = [180]Q
+            add(rho, work, Pa, &work->Pad, Pd, Pa);
+
+            work->diff1 = submod(work->Pad.X, work->Pad.Z, work->n);
+            work->sum1 = addmod(work->Pad.X, work->Pad.Z, work->n);
+            dup(rho, work, work->sum1, work->diff1, &work->Pad);    // Pad = [60]Q
+        }
+        else if (work->stg1_max == 205)
+        {
+            // need Pa = 210, Pad = 90.
+            // have pt1 = 90
+
+            work->diff1 = submod(work->Pad.X, work->Pad.Z, work->n);
+            work->sum1 = addmod(work->Pad.X, work->Pad.Z, work->n);
+            dup(rho, work, work->sum1, work->diff1, &work->Pad);    // Pad = [60]Q
+
+            // [150]Q + [60]Q([90]Q) = [210]Q
+            add(rho, work, Pa, &work->Pad, &work->pt1, Pa);
+            work->Pad.X = work->pt1.X;
+            work->Pad.Z = work->pt1.Z;
+        }
+
+        //initialize accumulator and Paprod
+        acc = u64div(1, work->n);
+        work->Paprod = mulredcx(Pa->X, Pa->Z, work->n, rho);
+
+        if (work->stg1_max == 70)
+        {
+            barray = b1_70;
+            numb = numb1_70;
+        }
+        else if (work->stg1_max == 85)
+        {
+            barray = b1_85;
+            numb = numb1_85;
+        }
+        else if (work->stg1_max == 125)
+        {
+            barray = b1_125;
+            numb = numb1_125;
+        }
+        else if (work->stg1_max == 165)
+        {
+            barray = b1_165;
+            numb = numb1_165;
+        }
+        else if (work->stg1_max == 205)
+        {
+            barray = b1_205;
+            numb = numb1_205;
+        }
+
+        for (i = 0; i < numb; i++)
+        {
+            if (barray[i] == 0)
+            {
+                //giant step - use the addition formula for ECM
+                work->pt1.X = Pa->X;
+                work->pt1.Z = Pa->Z;
+
+                //Pa + Pd
+                add(rho, work, Pa, Pd, &work->Pad, Pa);
+
+                //Pad holds the previous Pa
+                work->Pad.X = work->pt1.X;
+                work->Pad.Z = work->pt1.Z;
+
+                //and Paprod
+                work->Paprod = mulredcx(Pa->X, Pa->Z, work->n, rho);
+
+                i++;
+            }
+
+            //we accumulate XrZd - XdZr = (Xr - Xd) * (Zr + Zd) + XdZd - XrZr
+            //in CP notation, Pa -> (Xr,Zr), Pb -> (Xd,Zd)
+
+            b = barray[i];
+            // accumulate the cross product  (zimmerman syntax).
+            // page 342 in C&P
+            work->tt1 = submod(Pa->X, Pb[map[b]].X, work->n);
+            work->tt2 = addmod(Pa->Z, Pb[map[b]].Z, work->n);
+            work->tt3 = mulredcx(work->tt1, work->tt2, work->n, rho);
+            work->tt1 = addmod(work->tt3, work->Pbprod[map[b]], work->n);
+            work->tt2 = submod(work->tt1, work->Paprod, work->n);
+            acc = mulredcx(acc, work->tt2, work->n, rho);
+
+        }
+
+        work->stg2acc = acc;
+
+        return;
+    }
+
+    int check_factor(uint64_t Z, uint64_t n, uint64_t * f)
+    {
+        int status;
+
+        *f = spGCD(Z, n);
+
+        status = 0;
+        if (*f > 1)
+        {
+            if (*f == n)
+            {
+                *f = 0;
+                status = 0;
+            }
+            else
+            {
+                status = 1;
+            }
+        }
+
+        return status;
+    }
+
+    u64 modmul(u64 a, u64 b, u64 M) {
+        int64_t ret = a * b - M * u64(1.L / M * a * b);
+        return ret + M * (ret < 0) - M * (ret >= (int64_t)M);
+    }
+    u64 modpow(u64 b, u64 e, u64 mod) {
+        u64 ans = 1;
+        for (; e; b = modmul(b, b, mod), e /= 2)
+            if (e & 1) ans = modmul(ans, b, mod);
+        return ans;
+    }
+    bool isPrime(u64 n) {
+        if (n < 2 || n % 6 % 4 != 1) return (n | 1) == 3;
+        u64 A[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022},
+                  s = __builtin_ctzll(n - 1), d = n >> s;
+        for (u64 a : A) {   // ^ count trailing zeroes
+            u64 p = modpow(a % n, d, n), i = s;
+            while (p != 1 && p != n - 1 && a % n && i--)
+                p = modmul(p, p, n);
+            if (p != n - 1 && i != s) return 0;
+        }
+        return 1;
+    }
+    u64 pollard(u64 n) {
+        auto f = [n](u64 x) { return modmul(x, x, n) + 1; };
+        u64 x = 0, y = 0, t = 30, prd = 2, i = 1, q;
+        while (t < 1000 && (t++ % 40 || __gcd(prd, n) == 1)) {
+            if (x == y) x = ++i, y = f(x);
+            if ((q = modmul(prd, max(x, y) - min(x, y), n))) prd = q;
+            x = f(x), y = f(f(y));
+        }
+        return __gcd(prd, n);
+    }
+
+    vector<u64> factorise(u64 n) {
+        vector<u64> f;
+
+        u64 fac;
+        while ( n > 1 && !isPrime(n) && (fac = pollard(n)) != 1 && fac != n) {
+            auto l = factorise(fac), r = factorise(n / fac);
+            l.insert(l.end(), bend(r));
+            return l;
+        }
+
+        while (n > 1 && !isPrime(n)) {
+            int bitsize = 64 - __builtin_clzll(n);
+
+            int B1, curves;
+            if (bitsize == 0)
+            {
+                B1 = 70;
+                curves = 0;
+            }
+            else if (bitsize <= 24)
+            {
+                B1 = 27;
+                curves = 16;
+            }
+            else if (bitsize <= 26)
+            {
+                B1 = 31;
+                curves = 16;
+            }
+            else if (bitsize <= 28)
+            {
+                B1 = 37;
+                curves = 16;
+            }
+            else if (bitsize <= 32)
+            {
+                B1 = 41;
+                curves = 16;
+            }
+            else if (bitsize <= 50)
+            {
+                B1 = 70;
+                curves = 24;
+            }
+            else if (bitsize <= 52)
+            {
+                B1 = 85;
+                curves = 24;
+            }
+            else if (bitsize <= 55)
+            {
+                B1 = 125;
+                curves = 24;
+            }
+            else if (bitsize <= 60)
+            {
+                B1 = 165;
+                curves = 32;
+            }
+            else if (bitsize <= 64)
+            {
+                B1 = 205;
+                curves = 40;
+            }
+
+            u64 outf;
+            tinyecm(n, &outf, B1, curves);
+            if (outf != 1 && outf != n) {
+                n /= outf;
+                f.push_back(outf);
+                break;
+            }
+        }
+        if (n > 1) f.push_back(n);
+        return f;
+    }
+
+    vec<uint64_t> solve(uint64_t n) {
+        auto prime_factors = factorise(n);
+        sort(all(prime_factors));
+        return prime_factors;
+    }
+};

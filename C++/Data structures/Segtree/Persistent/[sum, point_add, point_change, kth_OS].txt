@@ -1,0 +1,110 @@
+template<typename T>
+struct segtree {
+
+    struct Node {
+
+        Node *l = 0, *r = 0;
+        T sm = 0;
+
+        Node() {}
+
+        Node(Node *n) {
+            l = n->l, r = n->r;
+            sm = n->sm;
+        }
+    };
+
+    inline T gsm(Node *n) {return n ? n->sm : 0;}
+
+    int a;
+    vec<Node*> store;
+    Node* root;
+    segtree() {}
+
+    segtree(vec<T> &arr) {
+        auto build = [&](auto && build, Node *&n, int l, int r) -> void{
+            if (l > r) return;
+            n = new Node();
+            if (l == r) {
+                n->sm = arr[l];
+                return;
+            }
+            int md = (l + r) / 2;
+            build(build, n->l, l, md);
+            build(build, n->r, md + 1, r);
+            upd(n);
+        };
+        a = arr.size();
+        build(build, root, 0, a - 1);
+        store.pb(root);
+    }
+
+    segtree(uint _a) {
+        vec<T> arr(_a);
+        (*this) = segtree(arr);
+    }
+
+    void upd(Node *n) {
+        n->sm = gsm(n->l) + gsm(n->r);
+    }
+
+    T seg_sum(uint ql, uint qr, uint l, uint r, Node *n) {
+        if (qr < l || r < ql) return 0;
+        if (ql <= l && r <= qr) {
+            return n->sm;
+        }
+        uint md = (l + r) >> 1;
+        const T lf = seg_sum(ql, qr, l, md, n->l);
+        const T rg = seg_sum(ql, qr, md + 1, r, n->r);
+        return lf + rg;
+    }
+    T seg_sum(uint version, uint ql, uint qr) {return seg_sum(ql, qr, 0, a - 1, store[version]);}
+
+    Node* point_add(uint pos, uint l, uint r, Node *n, T add_val) {
+        Node *nw = new Node(n);
+        if (l == r) {
+            nw->sm += add_val;
+            return nw;
+        }
+        uint md = (l + r) >> 1;
+        if (pos <= md) nw->l = point_add(pos, l, md, n->l, add_val);
+        else nw->r = point_add(pos, md + 1, r, n->r, add_val);
+        upd(nw);
+        return nw;
+    }
+    inline void point_add(uint version, uint pos, T add_val, bool push_to_store) {
+        Node* new_root = point_add(pos, 0, a - 1, store[version], add_val);
+        if (push_to_store) store.pb(new_root);
+    }
+
+    Node* point_change(uint pos, uint l, uint r, Node *n, T new_val) {
+        Node *nw = new Node(n);
+        if (l == r) {
+            nw->sm = new_val;
+            return nw;
+        }
+        uint md = (l + r) >> 1;
+        if (pos <= md) nw->l = point_change(pos, l, md, nw->l, new_val);
+        else nw->r = point_change(pos, md + 1, r, nw->r, new_val);
+        upd(nw);
+        return nw;
+    }
+    inline void point_change(uint version, uint pos, T new_val, bool push_to_store) {
+        Node* new_root = point_change(pos, 0, a - 1, store[version], new_val);
+        if (push_to_store) store.pb(new_root);
+    }
+
+    int seg_kth_order_statistics(int ql, int qr, int k) {
+        Node *lf = store[ql], *rg = store[qr + 1];
+        int l = 0, r = a - 1;
+        for (; l < r;) {
+            int md = (l + r) / 2;
+            int l_val = gsm(rg->l) - gsm(lf->l);
+            if (k < l_val) lf = lf->l, rg = rg->l, r = md;
+            else k -= l_val, lf = lf->r, rg = rg->r, l = md + 1;
+        }
+        return l;
+    }
+};
+//0-th version is the initial array.
+//All queries are 0-index.

@@ -1,0 +1,52 @@
+struct MaxBipartiteMatchingKyhn {
+
+    int L, R;
+    graph<edge<void>> g;
+    vec<int> mtl;
+    vec<int> mtr;
+    vec<bool> us;
+    bool sw = 0;
+
+    MaxBipartiteMatchingKyhn(int _L, int _R, int E = -1) {
+        L = _L, R = _R;
+        if (L > R) swap(L, R), sw = 1;
+        g = graph<edge<void>>(L, E);
+        mtl = vec<int>(L, -1);
+        mtr = vec<int>(R, -1);
+        us.resize(L);
+    }
+
+    void add_edge(int x, int y) {
+        if (sw) swap(x, y);
+        g.add_edge(x, y, 1);
+    }
+
+    int dfs(int v) {
+        if (us[v]) return 0;
+        us[v] = 1;
+        for (const auto &h : g[v]) if (mtr[h.to] == -1) return mtr[h.to] = v, mtl[v] = h.to, 1;
+        for (const auto &h : g[v]) if (dfs(mtr[h.to])) return mtr[h.to] = v, mtl[v] = h.to, 1;
+        return 0;
+    }
+
+    vec<pii> calc() {
+        g.prepare();
+        int mt_size = 0;
+        for (;;) {
+            fill(all(us), 0);
+            int was = mt_size;
+            for (int q = 0; q < L; ++q) {
+                if (mtl[q] == -1) mt_size += dfs(q);
+            }
+            if (was == mt_size) break;
+        }
+        vec<pii> ans(mt_size);
+        for (int q = 0, i = 0; q < L; ++q) {
+            if (mtl[q] != -1) {
+                ans[i++] = {q, mtl[q]};
+            }
+        }
+        if (sw) for (pii &p : ans) swap(p.F, p.S);
+        return ans;
+    }
+};
