@@ -1,7 +1,7 @@
 #pragma GCC optimize("Ofast")
 // #pragma GCC target("avx,avx2,fma")
 
-#include<bits/stdc++.h>
+#include "bits/stdc++.h"
 
 //#define NDEBUG
 #define F first
@@ -43,9 +43,11 @@ template<typename K, typename V> using umap = unordered_map<K, V, custom_hash>;
 template<typename T1, typename T2> ostream& operator<<(ostream& out, const pair<T1, T2>& x) {return out << x.F << ' ' << x.S;}
 template<typename T1, typename T2> istream& operator>>(istream& in, pair<T1, T2>& x) {return in >> x.F >> x.S;}
 template<typename T> istream& operator>>(istream& in, vector<T>& a) {for (auto &x : a) in >> x; return in;};
-template<typename T> ostream& operator<<(ostream& out, vector<T>& a) {for (int q = 0; q < a.size(); ++q) {out << a[q]; if (q + 1 < a.size()) out << ' ';}  return out;};
+template<typename T> ostream& operator<<(ostream& out, vector<T>& a) {for (int q = 0; q < a.size(); ++q) {out << a[q]; if (q + 1 < a.size()) out << ' ';} return out;};
+template<typename T, auto K> istream& operator>>(istream& in, array<T, K>& a) {for (auto &x : a) in >> x; return in;};
+template<typename T, auto K> ostream& operator<<(ostream& out, array<T, K>& a) {for (int q = 0; q < a.size(); ++q) {out << a[q]; if (q + 1 < a.size()) out << ' ';} return out;};
 
 int main() {
     fast;
-
+    
 }
