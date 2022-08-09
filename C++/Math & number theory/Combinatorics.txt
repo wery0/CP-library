@@ -33,9 +33,7 @@ ll powmod(ll x, ll k) {
 
 ll inv(ll x) {return powmod(x, mod - 2);}
 
-ll C(ll n, ll k) {
-    return n < 0 || k < 0 || k > n ? 0 : fc[n] * ifc[k] % mod * ifc[n - k] % mod;
-}
+ll C(ll n, ll k) {return n < 0 || k < 0 || k > n ? 0 : fc[n] * ifc[k] % mod * ifc[n - k] % mod;}
 
 int main() {
     fast;

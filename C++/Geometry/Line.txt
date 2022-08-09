@@ -1,0 +1,65 @@
+struct line {
+    ld A, B, C;
+
+    line(ld AA, ld BB, ld CC) {
+        A = AA;
+        B = BB;
+        C = CC;
+        normalize();
+    }
+
+    line(pt a, pt b) {
+        A = a.y - b.y;
+        B = b.x - a.x;
+        C = a.cross(b);
+        normalize();
+    }
+
+    ld dst_to_pt(pt &p) {
+        normalize();
+        return abs(A * p.x + B * p.y + C);
+    }
+
+    void normalize() {
+        assert(abs(A) + abs(B) > EPS);
+        ld u = sqrtl(A * A + B * B);
+        A /= u, B /= u, C /= u;
+        if (A < -EPS || (abs(A) < EPS && B < -EPS)) A *= -1, B *= -1, C *= -1;
+    }
+
+    line get_normal_from_point(pt p) {
+        return line(p, p + pt(A, B));
+    }
+
+    void make_normal_from_point(pt p) {
+        pt p2 = p + pt(A, B);
+        (*this) = line(p, p2);
+    }
+
+    pt intersect(const line &l) {
+        assert(abs(A - l.A) + abs(B - l.B) > EPS);
+        ld x = (l.C * B - C * l.B) / (A * l.B - l.A * B);
+        ld y = (l.A * C - A * l.C) / (A * l.B - l.A * B);
+        return {x, y};
+    }
+
+    bool is_parallel_to(line &l) {
+        return abs(l.A - A) + abs(l.B - B) < EPS;
+    }
+
+    bool is_equal_to(line &l) {
+        return abs(l.A - A) + abs(l.B - B) + abs(l.C - C) < EPS;
+    }
+
+    void printkxb() {
+        if (abs(B) < EPS) {
+            cout << "X = " << -C / A << '\n';
+        } else {
+            cout << "Y = " << -A / B << "X + " << (-C / B) << '\n';
+        }
+    }
+
+    void printABC() {
+        cout << A << " " << B << " " << C << '\n';
+    }
+};

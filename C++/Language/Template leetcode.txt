@@ -29,6 +29,7 @@ auto integral_binary_search_left = [](auto f, auto l, auto r) {static_assert(is_
 auto integral_binary_search_right = [](auto f, auto l, auto r) {static_assert(is_same<decltype(l), decltype(r)>::value); while (l + 1 < r) {auto md = l + (r - l) / 2; if (f(md)) l = md; else r = md;} return r;};
 bool is_prime(ll c) {if (c < 2) return 0; if (c == 2 || c == 3) return 1; if (c % 2 == 0 || c % 3 == 0) return 0; const ll gr = sqrtl(c) + 1; for (ll q = 6; q <= gr; q += 6) {if (c % (q - 1) == 0) return 0; if (c % (q + 1) == 0) return 0;} return 1;}
 ll binpow(ll x, ll k) {if (k < 0) return 0; ll o = 1; for (; k; k >>= 1) {if (k & 1) o = o * x; x = x * x;} return o;}
+vec<vec<int>> get_cycles_of_perm(vec<int> &m, int index) {int a = m.size(); vec<vec<int>> ans; vec<bool> us(a); for (int q = 0; q < a; ++q) {if (us[q]) continue; vec<int> tyt; for (int w = q; !us[w]; w = m[w] - index) {tyt.pb(w); us[w] = 1;} ans.pb(tyt);} return ans;}
 template<typename I> bool is_subseq(I f1, I l1, I f2, I l2) {for (; f1 != l1 && f2 != l2; ++f1) if (*f1 == *f2) ++f2; return f2 == l2;}
 template<typename T> int min_period(T m) {return min_period(all(m));}
 ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}

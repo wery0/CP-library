@@ -1,0 +1,74 @@
+const ld EPS = 1e-9;
+const ld PI = 3.1415926535897932384626433832;
+
+struct circle {
+    pt p;
+    ld r;
+
+    circle() {}
+
+    circle(pt a, ld b) {
+        p = a;
+        r = b;
+    }
+
+    vec<pt> line_intersection(line l) {
+        ld dst = l.dst_pt(p);
+        if (dst > r + EPS) return {};
+        pt mid = l.intersect(l.get_normal(p));
+        if (abs(dst - r) < EPS) return {mid};
+        pt n = { -l.B, l.A};
+        ld d = sqrtl(r * r - dst * dst);
+        n.normalize();
+        return {mid - n * d, mid + n * d};
+    }
+
+    vec<pt> circle_intersection(circle c) {
+        ld d = c.p.dst(p);
+        if (abs(d) < EPS) {
+            if (abs(r - c.r) > EPS) return {};
+            //process inf points
+            assert(0);
+            return {};
+        }
+        pt df = p;
+        p -= df, c.p -= df;
+        line l = line(-2 * c.p.x, -2 * c.p.y, c.p.dot(c.p) + r * r - c.r * c.r);
+        vec<pt> m = line_intersection(l);
+        for (pt &P : m) P += df;
+        p += df;
+        c.p += df;
+        return m;
+    }
+
+    void tangents(pt c, ld r1, ld r2, vec<line> &ans) {
+        ld r = r2 - r1;
+        ld z = c.x * c.x + c.y * c.y;
+        ld d = z - r * r;
+        if (d < -EPS) return;
+        d = sqrtl(abs(d));
+        ans.pb(line((c.x * r + c.y * d) / z, (c.y * r - c.x * d) / z, r1));
+    }
+
+    vec<line> common_tangents (circle b) {
+        vec<line> ans;
+        for (int i = -1; i <= 1; i += 2)
+            for (int j = -1; j <= 1; j += 2)
+                tangents (b.p - p, r * i, b.r * j, ans);
+        for (line &l : ans) l.C -= l.A * p.x + l.B * p.y;
+        vec<line> nw;
+        for (line l : ans) {
+            int fl = 0;
+            for (line u : nw) fl |= u.is_equal(l);
+            if (!fl) nw.pb(l);
+        }
+        return nw;
+    }
+};
+
+ld calc_len_of_arc(pt c, pt p1, pt p2) {
+    ld r = c.dst(p1);
+    ld d = p1.dst(p2);
+    ld ang = acosl(1 - d * d / (2 * r * r) + EPS);
+    return r * ang;
+}

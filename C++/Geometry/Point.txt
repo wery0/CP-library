@@ -1,0 +1,55 @@
+template<typename T>
+struct pt {
+    T x = 0, y = 0;
+
+    pt() = default;
+
+    pt(T a, T b): x(a), y(b) {}
+
+    pt<T> operator+(const pt &p) const { return {x + p.x, y + p.y}; }
+
+    pt<T> operator-(const pt &p) const { return {x - p.x, y - p.y}; }
+
+    pt<T> operator*(const T c) const { return {x * c, y * c}; }
+
+    pt<T> operator/(const T c) const { return {x / c, y / c}; }
+
+    void operator+=(const pt &p) { x += p.x, y += p.y; }
+
+    void operator-=(const pt &p) { x -= p.x, y -= p.y; }
+
+    void operator*=(const T c) { x *= c, y *= c; }
+
+    void operator/=(const T c) { x /= c, y /= c; }
+
+    bool operator==(const pt &p) const {return p.x == x && p.y == y;}
+
+    bool operator!=(const pt &p) const {return p.x != x || p.y != y;}
+
+    ld dst(const pt &p) { return sqrtl((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y)); }
+
+    T sqdst(const pt &p) { return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y); }
+
+    T dot(const pt &p) { return x * p.x + y * p.y; }
+
+    T cross(const pt &p) { return x * p.y - y * p.x; }
+
+    pt<ld> normalize(const ld EPS = 1e-9) {
+        if (abs(x) < EPS && abs(y) < EPS) assert(0);
+        ld c = sqrtl(x * x + y * y);
+        x /= c;
+        y /= c;
+        return pt(x, y);
+    }
+
+    bool operator<(const pt &p) const {return x < p.x || (x == p.x && y < p.y);}
+
+    friend istream& operator>>(istream &is, pt &p) {
+        is >> p.x >> p.y;
+        return is;
+    }
+
+    friend ostream& operator<<(ostream &os, const pt &p) {
+        return os << '{' << p.x << ", " << p.y << '}';
+    }
+};
