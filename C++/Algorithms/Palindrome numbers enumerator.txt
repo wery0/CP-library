@@ -1,0 +1,21 @@
+struct palindrome_numbers_enumerator {
+
+    ll st = 1, is_odd = 1, q1 = 1, q2 = 1;
+
+    ll construct(ll num) {
+        ll x = num;
+        if (is_odd) x /= 10;
+        for (; x; x /= 10) num = num * 10 + x % 10;
+        return num;
+    }
+
+    ll next() {
+        ll res = construct((is_odd ? q1 : q2)++);
+        if ((is_odd ? q1 : q2) == st * 10) {
+            is_odd ^= 1;
+            if (q2 != st) st *= 10;
+        }
+        return res;
+    }
+};
+//1, 2, .., 9, 11, 22, .., 99, 101, 111, .., 989, 999, .., 1001, ..
