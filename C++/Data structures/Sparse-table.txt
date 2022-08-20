@@ -7,21 +7,28 @@ struct sparse_table {
         return min(x, y);
     }
 
-    sparse_table(vec<T> &n) {
-        init_table(n);
+    template<typename T_arr>
+    sparse_table(T_arr &n) {
+        init_table(all(n));
     }
 
-    void init_table(vec<T> &n) {
-        G = n.size();
+    template<typename I>
+    sparse_table(I fir, I last) {
+        init_table(fir, last);
+    }
+
+    template<typename I>
+    void init_table(I fir, I last) {
+        G = last - fir;
         K = __lg(G) + 1;
         m = vec<vec<T>>(K);
         for (int q = 0; q < K; q++) m[q] = vec<T>(max(0, G - (1 << q) + 1));
-        for (int q = 0; q < G; q++) m[0][q] = n[q];
-        for (int q = 1; q < K; q++) {
-            for (int w = 0; w + (1 << q) <= G; w++) {
-                m[q][w] = merge(m[q - 1][w], m[q - 1][w + (1 << (q - 1))]);
+        for (int q = 0; q < G; q++) m[0][q] = *(fir + q);
+            for (int q = 1; q < K; q++) {
+                for (int w = 0; w + (1 << q) <= G; w++) {
+                    m[q][w] = merge(m[q - 1][w], m[q - 1][w + (1 << (q - 1))]);
+                }
             }
-        }
     }
 
     T query(int l, int r, const int index = 0) {
