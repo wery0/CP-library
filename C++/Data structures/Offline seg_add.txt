@@ -6,6 +6,21 @@ struct offline_seg_add {
 
     offline_seg_add() {}
 
+    template<typename I>
+    offline_seg_add(I first, I last) {
+        a = last - first;
+        m.resize(a + 1);
+        for (int q = 0; q < a; ++q) {
+            m[q] += *(first + q);
+            m[q + 1] -= *(first + q);
+        }
+    }
+
+    template<typename T_arr>
+    offline_seg_add(T_arr &n) {
+        (*this) = offline_seg_add(all(n));
+    }
+
     offline_seg_add(int _a) {
         a = _a;
         m.resize(a + 1);
