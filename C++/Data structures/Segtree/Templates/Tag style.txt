@@ -1,3 +1,4 @@
+template<typename T>
 struct segtree {
 
     struct tag {
@@ -14,7 +15,7 @@ struct segtree {
         }
 
         friend inline void merge(const tag &l, const tag &r, tag &res) {
-            if (is_neutral(l)) {res = r; return;}if (is_neutral(r)) {res = l; return;}
+            if (is_neutral(l)) {res = r; return;} if (is_neutral(r)) {res = l; return;}
             //write merge
         }
 
@@ -31,18 +32,30 @@ struct segtree {
     vec<tag> m;
     segtree() {}
 
-    segtree(uint _a) {
-        a = _a;
+    template<typename I>
+    segtree(I first, I last) {
+        a = last - first;
         U = geq_pow2(a);
         m.resize(U * 2);
         for (uint q = 0; q < a; q++) {
             tag &t = m[U + q];
+            const T val = *(first + q);
             //write init of last layer
         }
         for (uint q = U; --q;) {
             const tag &l = m[q << 1], &r = m[q << 1 | 1];
             merge(l, r, m[q]);
         }
+    }
+
+    template<typename T_arr>
+    segtree(T_arr &n) {
+        (*this) = segtree<T>(all(n));
+    }
+
+    segtree(uint a) {
+        vec<T> m(a);
+        (*this) = segtree<T>(m);
     }
 
     inline constexpr int gsz(int v) {

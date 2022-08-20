@@ -6,11 +6,13 @@ struct segtree {
 
     segtree() {}
 
-    segtree(vec<T> &m) {
-        a = m.size();
+    template<typename I>
+    segtree(I first, I last) {
+        a = last - first;
         U = geq_pow2(a);
         //resize need vectors with U * 2
         for (uint q = 0; q < a; q++) {
+            const T val = *(first + q);
             //init last layer. Indices of last layer is U + q.
         }
         for (uint q = U; --q;) {
@@ -18,9 +20,14 @@ struct segtree {
             //write additional info, if need
         }
     }
-    
-    segtree(uint _a) {
-        vec<T> m(_a);
+
+    template<typename T_arr>
+    segtree(T_arr &n) {
+        (*this) = segtree<T>(all(n));
+    }
+
+    segtree(uint a) {
+        vec<T> m(a);
         (*this) = segtree<T>(m);
     }
 
