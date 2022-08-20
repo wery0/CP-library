@@ -1,36 +1,41 @@
-template<typename T>
+template<typename T_flow, typename T_cost>
 struct min_cost_max_flow {
     struct edge {
         int fr, to;
-        T f, c, w;
+        T_flow f;
+        T_cost c, w;
     };
 
-    const T inf = numeric_limits<T>::max();
     int a, ss, tt;
     vec<vec<int>> l;
     vec<edge> e;
 
-    min_cost_flow(int _a) {
+    min_cost_max_flow(int _a) {
         a = _a;
         ss = a - 2, tt = a - 1;
         l = vec<vec<int>>(a, vec<int>());
     }
 
-    void add_edge(int fr, int to, T c, T w) {
+    void add_edge(int fr, int to, T_flow c, T_cost w) {
         l[fr].pb(e.size());
         e.pb({fr, to, 0, c, w});
         l[to].pb(e.size());
         e.pb({to, fr, 0, 0, -w});
     }
 
-    pair<T, T> calc() {
-        T flow = 0, cost = 0;
-        T dst[a];
-        int pr[a], inq[a];
+    vec<T_cost> dst;
+    vec<int> pr, inq;
+    pair<T_flow, T_cost> calc() {
+        const T_cost inf = numeric_limits<T_cost>::max();
+        T_flow flow = 0;
+        T_cost cost = 0;
+        dst.resize(a);
+        pr.resize(a);
+        inq.resize(a);
         for (;;) {
-            fill(dst, dst + a, inf);
-            fill(pr, pr + a, -1);
-            fill(inq, inq + a, 0);
+            fill(all(dst), inf);
+            fill(all(pr), -1);
+            fill(all(inq), 0);
             dst[ss] = 0;
             inq[ss] = 1;
             deque<int> dq = {ss};
@@ -39,7 +44,7 @@ struct min_cost_max_flow {
                 inq[v] = 0;
                 for (int i : l[v]) {
                     if (e[i].c == e[i].f) continue;
-                    T tyt = dst[v] + e[i].w;
+                    T_cost tyt = dst[v] + e[i].w;
                     int to = e[i].to;
                     if (tyt < dst[to]) {
                         dst[to] = tyt;
