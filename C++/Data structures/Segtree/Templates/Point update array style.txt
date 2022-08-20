@@ -9,9 +9,6 @@ struct segtree_point_upd {
     segtree_point_upd(vec<T> &m) {
         a = m.size();
         U = geq_pow2(a);
-        sm.resize(U * 2);
-        mn.resize(U * 2);
-        mx.resize(U * 2);
         //resize need vectors with U * 2
         for (uint q = 0; q < a; ++q) {
             //write init of last layer. Indices of last layer is U + q.
