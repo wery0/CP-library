@@ -8,7 +8,7 @@ struct min_cost_max_flow {
     const T inf = numeric_limits<T>::max();
     vec<int> l[V];
     edge e[E];
-    int ss, tt, sze = 0;
+    int ss = V - 2, tt = V - 1, sze = 0;
     T dst[V];
     int pr[V], inq[V];
 

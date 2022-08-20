@@ -12,6 +12,7 @@ struct min_cost_max_flow {
 
     min_cost_flow(int _a) {
         a = _a;
+        ss = a - 2, tt = a - 1;
         l = vec<vec<int>>(a, vec<int>());
     }
 

@@ -13,7 +13,7 @@ struct HLPP {
         }
     };
 
-    int s = V - 1, t = V - 2;
+    int s = V - 2, t = V - 1;
     vector<edge> adj[V];
     vector<int> lst[V], gap[V];
     T ex[V];
