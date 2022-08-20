@@ -1,16 +1,21 @@
-template<typename K, typename V, const int N>
+template<typename K, typename V, const int MAXN>
 struct hash_map_open_addressing {
 
+    static const int N = MAXN;
     pair<K, V> store[N];
-    bool is_occupied[N] = {0};
+    vec<bool> is_occupied;
+
+    hash_map_open_addressing() {is_occupied.resize(N);}
 
     constexpr inline void next_pos(int &pos) const {
-        pos = (pos + 1) % N;
+        pos = pos < N - 1 ? pos + 1 : 0;
     }
 
+    const ull kek = uid<ull>(0, ULLONG_MAX)(rndll);
+    const ull kek2 = uid<ull>(0, ULLONG_MAX)(rndll);
     constexpr inline int hsh(const K& key) const {
-        if constexpr(is_integral<K>::value) {
-            return key % N;
+        if constexpr(std::is_integral<K>::value) {
+            return (((key ^ kek2) * kek) >> 32) % N;
         } else {
             return hash<K> {}(key) % N;
         }
@@ -37,7 +42,7 @@ struct hash_map_open_addressing {
         for (; is_occupied[pos]; next_pos(pos)) {
             if (store[pos].F == key) {
                 store[pos].S = val;
-                return;
+                break;
             }
         }
         store[pos] = {key, val};
