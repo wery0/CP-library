@@ -1,76 +1,22 @@
 template<typename T>
 struct static_range_frequency {
 
-    template<typename K, typename V>
-    struct hash_map_open_addressing {
-
-        int N;
-        vec<pair<K, V>> store;
-        vec<bool> is_occupied;
-
-        hash_map_open_addressing(){}
-
-        hash_map_open_addressing(int n){
-            N = n;
-            store.resize(n);
-            is_occupied.resize(n);
-        }
-
-        constexpr inline void next_pos(int &pos) const {
-            pos = (pos + 1) % N;
-        }
-
-        constexpr inline int hsh(const K& key) const {
-            if constexpr(is_integral<K>::value) {
-                return key % N;
-            } else {
-                return hash<K> {}(key) % N;
-            }
-        }
-
-        inline V operator[](const K& key) const {
-            int pos = hsh(key);
-            for (; is_occupied[pos]; next_pos(pos)) {
-                if (store[pos].F == key) return store[pos].S;
-            }
-            return -1;
-        }
-
-        inline bool contains(const K& key) const {
-            int pos = hsh(key);
-            for (; is_occupied[pos]; next_pos(pos)) {
-                if (store[pos].F == key) return true;
-            }
-            return false;
-        }
-
-        inline void add(const K& key, const V& val) {
-            int pos = hsh(key);
-            for (; is_occupied[pos]; next_pos(pos)) {
-                if (store[pos].F == key) {
-                    store[pos].S = val;
-                    return;
-                }
-            }
-            store[pos] = {key, val};
-            is_occupied[pos] = true;
-        }
-    };
-
-    hash_map_open_addressing<T, int> mp;
+    umap<T, int> mp;
     vec<vec<int>> store;
+
+    static_range_frequency() = default;
 
     template<typename Iterator>
     static_range_frequency(Iterator first, Iterator last) {
         //using T = typename iterator_traits<Iterator>::value_type;
         int a = last - first;
-        mp = hash_map_open_addressing<T, int>(a * 1.5 + 1);
+        mp = umap<T, int>(a);
         vec<int> m(a);
         int df = 0;
         for (int q = 0; q < a; ++q, ++first) {
-            int n = mp[*first];
+            int n = mp.count(*first) ? mp[*first] : -1;
             if (n == -1) {
-                mp.add(*first, df);
+                mp[*first] = df;
                 m[q] = df++;
             } else {
                 m[q] = n;
@@ -83,9 +29,11 @@ struct static_range_frequency {
     }
 
     int query(int l, int r, T val) {
-        int n = mp[val];
+        int n = mp.count(val) ? mp[val] : -1;
         if (n == -1) return 0;
         return upper_bound(all(store[n]), r) - lower_bound(all(store[n]), l);
     }
 };
 //change hash map if need.
+//static_range_frequency<_Type> srf;
+//static_range_frequency<_Type> srf(all(_arr));
