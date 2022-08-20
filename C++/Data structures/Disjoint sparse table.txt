@@ -7,27 +7,33 @@ struct disjoint_sparse_table {
         return min(x, y);
     }
 
-    disjoint_sparse_table(vec<T> &n) {
-        init_table(n);
+    template<typename T_arr>
+    disjoint_sparse_table(T_arr &n) {
+        init_table(all(n));
     }
 
-    void init_table(vec<T> &n) {
-        G = n.size();
+    template<typename I>
+    disjoint_sparse_table(I fir, I last) {
+        init_table(fir, last);
+    }
+
+    template<typename I>
+    void init_table(I fir, I last) {
+        G = last - fir;
         K = __lg(G) + 1 + (!!(G & (G - 1)));
         m = vec<vec<T>>(K - 1, vec<T>(G));
         for (int q = 1; q < K; q++) {
             for (int l = 0, md = (1 << q) / 2, r = (1 << q); md < G; l += 1 << q, md += 1 << q, r += 1 << q) {
-                m[q - 1][md - 1] = n[md - 1];
-                m[q - 1][md] = n[md];
-                for (int w = md - 2; w >= l; w--) m[q - 1][w] = merge(m[q - 1][w + 1], n[w]);
+                m[q - 1][md - 1] = *(fir + md - 1);
+                m[q - 1][md] = *(fir + md);
+                for (int w = md - 2; w >= l; w--) m[q - 1][w] = merge(m[q - 1][w + 1], *(fir + w));
                 const int gr = min(G, r);
-                for (int w = md + 1; w < gr; w++) m[q - 1][w] = merge(m[q - 1][w - 1], n[w]);
+                for (int w = md + 1; w < gr; w++) m[q - 1][w] = merge(m[q - 1][w - 1], *(fir + w));
             }
         }
     }
 
-    T query(int l, int r, const int index = 0) {
-        l -= index, r -= index;
+    T query(int l, int r) {
         const int u = l == r ? 0 : __lg(l ^ r);
         return l == r ? m[0][l] : merge(m[u][l], m[u][r]);
     }

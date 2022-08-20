@@ -31,8 +31,8 @@ struct sparse_table {
             }
     }
 
-    T query(int l, int r, const int index = 0) {
+    T query(int l, int r) {
         int u = __lg(r - l + 1);
-        return merge(m[u][l - index], m[u][r - index - (1 << u) + 1]);
+        return merge(m[u][l], m[u][r - (1 << u) + 1]);
     }
 };
