@@ -48,5 +48,4 @@ struct segtree_point_upd {
         }
     }
 };
-//0-indexed bottom-up segtree
-//Supports only point updates
+//Bottom-up segtree, supports only point updates
