@@ -39,6 +39,7 @@ template<typename I> bool is_B_subseq_A(I A_beg, I A_end, I B_beg, I B_end) {for
 template<typename T_arr> int min_period(T_arr m) {return min_period(all(m));}
 template<typename T_arr> bool is_palindrome(T_arr m) {return is_palindrome(all(m));}
 template<typename T_arr> T_arr reverse(T_arr x) {reverse(all(x)); return x;}
+int replace(str &s, str from, str to) {str t = from; t.pb(0); t += s; int a = t.size(); vec<int> m(a); for (int q = 1; q < a; ++q) {for (int w = m[q - 1]; w && !m[q]; w = m[w - 1]) {if (t[q] == t[w]) m[q] = w + 1;} m[q] += !m[q] && t[q] == t[0];} int szf = from.size(), lst = szf; for (int q = szf; q < t.size(); ++q) {if (m[q] == szf && q - lst >= szf) {m[q - szf + 1] = -1; lst = q;}} str ans; int o = 0; for (int q = szf + 1; q < t.size(); ++q) {if (m[q] != -1) ans += t[q]; else ans += to, q += szf - 1, ++o;} s = ans; return o;}
 str from_base_10_to_base_b(str x, ll b) {return from_base_10_to_base_b(stoll(x), b);}
 ll from_base_b_to_base_10(str x, ll b) {ll o = 0, pw = 1; for (int q = (int)x.size() - 1; q >= 0; --q, pw *= b) o += (x[q] - '0') * pw; return o;}
 str from_base_a_to_base_b(str x, ll a, ll b) {ll x10 = from_base_b_to_base_10(x, a); return from_base_10_to_base_b(x10, b);}
