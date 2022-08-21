@@ -5,11 +5,21 @@ struct hash_map_chain {
 
     hash_map_chain() {}
 
+    const ull kek = uid<ull>(0, ULLONG_MAX)(rndll);
+    const ull kek2 = uid<ull>(0, ULLONG_MAX)(rndll);
     constexpr inline int hsh(const K& key) const {
         if constexpr(is_integral<K>::value) {
-            return key % N;
+            //return key % N;
+            return (((key ^ kek2) * kek) >> 32) % N;
         } else {
             return hash<K> {}(key) % N;
+        }
+    }
+
+    inline void clear() {
+        for (int q = 0; q < N; ++q) {
+            table[q].clear();
+            table[q].shrink_to_fit();
         }
     }
 

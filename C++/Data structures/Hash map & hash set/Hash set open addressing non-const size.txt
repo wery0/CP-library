@@ -21,6 +21,7 @@ struct hash_set_open_addressing {
     const ull kek2 = uid<ull>(0, ULLONG_MAX)(rndll);
     constexpr inline int hsh(const K& key) const {
         if constexpr(std::is_integral<K>::value) {
+            //return key % N;
             return (((key ^ kek2) * kek) >> 32) % N;
         } else {
             return hash<K> {}(key) % N;
