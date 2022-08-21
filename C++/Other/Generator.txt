@@ -1,0 +1,27 @@
+namespace Generator {
+
+    template<typename T>
+    vec<T> gen_random_vector_32(int a, T l, T r) {
+        uid<T> gen(l, r);
+        vec<T> m(a);
+        for (auto &i : m) i = gen(rnd);
+        return m;
+    }
+
+    template<typename T>
+    vec<T> gen_random_vector_64(int a, T l, T r) {
+        uid<T> gen(l, r);
+        vec<T> m(a);
+        for (auto &i : m) i = gen(rndll);
+        return m;
+    }
+
+    str gen_random_string(int a, int first_letters) {
+        string s; s.resize(a);
+        uid<int> gen('a', 'a' + first_letters - 1);
+        for (int q = 0; q < a; ++q) {
+            s[q] = gen(rnd);
+        }
+        return s;
+    }
+}
