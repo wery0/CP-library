@@ -21,6 +21,10 @@ struct hash_map_open_addressing {
         }
     }
 
+    inline void clear() {
+        fill(all(is_occupied), false);
+    }
+
     inline V operator[](const K& key) const {
         int pos = hsh(key);
         for (; is_occupied[pos]; next_pos(pos)) {

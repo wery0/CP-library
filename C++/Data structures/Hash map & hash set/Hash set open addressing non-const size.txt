@@ -27,6 +27,10 @@ struct hash_set_open_addressing {
         }
     }
 
+    inline void clear() {
+        fill(all(is_occupied), false);
+    }
+
     inline bool contains(const K& key) const {
         int pos = hsh(key);
         for (; is_occupied[pos]; next_pos(pos)) {
