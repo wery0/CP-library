@@ -2,8 +2,8 @@ template<typename K, typename V>
 struct hash_map_open_addressing {
 
     int N;
-    vec<pair<K, V>> store;
-    vec<bool> is_occupied;
+    inline static vec<pair<K, V>> store;
+    inline static vec<bool> is_occupied;
 
     hash_map_open_addressing() {}
 

@@ -2,7 +2,7 @@ template<typename K, typename V>
 struct hash_map_chain {
 
     int N;
-    vec<vec<pair<K, V>>> table;
+    inline static vec<vec<pair<K, V>>> table;
 
     hash_map_chain() {}
 
