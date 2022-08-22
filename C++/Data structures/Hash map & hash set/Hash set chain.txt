@@ -2,7 +2,7 @@ template<typename K>
 struct hash_set_chain {
 
     int N;
-    inline static vec<vec<K>> table;
+    vec<vec<K>> table;
 
     constexpr inline int hsh(const K& key) const {
         if constexpr(is_integral<K>::value) {
