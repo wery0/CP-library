@@ -1,29 +1,22 @@
-namespace longest_increasing_arithmetic_progression {
+template<typename T>
+struct longest_increasing_arithmetic_progression {
 
-    template<typename K, typename V>
+    template<typename K, typename V, const int LG>
     struct hash_map_open_addressing {
 
-        int N;
-        inline static vec<pair<K, V>> store;
-        inline static vec<bool> is_occupied;
-
-        hash_map_open_addressing() {}
-
-        hash_map_open_addressing(int n) {
-            N = n;
-            store.resize(n);
-            is_occupied.resize(n);
-        }
+        const int N = 1 << LG;
+        vec<pair<K, V>> store = vec<pair<K, V>>(N);
+        vec<bool> is_occupied = vec<bool>(N);
 
         constexpr inline void next_pos(int &pos) const {
             pos = pos < N - 1 ? pos + 1 : 0;
         }
 
-        const ull kek = uid<ull>(0, ULLONG_MAX)(rndll);
+        static constexpr ull kek = 11995408973635179863ull;
         constexpr inline int hsh(const K& key) const {
             if constexpr(std::is_integral<K>::value) {
-                //return key % N;
-                return ((key * kek) >> 32) % N;
+                //return key & (N - 1);
+                return (key * kek) >> (64 - LG);
             } else {
                 return hash<K> {}(key) % N;
             }
@@ -58,18 +51,17 @@ namespace longest_increasing_arithmetic_progression {
                 }
             }
             store[pos] = {key, val};
-            is_occupied[pos] = true;
+            is_occupied[pos] = 1;
         }
     };
 
-    template<typename T>
+    hash_map_open_addressing < T, int, 18 > mp; //change, if need
     vec<int> solve(vec<T> m) {
         int a = m.size(), na = 0;
         vec<pair<T, int>> stm(a);
         vec<int> ps(a);
         for (int q = 0; q < a; ++q) stm[q] = {m[q], q};
         sort(all(stm));
-        hash_map_open_addressing<T, int> mp(1 << 17);  //change, if need
         for (int q = 0; q < a; q++) {
             if (q && stm[q].F == stm[q - 1].F) continue;
             m[na] = stm[q].F;
