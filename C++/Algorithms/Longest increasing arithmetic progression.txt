@@ -1,24 +1,81 @@
 namespace longest_increasing_arithmetic_progression {
 
-    const int C = 1 << 17;   //change, if need
-    vec<pii> lol[C];
+    template<typename K, typename V>
+    struct hash_map_open_addressing {
 
-    vec<int> solve(vec<int> m) {
+        int N;
+        inline static vec<pair<K, V>> store;
+        inline static vec<bool> is_occupied;
+
+        hash_map_open_addressing() {}
+
+        hash_map_open_addressing(int n) {
+            N = n;
+            store.resize(n);
+            is_occupied.resize(n);
+        }
+
+        constexpr inline void next_pos(int &pos) const {
+            pos = pos < N - 1 ? pos + 1 : 0;
+        }
+
+        const ull kek = uid<ull>(0, ULLONG_MAX)(rndll);
+        constexpr inline int hsh(const K& key) const {
+            if constexpr(std::is_integral<K>::value) {
+                //return key % N;
+                return ((key * kek) >> 32) % N;
+            } else {
+                return hash<K> {}(key) % N;
+            }
+        }
+
+        inline void clear() {
+            fill(all(is_occupied), false);
+        }
+
+        inline V operator[](const K& key) const {
+            int pos = hsh(key);
+            for (; is_occupied[pos]; next_pos(pos)) {
+                if (store[pos].F == key) return store[pos].S;
+            }
+            return -1;
+        }
+
+        inline bool contains(const K& key) const {
+            int pos = hsh(key);
+            for (; is_occupied[pos]; next_pos(pos)) {
+                if (store[pos].F == key) return true;
+            }
+            return false;
+        }
+
+        inline void add(const K& key, const V& val) {
+            int pos = hsh(key);
+            for (; is_occupied[pos]; next_pos(pos)) {
+                if (store[pos].F == key) {
+                    store[pos].S = val;
+                    return;
+                }
+            }
+            store[pos] = {key, val};
+            is_occupied[pos] = true;
+        }
+    };
+
+    template<typename T>
+    vec<int> solve(vec<T> m) {
         int a = m.size(), na = 0;
-        vec<pii> stm(a);
+        vec<pair<T, int>> stm(a);
         vec<int> ps(a);
         for (int q = 0; q < a; ++q) stm[q] = {m[q], q};
         sort(all(stm));
+        hash_map_open_addressing<T, int> mp(1 << 17);  //change, if need
         for (int q = 0; q < a; q++) {
             if (q && stm[q].F == stm[q - 1].F) continue;
             m[na] = stm[q].F;
-            lol[m[na] & (C - 1)].pb({m[na], na});
+            mp.add(m[na], na);
             ps[na++] = stm[q].S;
         }
-        auto get = [&](int x) {
-            for (pii p : lol[x & (C - 1)]) if (p.F == x) return p.S;
-            return -1;
-        };
         int o = 1, st = m[0], bd = 1;
         //vec<int> poss(na); iota(all(poss), 0);shuffle(all(poss), rnd);
         for (int qq = 0; qq < na; qq++) {
@@ -28,10 +85,10 @@ namespace longest_increasing_arithmetic_progression {
                 int d = m[w] - m[q], cnt = 2;
                 ll nd = m[q] + 1LL * d * o;
                 if (nd > m[na - 1]) break;
-                int pos = get(nd);
+                int pos = mp[nd];
                 if (pos - q + 1 <= o) continue;
                 for (int c = m[w] + d; ; c += d) {
-                    int u = get(c);
+                    int u = mp[c];
                     if (u == -1 || u + (o - cnt) >= na) break;
                     cnt++;
                 }
@@ -40,9 +97,8 @@ namespace longest_increasing_arithmetic_progression {
         }
         vec<int> ans(o);
         for (int c = st, i = 0; i < o; ++i, c += bd) {
-            ans[i] = ps[get(c)];
+            ans[i] = ps[mp[c]];
         }
-        for (int q = 0; q < C; ++q) lol[q].clear(); 
         return ans;
     }
 };
