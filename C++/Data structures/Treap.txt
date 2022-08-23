@@ -205,7 +205,7 @@ public:
     void erase_pos(ll pos) {root = erase_pos(root, pos);}
     K extract_pos_get_key(ll pos) {erase_pos(pos); return last_erased_key;}
     V extract_pos_get_val(ll pos) {erase_pos(pos); return last_erased_val;}
-    void erase_one_key(K x) {root = erase_key(root, x);}
+    void erase_one_key(K x) {root = erase_one_key(root, x);}
     void remove_seg(int l, int len) {pnn p1 = splitSz(root, l); pnn p2 = splitSz(p1.S, len); root = merge(p1.F, p2.S);}
 
     template<typename I> void insert_array(int pos, I first, I last) {pnn p = splitSz(root, pos); root = merge(merge(p.F, build(first, last)), p.S);}
