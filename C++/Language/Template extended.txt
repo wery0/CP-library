@@ -16,10 +16,10 @@ str from_base_10_to_base_b(ll x, ll b) {str t; if (x == 0) t = "0"; for (; x; x 
 #define vvs vec<vec<str>>
 const int dx[] = { -1, 0, 1, 0, -1, 1, 1, -1};
 const int dy[] = {0, 1, 0, -1, 1, 1, -1, -1};
-template<typename T> int LCP(T m1, T m2) {return LCP(all(m1), all(m2));}
-template<typename T> vec<T> subset_sum(T m) {return subset_sum(all(m));}
+template<typename T_arr> int LCP(T_arr m1, T_arr m2) {return LCP(all(m1), all(m2));}
+template<typename T_arr> T_arr subset_sum(T_arr m) {return subset_sum(all(m));}
 template<typename T> umap<T, int> array_cnt(vec<T> m) {return array_cnt(all(m));}
-template<typename T> vec<pii> get_segs_of_eq_elems(T m) {return get_segs_of_eq_elems(all(m));}
+template<typename T_arr> vec<pii> get_segs_of_eq_elems(T_arr m) {return get_segs_of_eq_elems(all(m));}
 template<typename T> int sum_of_digits(T val) {int o = 0; for (; val; val /= 10) o += val % 10; return o;}
 template<typename T> struct static_sum_query {vec<T> m; static_sum_query() {} template<typename I> static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) *it = *(it - 1) + *f;} template<typename T_arr> static_sum_query(T_arr m) {(*this) = static_sum_query(all(m));} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
 template<typename T> vec<pair<T, int>> zip_with_positions(vec<T> &m) {int a = m.size(); vec<pair<T, int>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q], q}; return ans;}
