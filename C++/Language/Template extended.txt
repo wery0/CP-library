@@ -30,7 +30,6 @@ vec<pii> get_rotation_points_in_square(int a, int x, int y) {assert(0 <= x && x 
 auto integral_binary_search_left = [](auto f, auto l, auto r) {static_assert(is_same<decltype(l), decltype(r)>::value); while (l + 1 < r) {auto md = l + (r - l) / 2; if (f(md)) l = md; else r = md;} return l;};
 auto integral_binary_search_right = [](auto f, auto l, auto r) {static_assert(is_same<decltype(l), decltype(r)>::value); while (l + 1 < r) {auto md = l + (r - l) / 2; if (f(md)) l = md; else r = md;} return r;};
 bool is_prime(ll c) {if (c < 2) return 0; if (c == 2 || c == 3) return 1; if (c % 2 == 0 || c % 3 == 0) return 0; const ll gr = sqrtl(c) + 1; for (ll q = 6; q <= gr; q += 6) {if (c % (q - 1) == 0) return 0; if (c % (q + 1) == 0) return 0;} return 1;}
-ll binpow(ll x, ll k) {if (k < 0) return 0; ll o = 1; for (; k; k >>= 1) {if (k & 1) o = o * x; x = x * x;} return o;}
 vec<vec<int>> get_cycles_of_perm(vec<int> &m, int index) {int a = m.size(); vec<vec<int>> ans; vec<bool> us(a); for (int q = 0; q < a; ++q) {if (us[q]) continue; vec<int> tyt; for (int w = q; !us[w]; w = m[w] - index) {tyt.pb(w); us[w] = 1;} ans.pb(tyt);} return ans;}
 int find_closing_bracket(str &s, int i) {char op = s[i], cl = op == '(' ? ')' : op == '{' ? '}' : op == '[' ? ']' : op == '<' ? '>' : '@'; assert(cl != '@'); int dep = 1; for (int q = i + 1; q < s.size(); ++q) {dep += s[q] == op ? 1 : s[q] == cl ? -1 : 0; if (dep == 0) return q;} return -1;}
 template<typename T> vec<pair<T, T>> vv_to_vp(vec<vec<T>> &m) {int a = m.size(); vec<pair<T, T>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q][0], m[q][1]}; return ans;}
@@ -43,4 +42,10 @@ int replace(str &s, str from, str to) {str t = from; t.pb(0); t += s; int a = t.
 str from_base_10_to_base_b(str x, ll b) {return from_base_10_to_base_b(stoll(x), b);}
 ll from_base_b_to_base_10(str x, ll b) {ll o = 0, pw = 1; for (int q = (int)x.size() - 1; q >= 0; --q, pw *= b) o += (x[q] - '0') * pw; return o;}
 str from_base_a_to_base_b(str x, ll a, ll b) {ll x10 = from_base_b_to_base_10(x, a); return from_base_10_to_base_b(x10, b);}
+template<typename T> T binpow(T x, T k) {if (k < 0) return 0; T o = 1; for (; k; k >>= 1) {if (k & 1) o = o * x; x = x * x;} return o;}
+template<typename T> T ar_prog_sum_fcl(T first, T cnt, T last) {return (first + last) * cnt / 2;}
+template<typename T> T ar_prog_sum_fdc(T first, T diff, T cnt) {return (first * 2 + diff * (cnt - 1)) * cnt / 2;}
+template<typename T> T ar_prog_sum_fdl(T first, T diff, T last) {return (first + last) * ((last - first) / diff + 1) / 2;}
+template<typename T> T geom_prog_sum_fdl(T first, T diff, T last) {return (last * diff - first) / (diff - 1);}
+template<typename T> T geom_prog_sum_fdc(T first, T diff, T cnt) {return (first * binpow(diff, cnt) - first) / (diff - 1);}
 ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}
