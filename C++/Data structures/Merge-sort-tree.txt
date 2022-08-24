@@ -30,7 +30,7 @@ struct merge_sort_tree {
     int query(int l, int r, T val_l, T val_r) {
         l += U, r += U;
         int ans = 0;
-        while (l <= r && !ans) {
+        while (l <= r) {
             if (l & 1) ans += work(store[l], val_l, val_r);
             if (~r & 1) ans += work(store[r], val_l, val_r);
             l = (l + 1) >> 1;
