@@ -80,7 +80,7 @@ struct tree {
         }
 
         inline void add_edge(int x, Edge e, const bool is_dir) {
-            assert(0 <= x && x < V); assert(0 <= e.to && e.to < V);
+            if (V != -1) assert(0 <= x && x < V), assert(0 <= e.to && e.to < V);
             acc_edge.pb({x, e});
             if (!is_dir) {
                 swap(x, e.to);
@@ -94,7 +94,7 @@ struct tree {
     };
 
     graph g;
-    int V;
+    int V = -1;
     bool is_prepared = false;
 
     tree() = default;
@@ -121,7 +121,7 @@ struct tree {
     //vec<ll> wdep;
 
     void prepare_and_root(int v) {
-        g.prepare();
+        g.prepare(); V = g.V;
         assert(g.E == (V - 1) * 2);
         pr.resize(V);
         jump.resize(V);
