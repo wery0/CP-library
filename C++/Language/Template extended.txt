@@ -48,4 +48,6 @@ template<typename T> T ar_prog_sum_fdc(T first, T diff, T cnt) {return (first * 
 template<typename T> T ar_prog_sum_fdl(T first, T diff, T last) {return (first + last) * ((last - first) / diff + 1) / 2;}
 template<typename T> T geom_prog_sum_fdl(T first, T diff, T last) {return (last * diff - first) / (diff - 1);}
 template<typename T> T geom_prog_sum_fdc(T first, T diff, T cnt) {return (first * binpow(diff, cnt) - first) / (diff - 1);}
+template<typename T> vec<vec<T>> transpose_matrix(vec<vec<T>> &m) {int a = m.size(), b = a ? m[0].size() : 0; vec<vec<T>> ans(b, vec<T>(a)); for (int q = 0; q < a; ++q) {for (int w = 0; w < b; ++w) {ans[w][q] = m[q][w];}} return ans;}
+template<typename T> vec<vec<T>> rotate_matrix_cw(vec<vec<T>> &m) {int a = m.size(), b = a ? m[0].size() : 0; vec<vec<T>> ans(b, vec<T>(a)); for (int w = 0; w < b; ++w) for (int q = 0; q < a; ++q) ans[w][q] = m[a - 1 - q][w]; return ans;}
 ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}
