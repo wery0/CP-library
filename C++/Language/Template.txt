@@ -28,8 +28,8 @@ using uint = unsigned int;
 using ull = unsigned long long;
 mt19937 rnd(timeStamp().time_since_epoch().count());
 mt19937_64 rndll(timeStamp().time_since_epoch().count());
-template<typename T, typename U> bool chmin(T& a, const U& b) {return b < a ? a = b, 1 : 0;}
-template<typename T, typename U> bool chmax(T& a, const U& b) {return b > a ? a = b, 1 : 0;}
+template<typename T, typename U> bool chmin(T& a, const U& b) {return (T)b < a ? a = b, 1 : 0;}
+template<typename T, typename U> bool chmax(T& a, const U& b) {return (T)b > a ? a = b, 1 : 0;}
 constexpr inline uint leq_pow2(const uint x) {return 1u << __lg(x);}
 constexpr inline ull leq_pow2ll(const ull x) {return 1ull << __lg(x);}
 constexpr inline uint geq_pow2(const uint x) {return x & (x - 1) ? 2u << __lg(x) : x;}
