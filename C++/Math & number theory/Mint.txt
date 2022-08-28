@@ -29,10 +29,10 @@ struct mint {
     mint operator*(const mint &o) const {return 1ll * val * o.val % MOD;}
     mint operator/(const mint &o) const {return 1ll * val * o.inv() % MOD;}
 
-    mint operator+=(const mint &o) {val += o.val; val -= val < MOD ? 0 : MOD;}
-    mint operator-=(const mint &o) {val -= o.val; val += val < 0 ? MOD : 0;}
-    mint operator*=(const mint &o) {val = 1ll * val * o.val % MOD;}
-    mint operator/=(const mint &o) {val = 1ll * val * o.inv() % MOD;}
+    void operator+=(const mint &o) {val += o.val; val -= val < MOD ? 0 : MOD;}
+    void operator-=(const mint &o) {val -= o.val; val += val < 0 ? MOD : 0;}
+    void operator*=(const mint &o) {val = 1ll * val * o.val % MOD;}
+    void operator/=(const mint &o) {val = 1ll * val * o.inv() % MOD;}
 
     friend ostream& operator<<(ostream& out, mint& m) {return out << m.val;}
     friend ostream& operator<<(ostream& out, mint&& m) {return out << m.val;}
