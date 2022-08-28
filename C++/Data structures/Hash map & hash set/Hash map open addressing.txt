@@ -8,6 +8,7 @@ struct hash_map_open_addressing {
     hash_map_open_addressing() {}
 
     hash_map_open_addressing(int n) {
+	assert(n > 0);
         N = n;
         store.resize(n);
         is_occupied.resize(n);
