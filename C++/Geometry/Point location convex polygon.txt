@@ -1,3 +1,8 @@
+template<typename T>
+bool pis(pt<T> p1, pt<T> p2, pt<T> p) {
+    return dot(p2 - p1, p - p1) >= 0 && dot(p1 - p2, p - p2) >= 0;
+}
+
 //1 - inside, 0 - border, -1 - outside
 template<typename T>
 int point_location_convex_polygon(vec<pt<T>> &ch, pt<T> &p) {
