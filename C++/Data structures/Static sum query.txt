@@ -2,7 +2,7 @@ template<typename T>
 struct static_sum_query {
     vec<T> m;
 
-    static_sum_query(){}
+    static_sum_query() = default;
 
     template<typename I>
     static_sum_query(I f, I l) {
@@ -12,5 +12,11 @@ struct static_sum_query {
         }
     }
 
-    inline T query(const int l, const int r) const {return m[r + 1] - m[l];}
+    template<typename T_arr> static_sum_query(T_arr& m) {
+        (*this) = static_sum_query(all(m));
+    }
+
+    inline T query(const int l, const int r) const {
+        return m[r + 1] - m[l];
+    }
 };
