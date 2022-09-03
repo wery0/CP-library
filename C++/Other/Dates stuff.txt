@@ -1,0 +1,6 @@
+vec<str> days_of_week_names = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+vec<str> months_names = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+bool is_leap_year(int y) {
+    return ((y % 400) == 0) || ((y % 4) == 0 && (y % 100));
+}
