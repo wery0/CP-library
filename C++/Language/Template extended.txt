@@ -21,7 +21,7 @@ template<typename T_arr> T_arr subset_sum(T_arr m) {return subset_sum(all(m));}
 template<typename T_arr> auto array_cnt(T_arr m) {return array_cnt(all(m));}
 template<typename T_arr> vec<pii> get_segs_of_eq_elems(T_arr m) {return get_segs_of_eq_elems(all(m));}
 template<typename T> int sum_of_digits(T val) {int o = 0; for (; val; val /= 10) o += val % 10; return o;}
-template<typename T> struct static_sum_query {vec<T> m; static_sum_query() {} template<typename I> static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) *it = *(it - 1) + *f;} template<typename T_arr> static_sum_query(T_arr m) {(*this) = static_sum_query(all(m));} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
+template<typename T> struct static_sum_query {vec<T> m; static_sum_query() = default; template<typename I>static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) {*it = *(it - 1) + *f;}} template<typename T_arr> static_sum_query(T_arr& m) {(*this) = static_sum_query(all(m));} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
 template<typename T> vec<pair<T, int>> zip_with_positions(vec<T> &m) {int a = isz(m); vec<pair<T, int>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q], q}; return ans;}
 vec<str> split(str &s, char c, bool ignore_empty = false) {vec<str> o; str u; for (int q = 0; q < isz(s); q++) {if (s[q] == c) {if (!u.empty() || !ignore_empty) o.pb(u); u.clear();} else u += s[q];} if (!u.empty() || !ignore_empty) o.pb(u); return o;}
 template<typename T> str join(vec<T> &m, char c) {str o; for (const T &s : m) o += to_string(s) + c; if (isz(o)) o.pop_back(); return o;}
