@@ -5,7 +5,7 @@ struct segtree_on_points {
     vec<pair<T, T>> seg_gr;
     //create needed vectors
 
-    segtree_on_points() {}
+    segtree_on_points() = default;
 
     segtree_on_points(vec<T> points) {
         if (points.empty()) return;

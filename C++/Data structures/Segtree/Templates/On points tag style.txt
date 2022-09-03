@@ -32,7 +32,8 @@ struct segtree_on_points {
 
     uint a, U;
     vec<tag> m;
-    segtree_on_points() {}
+
+    segtree_on_points() = default;
 
     segtree_on_points(vec<T> points) {
         unify(points);

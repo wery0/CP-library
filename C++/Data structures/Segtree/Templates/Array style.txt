@@ -4,7 +4,7 @@ struct segtree {
     uint a, U;
     //create needed vectors
 
-    segtree() {}
+    segtree() = default;
 
     template<typename I>
     segtree(I first, I last) {

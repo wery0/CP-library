@@ -30,7 +30,8 @@ struct segtree {
 
     uint a, U;
     vec<tag> m;
-    segtree() {}
+
+    segtree() = default;
 
     template<typename I>
     segtree(I first, I last) {

@@ -4,7 +4,7 @@ struct segtree_point_upd {
     uint a, U;
     //create needed vectors
 
-    segtree_point_upd() {}
+    segtree_point_upd() = default;
 
     template<typename I>
     segtree_point_upd(I first, I last) {
