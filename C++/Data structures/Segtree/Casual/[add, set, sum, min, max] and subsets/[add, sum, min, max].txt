@@ -6,23 +6,36 @@ struct segtree {
     uint a, U;
     vec<T> sm, mn, mx;
     vec<T> ps_add;
-    segtree() {}
 
-    segtree(vec<T> &m) {
-        a = m.size();
+    segtree() = default;
+
+    template<typename I>
+    segtree(I first, I last) {
+        a = last - first;
         U = geq_pow2(a);
         sm.resize(U * 2);
         mn = vec<T>(U * 2, INF);
         mx = vec<T>(U * 2, -INF);
         ps_add = vec<T>(U * 2, 0);
         for (uint q = 0; q < a; q++) {
-            sm[U + q] = m[q];
-            mn[U + q] = m[q];
-            mx[U + q] = m[q];
+            const T val = *(first + q);
+            sm[U + q] = val;
+            mn[U + q] = val;
+            mx[U + q] = val;
         }
         for (uint q = U; --q;) {
             upd(q);
         }
+    }
+
+    template<typename T_arr>
+    segtree(T_arr &n) {
+        (*this) = segtree<T>(all(n));
+    }
+
+    segtree(uint a) {
+        vec<T> m(a);
+        (*this) = segtree<T>(m);
     }
 
     inline constexpr int gsz(int v) {
