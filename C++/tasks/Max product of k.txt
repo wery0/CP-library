@@ -1,4 +1,5 @@
 //Ensure that the ans fits in T
+//Verification: https://atcoder.jp/contests/abc173/tasks/abc173_e
 template<typename T>
 T calc_max_product_of_k(vec<T> m, int k) {
     int a = isz(m); assert(0 < k && k <= a);
