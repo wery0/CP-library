@@ -26,14 +26,14 @@ struct segtree_point_upd {
         }
     }
 
-    template<typename T_arr>
-    segtree_point_upd(T_arr &n) {
-        (*this) = segtree_point_upd<T>(all(n));
-    }
-
-    segtree_point_upd(uint a) {
-        vec<T> m(a);
-        (*this) = segtree_point_upd<T>(m);
+    template<typename U>
+    segtree_point_upd(U& n) {
+        if constexpr(is_integral<U>::value) {
+            vec<T> m(n);
+            (*this) = segtree_point_upd<T>(m);
+        } else {
+            (*this) = segtree_point_upd<T>(all(n));
+        }
     }
 
     inline void upd(uint v) {
@@ -42,7 +42,7 @@ struct segtree_point_upd {
         mx[v] = max(mx[v << 1], mx[v << 1 | 1]);
     }
 
-    inline T seg_sum(uint ql, uint qr) {
+    inline T seg_sum(uint ql, uint qr) const {
         ql += U, qr += U;
         T ans = 0;
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -52,7 +52,7 @@ struct segtree_point_upd {
         return ans;
     }
 
-    inline T seg_min(uint ql, uint qr) {
+    inline T seg_min(uint ql, uint qr) const {
         ql += U, qr += U;
         T ans = mn[ql];
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -62,7 +62,7 @@ struct segtree_point_upd {
         return ans;
     }
 
-    inline T seg_max(uint ql, uint qr) {
+    inline T seg_max(uint ql, uint qr) const {
         ql += U, qr += U;
         T ans = mx[qr];
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -78,6 +78,10 @@ struct segtree_point_upd {
         for (p >>= 1; p; p >>= 1) {
             upd(p);
         }
+    }
+
+    T operator[](uint pos) const {
+        return sm[U + pos];
     }
 };
 //Supports only point updates
