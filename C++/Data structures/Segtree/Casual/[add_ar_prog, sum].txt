@@ -6,19 +6,31 @@ struct segtree {
     vec<T> psA;
     vec<T> psB;
 
-    segtree() {}
+    segtree() = default;
 
-    segtree(vec<T> &m) {
-        a = m.size();
+    template<typename I>
+    segtree(I first, I last) {
+        a = last - first;
         U = geq_pow2(a);
         sm.resize(U * 2);
         psA.resize(U * 2);
         psB.resize(U * 2);
         for (uint q = 0; q < a; q++) {
-            sm[U + q] = m[q] * 2;
+            const T val = *(first + q);
+            sm[U + q] = val * 2;
         }
         for (uint q = U; --q;) {
             upd(q);
+        }
+    }
+
+    template<typename U>
+    segtree(U& n) {
+        if constexpr(is_integral<U>::value) {
+            vec<T> m(n);
+            (*this) = segtree<T>(m);
+        } else {
+            (*this) = segtree<T>(all(n));
         }
     }
 

@@ -7,7 +7,7 @@ struct segtree_on_points {
     vec<T> psA;
     vec<T> psB;
 
-    segtree_on_points() {}
+    segtree_on_points() = default;
 
     segtree_on_points(vec<T> points) {
         if (points.empty()) return;

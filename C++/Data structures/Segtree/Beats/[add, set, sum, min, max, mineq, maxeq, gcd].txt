@@ -21,7 +21,7 @@ struct segtree {
     vec<Node> m;
     uint a, U;
 
-    segtree() {}
+    segtree() = default;
 
     segtree(vec<ll> &n) {
         a = n.size();

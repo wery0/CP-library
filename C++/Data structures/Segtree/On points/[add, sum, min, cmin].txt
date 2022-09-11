@@ -9,7 +9,7 @@ struct segtree_on_points {
     vec<T> mn, cnt_mn;
     vec<T> ps_add;
 
-    segtree_on_points() {}
+    segtree_on_points() = default;
 
     segtree_on_points(vec<T> points) {
         if (points.empty()) return;

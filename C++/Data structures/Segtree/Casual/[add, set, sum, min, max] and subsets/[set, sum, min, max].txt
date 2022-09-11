@@ -29,14 +29,14 @@ struct segtree {
         }
     }
 
-    template<typename T_arr>
-    segtree(T_arr &n) {
-        (*this) = segtree<T>(all(n));
-    }
-
-    segtree(uint a) {
-        vec<T> m(a);
-        (*this) = segtree<T>(m);
+    template<typename U>
+    segtree(U& n) {
+        if constexpr(is_integral<U>::value) {
+            vec<T> m(n);
+            (*this) = segtree<T>(m);
+        } else {
+            (*this) = segtree<T>(all(n));
+        }
     }
 
     inline constexpr int gsz(int v) {
