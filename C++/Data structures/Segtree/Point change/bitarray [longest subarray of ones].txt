@@ -41,7 +41,8 @@ struct segtree_point_upd {
 
     uint a, U;
     vec<tag> m;
-    segtree_point_upd() {}
+
+    segtree_point_upd() = default;
 
     template<typename T>
     segtree_point_upd(vec<T> &n) {
@@ -60,8 +61,8 @@ struct segtree_point_upd {
         }
     }
 
-    segtree_point_upd(int _a) {
-        vec<bool> m(_a);
+    segtree_point_upd(int a) {
+        vec<bool> m(a);
         (*this) = segtree_point_upd(m);
     }
 

@@ -4,7 +4,8 @@ struct segtree_point_upd {
     uint a, U;
     vec<uint> A;
     vec<uint> B;
-    segtree_point_upd() {}
+
+    segtree_point_upd() = default;
 
     segtree_point_upd(vec<pii> &n) {
         a = n.size();

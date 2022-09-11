@@ -47,7 +47,8 @@ struct segtree_point_upd {
 
     uint a, U;
     vec<tag> m;
-    segtree_point_upd() {}
+
+    segtree_point_upd() = default;
 
     template<typename I>
     segtree_point_upd(I first, I last) {
@@ -67,10 +68,10 @@ struct segtree_point_upd {
     }
 
     template<typename U>
-    segtree_point_upd(U& n) {
+    segtree_point_upd(U n) {
         if constexpr(is_integral<U>::value) {
             vec<T> m(n);
-            (*this) = segtree_point_upd<T>(m);
+            (*this) = segtree_point_upd<T>(all(m));
         } else {
             (*this) = segtree_point_upd<T>(all(n));
         }

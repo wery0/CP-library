@@ -25,10 +25,10 @@ struct segtree {
     }
 
     template<typename U>
-    segtree(U& n) {
+    segtree(U n) {
         if constexpr(is_integral<U>::value) {
             vec<T> m(n);
-            (*this) = segtree<T>(m);
+            (*this) = segtree<T>(all(m));
         } else {
             (*this) = segtree<T>(all(n));
         }
