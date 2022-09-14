@@ -26,10 +26,9 @@ vec<T> uset_hacker(const int N) {
         return ans;
     };
     vec<int> bc = get_bucket_counts();
-    cout << bc << endl;
     if constexpr(is_same<string, T>::value) {
         const int len = 15;
-        const str pref = "fuckcpp";
+        const str pref = "";
         const str alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
         vec<T> ans1; ll op1 = 0;
         for (ll i = 0, psb = 0, cnt = 0, lst = bc[0]; i < N; ++i) {
