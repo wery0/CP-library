@@ -10,6 +10,7 @@ str gen_str_with_divisible_hash(int len, int mod, str alphabet, str pref = "") {
     return "LOX";
 }
 
+//Just run it on the same compiler and same options as the solution you want to hack.
 template<typename T>
 vec<T> uset_hacker(const int N) {
     auto get_bucket_counts = [&]() -> vec<int> {
