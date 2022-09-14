@@ -26,9 +26,10 @@ vec<T> uset_hacker(const int N) {
         return ans;
     };
     vec<int> bc = get_bucket_counts();
+    cout << bc << endl;
     if constexpr(is_same<string, T>::value) {
         const int len = 15;
-        const str pref = "";
+        const str pref = "fuckcpp";
         const str alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
         vec<T> ans1; ll op1 = 0;
         for (ll i = 0, psb = 0, cnt = 0, lst = bc[0]; i < N; ++i) {
@@ -52,8 +53,7 @@ vec<T> uset_hacker(const int N) {
         const T mx = numeric_limits<T>::max();
         vec<T> ans1; ll op1 = 0;
         for (ll i = 0, psb = 0, cnt = 0, lst = bc[0]; i < N; ++i) {
-            T nw = min(lst * cnt, (ll)(mx - mx % lst));
-            ans1.pb(nw);
+            ans1.pb(lst * cnt);
             op1 += cnt;
             if (i >= lst) {
                 lst = bc[++psb];
@@ -62,8 +62,7 @@ vec<T> uset_hacker(const int N) {
         }
         vec<T> ans2; ll op2 = 0;
         for (ll i = 0, cnt = 0, pr = isz(bc) > 1 ? bc[isz(bc) - 2] : 0, lst = bc.back(); i < N; ++i) {
-            T nw = min(lst * cnt, (ll)(mx - mx % lst));
-            ans2.pb(nw);
+            ans2.pb(lst * cnt);
             op2 += i < pr ? 1 : cnt;
             ++cnt;
         }
