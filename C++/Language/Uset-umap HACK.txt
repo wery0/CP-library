@@ -1,8 +1,0 @@
-void HACK(ll num){
-    int N = 2e5;
-    uset<ll> s;
-    for(int q=1; q <= N; q++) s.insert(num * q);
-}
-
-GNU G++11/14: 62233
-GNU G++17: 53201
