@@ -57,4 +57,14 @@ namespace Generator {
         assert(isz(m));
         return m[uid<int>(0, isz(m) - 1)(rnd)];
     }
+
+    template<typename T>
+    T gen_rand_integer_val() {
+        return uid<T>(numeric_limits<T>::min(), numeric_limits<T>::max())(rnd);
+    }
+
+    template<typename T>
+    T gen_rand_integer_val(T l, T r) {
+        return uid<T>(l, r)(rnd);
+    }
 }
