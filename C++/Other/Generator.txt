@@ -51,4 +51,10 @@ namespace Generator {
         for (auto &i : s) i = 'A' + gen(rnd);
         return s;
     }
+
+    template<typename T_arr>
+    auto gen_random_element_from(T_arr &m) {
+        assert(isz(m));
+        return m[uid<int>(0, isz(m) - 1)(rnd)];
+    }
 }
