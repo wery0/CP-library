@@ -1,6 +1,6 @@
-template<const int MOD>
+template<typename INT = int, typename LL = ll, const INT MOD = 1000000007>
 struct Mint {
-    int val = 0;
+    INT val = 0;
 
     Mint() = default;
 
@@ -12,9 +12,8 @@ struct Mint {
         val = c;
     }
 
-    Mint binpow(ll pw) const {
-        ll o = 1;
-        ll cur = val;
+    Mint binpow(LL pw) const {
+        LL o = 1, cur = val;
         for (; pw; pw >>= 1) {
             if (pw & 1) o = o * cur % MOD;
             cur = cur * cur % MOD;
@@ -26,13 +25,21 @@ struct Mint {
 
     Mint operator+(const Mint &o) const {return val + o.val >= MOD ? val + o.val - MOD : val + o.val;}
     Mint operator-(const Mint &o) const {return val < o.val ? MOD - o.val + val : val - o.val;}
-    Mint operator*(const Mint &o) const {return 1ll * val * o.val % MOD;}
-    Mint operator/(const Mint &o) const {return 1ll * val * o.inv().val % MOD;}
+    Mint operator*(const Mint &o) const {return (LL)1 * val * o.val % MOD;}
+    Mint operator/(const Mint &o) const {return (LL)1 * val * o.inv().val % MOD;}
 
     void operator+=(const Mint &o) {val += o.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint &o) {val -= o.val; val += val < 0 ? MOD : 0;}
-    void operator*=(const Mint &o) {val = 1ll * val * o.val % MOD;}
-    void operator/=(const Mint &o) {val = 1ll * val * o.inv().val % MOD;}
+    void operator*=(const Mint &o) {val = (LL)1 * val * o.val % MOD;}
+    void operator/=(const Mint &o) {val = (LL)1 * val * o.inv().val % MOD;}
+
+    Mint &operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
+    Mint operator++(int) {Mint res = *this; ++*this; return res;}
+
+    bool operator==(const Mint &o) const {return val == o.val;}
+    bool operator!=(const Mint &o) const {return val != o.val;}
+    bool operator<(const Mint &o) const {return val < o.val;}
+    bool operator>(const Mint &o) const {return val > o.val;}
 
     friend istream& operator>>(istream& in, Mint& m) {return in >> m.val;}
     friend ostream& operator<<(ostream& out, const Mint& m) {return out << m.val;}
