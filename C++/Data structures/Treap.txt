@@ -131,7 +131,9 @@ private:
         if (gsz(n->l) == pos) {
             last_erased_key = n->x;
             last_erased_val = n->val;
-            return merge(n->l, n->r);
+            Node *l = n->l, *r = n->r;
+            delete n;
+            return merge(l, r);
         }
         if (pos < gsz(n->l)) n->l = erase_pos(n->l, pos);
         else n->r = erase_pos(n->r, pos - gsz(n->l) - 1);
@@ -154,7 +156,12 @@ private:
     }
 
     Node* erase_one_key(Node *n, K x) {
-        if (n->x == x) return merge(n->l, n->r);
+        if (!n) return 0;
+        if (n->x == x) {
+            Node *l = n->l, *r = n->r;
+            delete n;
+            return merge(l, r);
+        }
         if (x < n->x) n->l = erase_one_key(n->l, x);
         else n->r = erase_one_key(n->r, x);
         upd(n);
@@ -187,13 +194,26 @@ private:
     void print_keys(Node *n) {if (!n) return; print_keys(n->l); cout << n->x << " "; print_keys(n->r);}
     void print_vals(Node *n) {if (!n) return; print_vals(n->l); cout << n->val << " "; print_vals(n->r);}
 
+    void delete_subtree(Node *n) {
+        if (!n) return;
+        delete_subtree(n->l);
+        delete_subtree(n->r);
+        delete n;
+    }
+
 public:
 
-    treap() {}
+    treap() = default;
+    ~treap() {delete_subtree(root);}
+
     template<typename I> treap(I f_key, I l_key) {root = build(f_key, l_key);}
     template<typename I1, typename I2> treap(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {assert(l_key - f_key == l_val - f_val); root = build(f_key, l_key, f_val, l_val);}
 
     pair<K, V> operator[](ll pos) {Node *n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {const int szl = gsz(n->l); if (pos == szl) return {n->x, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
+
+    ll count_keys_leq(K x) {Node* n = root; ll o = 0; while (n) {if (n->x <= x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    ll count_keys_less(K x) {Node* n = root; ll o = 0; while (n) {if (n->x < x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    ll count_keys_in_seg(K l, K r) {return l > r ? 0 : count_keys_leq(r) - count_keys_less(l);}
 
     int pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
 
