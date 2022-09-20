@@ -1,6 +1,5 @@
 template<typename K, typename V>
 struct treap {
-
 public:
     static const V inf = std::numeric_limits<V>::max();
     static const V UNDEF = 0;
@@ -202,7 +201,6 @@ private:
     }
 
 public:
-
     treap() = default;
     ~treap() {delete_subtree(root);}
 
