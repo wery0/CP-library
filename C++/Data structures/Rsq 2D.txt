@@ -3,7 +3,7 @@ struct rsq2D {
     int a, b;
     vec<vec<T>> m;
 
-    rsq2D() {}
+    rsq2D() = default;
 
     rsq2D(vec<vec<T>> &_m) {
         a = _m.size();
@@ -16,7 +16,7 @@ struct rsq2D {
         }
     }
 
-    T query(int x1, int y1, int x2, int y2) { //0 - index
+    T query(int x1, int y1, int x2, int y2) {
         // assert(0 <= x1 && x1 < a);assert(0 <= x2 && x2 < a);assert(0 <= y1 && y1 < b);assert(0 <= y2 && y2 < b);
         // if (x1 > x2) swap(x1, x2);if (y1 > y2) swap(y1, y2);
         return m[x2 + 1][y2 + 1] - m[x1][y2 + 1] - m[x2 + 1][y1] + m[x1][y1];
