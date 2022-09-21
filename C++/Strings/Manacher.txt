@@ -1,8 +1,22 @@
-ll manak(str t){
+template<typename T_arr>
+ll manacher(T_arr& t) {
     int a = t.size();
-    vec<int> m(a);
-    ll o = 0;
-    for(int q=0, l=0, r=0; q<a; o+=m[q], l = q+m[q]-1>r ? q-m[q]+1 : l, r = max(r, q+m[q]-1), q++) for(m[q] = max(0, min(r-q, m[r-q+l])); q+m[q]<a && q-m[q]>=0 && t[q-m[q]]==t[q+m[q]];) m[q]++;
-    for(int q=1, l=0, r=0; q<a; o+=m[q], l = q+m[q]>r ? q-m[q]-1 : l, r = max(r, q+m[q]), q++) for(m[q] = max(0, min(r-q, m[r-q+l+1])); q+m[q]<a && q-m[q]>=1 && t[q-m[q]-1]==t[q+m[q]];) m[q]++;
-    return o;
+    vec<int> odd(a), even(a);  //even("aa") = {0, 1}
+    for (int q = 0, l = 0, r = 0; q < a; ++q) {
+        int& d = odd[q];
+        d = max(0, min(r - q, odd[r - q + l]));
+        while (q - d >= 0 && q + d < a && t[q - d] == t[q + d]) {
+            ++d;
+        }
+        l = chmax(r, q + d - 1) ? q - d + 1 : l;
+    }
+    for (int q = 1, l = 0, r = 0; q < a; ++q) {
+        int& d = even[q];
+        d = max(0, min(r - q, even[r - q + l + 1]));
+        while (q - d - 1 >= 0 && q + d < a && t[q - d - 1] == t[q + d]) {
+            ++d;
+        }
+        l = chmax(r, q + d) ? q - d - 1 : l;
+    }
+    return accumulate(all(odd), 0ll) + accumulate(all(even), 0ll);
 }
