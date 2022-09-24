@@ -49,7 +49,6 @@ struct segtree_point_upd {
         for (uint q = 0; q < a; ++q) {
             tag &t = m[U + q];
             const T val = *(first + q);
-            //write init of last layer
             t.sm = val;
             t.ssm = val;
             t.len = 1;
