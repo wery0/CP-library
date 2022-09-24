@@ -82,7 +82,7 @@ struct segtree_point_upd {
         return merge(lt, rt);
     }
 
-    inline void change(uint p, tag t) {
+    inline void point_change(uint p, tag t) {
         p += U;
         m[p] = t;
         for (p >>= 1; p; p >>= 1) {
