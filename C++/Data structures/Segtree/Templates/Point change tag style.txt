@@ -3,7 +3,7 @@ struct segtree_point_upd {
 
     struct tag {
 
-        tag() {}
+        tag() = default;
 
         friend inline bool is_neutral(const tag &t) {
             //write neutral if need, or remove it

@@ -5,7 +5,7 @@ struct segtree_on_points {
 
         T bl, br;
 
-        tag() {}
+        tag() = default;
 
         friend inline void push_tag(tag &t, tag &l, tag &r) {
             //write push if need, or remove it

@@ -10,7 +10,7 @@ struct segtree_point_upd {
         T mx_seg = 0;
         T sm = 0, mx = -inf;
 
-        tag() {}
+        tag() = default;
 
         friend inline void merge(const tag &l, const tag &r, tag &res) {
             res.sm = l.sm + r.sm;

@@ -6,7 +6,7 @@ struct segtree_point_upd {
         int mxd = 0;
         int sz = 0;
 
-        tag() {}
+        tag() = default;
 
 
         friend inline void merge(const tag &l, const tag &r, tag &res) {
