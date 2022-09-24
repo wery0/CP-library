@@ -4,15 +4,15 @@ struct segtree_point_upd {
     struct tag {
 
         T sm = 0;
-        T ssm = 0;
+        T wsm = 0;
         T len = 0;
 
-        tag() {}
+        tag() = default;
 
         friend inline void merge(const tag &l, const tag &r, tag &res) {
             res.len = l.len + r.len;
             res.sm = l.sm + r.sm;
-            res.ssm = l.ssm + r.ssm + r.sm * l.len;
+            res.wsm = l.wsm + r.wsm + r.sm * l.len;
         }
 
         friend inline tag merge(const tag &l, const tag &r) {
@@ -22,13 +22,13 @@ struct segtree_point_upd {
         }
 
         friend inline void merge_to_left(tag &l, const tag &r) {
-            l.ssm += r.ssm + r.sm * l.len;
+            l.wsm += r.wsm + r.sm * l.len;
             l.sm += r.sm;
             l.len += r.len;
         }
 
         friend inline void merge_to_right(const tag &l, tag &r) {
-            r.ssm += l.ssm + r.sm * l.len;
+            r.wsm += l.wsm + r.sm * l.len;
             r.sm += l.sm;
             r.len += l.len;
         }
@@ -50,7 +50,7 @@ struct segtree_point_upd {
             tag &t = m[U + q];
             const T val = *(first + q);
             t.sm = val;
-            t.ssm = val;
+            t.wsm = val;
             t.len = 1;
         }
         for (uint q = U; --q;) {
@@ -83,12 +83,12 @@ struct segtree_point_upd {
             if (~qr & 1) merge_to_right(m[qr], rt);
         }
         merge_to_left(lt, rt);
-        return lt.ssm;
+        return lt.wsm;
     }
 
-    inline void change(uint p, T val) {
+    inline void point_change(uint p, T val) {
         p += U;
-        m[p].sm = m[p].ssm = val;
+        m[p].sm = m[p].wsm = val;
         for (p >>= 1; p; p >>= 1) {
             upd(p);
         }
