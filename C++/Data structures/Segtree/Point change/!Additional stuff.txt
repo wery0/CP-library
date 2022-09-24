@@ -1,5 +1,6 @@
 //You may add some of these functions inside point_change_segtree.
 
+//Works only with nonnegative values
 inline int first_to_right_where_sum_becomes_geq_k(uint ql, T k) {
     ql += U;
     uint qr = U + U - 1;
@@ -20,6 +21,7 @@ inline int first_to_right_where_sum_becomes_geq_k(uint ql, T k) {
     return -1;
 }
 
+//Works only with nonnegative values
 inline int first_to_left_where_sum_becomes_geq_k(uint qr, T k) {
     uint ql = U;
     qr += U;
