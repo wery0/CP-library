@@ -12,4 +12,4 @@ vec<T> covering_segments_with_points(vec<pair<T, T>> m) {
     if (ans.empty() || ans.back() != r) ans.pb(r);
     return ans;
 }
-//returns minimal set of points, s. t. each segment contains at least one point inside (including boards).
+//returns minimal set of points, s. t. each segment contains at least one point inside (including borders).
