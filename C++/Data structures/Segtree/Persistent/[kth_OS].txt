@@ -85,4 +85,3 @@ struct segtree {
         return was[l];
     }
 };
-//0-th version is the initial array
