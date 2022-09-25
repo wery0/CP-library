@@ -1,16 +1,13 @@
-template <int V, typename T> 
+template <int V, typename T>
 struct HLPP {
     const T INF = numeric_limits<T>::max();
     struct edge {
         int to, rev;
         T f;
 
-        edge() {}
+        edge() = default;
 
-        edge(int x, int y, T c) {
-            to = x, rev = y;
-            f = c;
-        }
+        edge(int x, int y, T c): to(x), rev(y), f(c) {}
     };
 
     int s = V - 2, t = V - 1;
@@ -18,6 +15,18 @@ struct HLPP {
     vector<int> lst[V], gap[V];
     T ex[V];
     int mxh, h[V], cnt[V], work;
+
+    void clear() {
+        for (int i = 0; i < V; ++i) {
+            adj[i].clear();
+            lst[i].clear();
+            gap[i].clear();
+        }
+        mxh = work = 0;
+        fill(h, h + V, 0);
+        fill(cnt, cnt + V, 0);
+        fill(ex, ex + V, 0);
+    }
 
     void add_edge(int x, int to, T f, int is_dir) {
         adj[x].pb(edge(to, adj[to].size(), f));
@@ -45,8 +54,9 @@ struct HLPP {
             int v = q.front();
             q.pop();
             for (auto &e : adj[v]) {
-                if (h[e.to] == V && adj[e.to][e.rev].f > 0)
+                if (h[e.to] == V && adj[e.to][e.rev].f > 0) {
                     q.push(e.to), updh(e.to, h[v] + 1);
+                }
             }
             mxh = h[v];
         }
@@ -65,19 +75,14 @@ struct HLPP {
             if (e.f > 0) {
                 if (h[v] == h[e.to] + 1) {
                     push(v, e);
-                    if (ex[v] <= 0)
-                        return;
-                } else {
-                    nh = min(nh, h[e.to] + 1);
-                }
+                    if (ex[v] <= 0) return;
+                } else chmin(nh, h[e.to] + 1);
             }
         }
-        if (cnt[h[v]] > 1) {
-            updh(v, nh);
-        } else {
+        if (cnt[h[v]] > 1) updh(v, nh);
+        else {
             for (int i = h[v]; i <= mxh; i++) {
-                for (auto j : gap[i])
-                    updh(j, V);
+                for (auto j : gap[i]) updh(j, V);
                 gap[i].clear();
             }
         }
@@ -88,13 +93,14 @@ struct HLPP {
         ex[s] = INF;
         globalRelabel();
         for (auto &e : adj[s]) push(s, e);
-        for (; mxh >= 0; mxh--) {
+        for (; mxh >= 0; --mxh) {
             while (!lst[mxh].empty()) {
                 int v = lst[mxh].back();
                 lst[mxh].pop_back();
                 discharge(v);
-                if (work > 4 * heur_n)
+                if (work > 4 * heur_n) {
                     globalRelabel();
+                }
             }
         }
         return ex[t];
