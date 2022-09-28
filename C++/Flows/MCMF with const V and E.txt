@@ -6,9 +6,8 @@ struct min_cost_max_flow {
         T_cost c, w;
     };
 
-    int a, ss = V - 2, tt = V - 1;
+    int ss = V - 2, tt = V - 1;
     vec<int> l[V];
-    vec<vec<int>> l;
     edge e[E]; int sze = 0;
 
     void add_edge(int fr, int to, T_flow c, T_cost w) {
@@ -24,9 +23,9 @@ struct min_cost_max_flow {
         const T_cost inf = numeric_limits<T_cost>::max();
         T_flow flow = 0;
         T_cost cost = 0;
-        dst.resize(a);
-        pr.resize(a);
-        inq.resize(a);
+        dst.resize(V);
+        pr.resize(V);
+        inq.resize(V);
         for (;;) {
             fill(all(dst), inf);
             fill(all(pr), -1);
@@ -35,6 +34,13 @@ struct min_cost_max_flow {
             inq[ss] = 1;
             deque<int> dq = {ss};
             for (; dq.size();) {
+                // constexpr int MAGIC = 1;
+                // for (int q = 0; q < MAGIC && q + 1 < dq.size(); ++q) {
+                //     if (dst[dq.back()] < dst[dq[q]]) {
+                //         swap(dq.back(), dq[q]);
+                //         break;
+                //     }
+                // }
                 int v = dq.front(); dq.pop_front();
                 inq[v] = 0;
                 for (int i : l[v]) {

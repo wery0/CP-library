@@ -40,6 +40,13 @@ struct min_cost_max_flow {
             inq[ss] = 1;
             deque<int> dq = {ss};
             for (; dq.size();) {
+                // constexpr int MAGIC = 1;
+                // for (int q = 0; q < MAGIC && q + 1 < dq.size(); ++q) {
+                //     if (dst[dq.back()] < dst[dq[q]]) {
+                //         swap(dq.back(), dq[q]);
+                //         break;
+                //     }
+                // }
                 int v = dq.front(); dq.pop_front();
                 inq[v] = 0;
                 for (int i : l[v]) {
