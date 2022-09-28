@@ -5,7 +5,7 @@ struct hash_set_open_addressing {
     vec<K> store;
     vec<bool> is_occupied;
 
-    hash_set_open_addressing() {}
+    hash_set_open_addressing() = default;
 
     hash_set_open_addressing(int n) {
 	assert(n > 0);

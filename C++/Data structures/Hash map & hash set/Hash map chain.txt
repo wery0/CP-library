@@ -4,7 +4,7 @@ struct hash_map_chain {
     int N;
     vec<vec<pair<K, V>>> table;
 
-    hash_map_chain() {}
+    hash_map_chain() = default;
 
     hash_map_chain(int n) {
         N = n;

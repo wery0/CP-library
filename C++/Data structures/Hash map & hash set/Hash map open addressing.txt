@@ -5,7 +5,7 @@ struct hash_map_open_addressing {
     vec<pair<K, V>> store;
     vec<bool> is_occupied;
 
-    hash_map_open_addressing() {}
+    hash_map_open_addressing() = default;
 
     hash_map_open_addressing(int n) {
 	assert(n > 0);

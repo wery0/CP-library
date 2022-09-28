@@ -12,7 +12,7 @@ struct hash_set_chain {
         }
     }
 
-    hash_set_chain() {}
+    hash_set_chain() = default;
 
     hash_set_chain(int n) {
         N = n;
