@@ -32,6 +32,13 @@ struct pt {
     friend T sqdst(const pt &p1, const pt &p2) {return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);}
     friend T mhdst(const pt &p1, const pt &p2) {return abs(p1.x - p2.x) + abs(p1.y - p2.y);}
 
+    void rotate_about_origin(ld ang) {
+        const ld sn = sinl(ang), cs = cosl(ang);
+        ld nx = x * cs - sn * y;
+        ld ny = x * sn + cs * y;
+        x = nx, y = ny;
+    }
+
     pt<ld> normalize(const ld EPS = 1e-9) {
         if (abs(x) < EPS && abs(y) < EPS) assert(0);
         ld c = sqrtl(x * x + y * y);
