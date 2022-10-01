@@ -28,10 +28,6 @@ namespace pollardRho {
         }
     };
 
-    inline ull func(__uint128_t x, ull mod) {
-        return (x * x + 1) % mod;
-    }
-
     inline ull gcd(ull x, ull y) {
         for (; x && y;) {
             y %= x;
@@ -40,19 +36,36 @@ namespace pollardRho {
         return x + y;
     }
 
-    ull pollard(ull n, ull seed = rnd()) {
-        if (n == 1 || MillerRabin::is_prime(n)) return n;
-        if (n % 2 == 0) return 2;
-        if (n % 5 == 0) return 5;
-        int IT = 200000;
-        ull x = seed, y = seed, divisor = 1;
-        for (int q = 0; divisor == 1 || divisor == n; q++) {
-            if (q == IT) return -1;
-            x = func(x, n);
-            y = func(func(y, n), n);
-            divisor = gcd(n, x < y ? y - x : x - y);
+    ull pollard(const ull n, ull seed = rnd()) {
+        if (n == 1) return 1;
+        if (MillerRabin::is_prime(n)) return n;
+        const ull K = (uid<ull>(0, ULLONG_MAX)(rndll) << 1) | 1;
+        auto func = [&](__uint128_t x) -> ull {
+            return (x * x + K) % n;
+        };
+        const ull IT = 2e5, C = 64;
+        ull x = seed, y = seed, dvs = 1;
+        for (int q = 0; dvs == 1 || dvs == n; ++q) {
+            if (q == IT / C) return -1;
+            ull p = 1, sx = x, sy = y;
+            for (int i = 0; i < C; ++i) {
+                x = func(x);
+                y = func(func(y));
+                ull d = x > y ? x - y : y - x;
+                d %= n;
+                if (d) p = (__uint128_t)p * d % n;
+            }
+            if (p == 0) {
+                for (x = sx, y = sy; dvs == 1 || dvs == n;) {
+                    x = func(x);
+                    y = func(func(y));
+                    dvs = gcd(n, x > y ? x - y : y - x);
+                }
+                return dvs;
+            }
+            dvs = gcd(n, p);
         }
-        return divisor;
+        return dvs;
     }
 
     void go(ull x, vec<ull> &res) {
@@ -68,6 +81,9 @@ namespace pollardRho {
 
     vec<ull> factorize(ull x) {
         vec<ull> res;
+        for (ull i : {2, 3, 5, 7, 11, 13, 17, 19}) {
+            while (x % i == 0) res.pb(i), x /= i;
+        }
         go(x, res);
         sort(all(res));
         return res;
