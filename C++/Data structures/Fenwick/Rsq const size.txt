@@ -31,7 +31,7 @@ struct fenwick {
         fill(all(fen), 0);
     }
 
-    void point_add(int p, T x) {  //0-index
+    void point_add(int p, T x) {
         assert(0 <= p && p < G - 1);
         for (p += 1; p < G; p += p & -p) fen[p] += x;
     }
@@ -47,7 +47,7 @@ struct fenwick {
         return pref_sum(G - 2) - pref_sum(p - 1);
     }
 
-    T seg_sum(int l, int r) { //0-index
+    T seg_sum(int l, int r) {
         assert(0 <= l && r < G - 1);
         return pref_sum(r) - pref_sum(l - 1);
     }

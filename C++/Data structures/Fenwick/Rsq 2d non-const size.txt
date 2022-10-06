@@ -40,7 +40,7 @@ struct fenwick {
         for (int q = 0; q < A; ++q) fill(all(fen[q]), 0);
     }
 
-    void point_add(int px, int py, T x) {  //0-index
+    void point_add(int px, int py, T x) {
         assert(0 <= px && px < A - 1); assert(0 <= py && py < B - 1);
         for (px += 1; px < A; px += px & -px) {
             for (int cpy = py + 1; cpy < B; cpy += cpy & -cpy) {
@@ -64,7 +64,7 @@ struct fenwick {
         return rect_sum(px, py, A - 2, B - 2);
     }
 
-    T rect_sum(int x1, int y1, int x2, int y2) { //0-index
+    T rect_sum(int x1, int y1, int x2, int y2) {
         assert(0 <= x1 && x2 < A - 1); assert(0 <= y1 && y2 < B - 1); assert(x1 <= x2 && y1 <= y2);
         return pref_sum(x2, y2) - pref_sum(x2, y1 - 1) -
                pref_sum(x1 - 1, y2) + pref_sum(x1 - 1, y1 - 1);

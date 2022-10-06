@@ -31,7 +31,7 @@ struct fenwick {
         fill(all(fen), 0);
     }
 
-    T operator[](int p) {  // 0-index
+    T operator[](int p) {
         p += 1;
         assert(1 <= p && p < G);
         T o = 0;
@@ -47,7 +47,7 @@ struct fenwick {
         }
     }
 
-    void seg_add(int l, int r, T x) {  // 0-index
+    void seg_add(int l, int r, T x) {
         l += 1, r += 1;
         assert(1 <= l && r < G);
         pref_add(r, x);
