@@ -59,12 +59,13 @@ namespace Generator {
     }
 
     template<typename T>
-    T gen_rand_integer_val() {
-        return uid<T>(numeric_limits<T>::min(), numeric_limits<T>::max())(rnd);
+    T gen_rand_integer_val(T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+        return uid<T>(l, r)(rnd);
     }
 
     template<typename T>
-    T gen_rand_integer_val(T l, T r) {
-        return uid<T>(l, r)(rnd);
+    T gen_rand_real_val(T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+        return uniform_real_distribution<T>(l, r)(rnd);
     }
 }
+using namespace Generator;
