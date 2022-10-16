@@ -59,11 +59,4 @@ struct fraction {
     friend fraction inv(const fraction &f) {return {f.den, f.num};}
     friend fraction abs(const fraction &f) {return f > 0 ? f : -f;}
     friend int sign(const fraction &f) {return f.num < 0 ? -1 : f.num == 0 ? 0 : 1;}
-    friend ll gcd_of_numenators(const fraction &f1, const fraction &f2) {return __gcd(abs(f1.num), abs(f2.num));}
-
-    friend fraction lcm_of_numenators(const fraction &f1, const fraction &f2) {
-        if (f1 == 0 || f2 == 0) return abs(f1 + f2);
-        ll gc = gcd_of_numenators(f1, f2);
-        return fraction(abs(f1.num) / gc * abs(f2.num));
-    }
 };
