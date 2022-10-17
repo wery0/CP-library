@@ -1,39 +1,31 @@
 struct SCC {
-    int n;
-    vec<vec<int>> l;
-    vec<vec<int>> inv;
-    vec<vec<int>> g;
-    vec<int> us;
-    vec<int> top_sort;
-    vec<int> color;
-    int ncolor = 0;
-
-    SCC(int N) {
-        n = N;
-        l = vec<vec<int>>(n, vec<int>());
-        inv = vec<vec<int>>(n, vec<int>());
-        us = vec<int>(n);
-        color = vec<int>(n, -1);
-    }
-
-    void add_edge(int x, int y) {
-        l[x].pb(y);
-        inv[y].pb(x);
-    }
-
+private:
     void dfs2(int v, int col) {
         color[v] = col;
-        for (int h : inv[v]) {
-            if (color[h] == -1) dfs2(h, col);
-        }
+        for (int h : inv[v]) if (color[h] == -1) dfs2(h, col);
     }
 
     void dfs1(int v) {
         us[v] = 1;
-        for (int h : l[v]) {
-            if (!us[h]) dfs1(h);
-        }
-        top_sort.pb(v);
+        for (int h : l[v]) if (!us[h]) dfs1(h);
+        top_sort.push_back(v);
+    }
+
+public:
+    int n, ncolor;
+    vector<vector<int>> l, inv, g;
+    vector<int> us, top_sort, color;
+
+    SCC(int _n): n(_n) {
+        l.resize(n);
+        inv.resize(n);
+        us.resize(n);
+        color.resize(n, -1);
+    }
+
+    void add_edge(int x, int y) {
+        l[x].push_back(y);
+        inv[y].push_back(x);
     }
 
     void calc() {
@@ -44,11 +36,11 @@ struct SCC {
         for (int v : top_sort) {
             if (color[v] == -1) dfs2(v, ncolor++);
         }
-        g = vec<vec<int>>(ncolor, vec<int>());
+        g.resize(ncolor);
         for (int q = 0; q < n; q++) {
             for (int h : l[q]) {
                 if (color[q] == color[h]) continue;
-                g[color[q]].pb(color[h]);
+                g[color[q]].push_back(color[h]);
             }
         }
         for (int q = 0; q < ncolor; q++) {
@@ -57,4 +49,4 @@ struct SCC {
         }
     }
 };
-//vertexes of condensation graph are numered in order of topological sort.
+//Vertexes of condensation graph are numered in order of topological sort
