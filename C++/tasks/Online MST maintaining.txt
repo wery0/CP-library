@@ -1,4 +1,5 @@
-//Онлайн добавляем рёбра в граф и отвечаем на запрос веса миностова.
+//Maintaining MST weight while adding edges online.
+//O(Qlog(N) * BIG_CONST)     :-)
 
 #pragma GCC optimize("Ofast")
 // #pragma GCC target("avx,avx2,fma")

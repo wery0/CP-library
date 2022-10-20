@@ -1,4 +1,5 @@
-//Для каждого прямоугольника считаем кол-во других, с которыми пересекаемся. Пересечение есть тогда, когда его площадь >0.
+//For every rectangle counting number of others, with which we are intersecting by non-zero surface area.
+//O(Nlog(N)) offline
 
 #pragma GCC optimize("Ofast")
 // #pragma GCC target("avx,avx2,fma")
