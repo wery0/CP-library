@@ -2,7 +2,7 @@
 //Each meeting is defined by [start_time, duration] (<=> [start_time, end_time))
 /*Each meeting wiil be arranged in the room with the smallest number among free rooms
 at the moment max(start_time, (when the first free room appears))*/
-//You can calculate the room where each meeting will be.
+//For every meeting calculates the room, where it will be.
 template<typename T>
 vec<int> meeting_simulator(T rooms, vec<pair<T, T>> meetings) {
     //chmin(rooms, isz(meetings));           //<- uncomment if it may help
