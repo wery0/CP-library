@@ -15,9 +15,9 @@ struct segtree {
         a = last - first;
         U = geq_pow2(a);
         sm.resize(U * 2);
-        mn = vec<T>(U * 2, INF);
-        mx = vec<T>(U * 2, -INF);
-        ps_set = vec<T>(U * 2, NO);
+        mn.resize(U * 2, INF);
+        mx.resize(U * 2, -INF);
+        ps_set.resize(U * 2, NO);
         for (uint q = 0; q < a; q++) {
             const T val = *(first + q);
             sm[U + q] = val;

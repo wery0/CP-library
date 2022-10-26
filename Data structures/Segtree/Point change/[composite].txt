@@ -10,7 +10,7 @@ struct segtree_point_upd {
     segtree_point_upd(vec<pii> &n) {
         a = n.size();
         U = geq_pow2(a);
-        A = vec<uint>(U * 2, 1);
+        A.resize(U * 2, 1);
         B.resize(U * 2);
         for (uint q = 0; q < a; ++q) {
             A[U + q] = n[q].F;
