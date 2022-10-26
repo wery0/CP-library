@@ -1,12 +1,12 @@
-inline void putChar(int c) {
+inline char getChar() {
     static char buf[1 << 16];
-    static int pos = 0;
-    if (c == EOF || pos == 1 << 16) {
-        fwrite(buf, sizeof(buf[0]), pos, stdout);
-        pos = 0;
+    static int ps = 0, sz = 0;
+    if (ps == sz) {
+        ps = 0;
+        sz = fread(buf, sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]), stdin);
+        if (sz == 0) return EOF;
     }
-    if (c == EOF) return;
-    buf[pos++] = c;
+    return buf[ps++];
 }
 
 inline void putChar(int c) {
@@ -18,6 +18,24 @@ inline void putChar(int c) {
     }
     if (c == EOF) return;
     buf[pos++] = c;
+}
+
+inline int ni() {
+    char c = getChar();
+    for (; c == '\n' || c == ' ';) c = getChar();
+    int o = 0, sign = 1;
+    if (c == '-') sign = -1, c = getChar();
+    for (; '0' <= c && c <= '9'; c = getChar()) o = o * 10 + c - '0';
+    return o * sign;
+}
+
+inline ll nl() {
+    char c = getChar();
+    for (; c == '\n' || c == ' ';) c = getChar();
+    ll o = 0, sign = 1;
+    if (c == '-') sign = -1, c = getChar();
+    for (; '0' <= c && c <= '9'; c = getChar()) o = o * 10 + c - '0';
+    return o * sign;
 }
 
 inline void printInt(int val) {
