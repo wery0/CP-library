@@ -117,6 +117,7 @@ struct tree {
     vec<int> dep;
     vec<int> sz;
     vec<int> tin, tout;
+    vi val;
     int root = -1;
     //vec<ll> wdep;
 
@@ -135,7 +136,7 @@ struct tree {
     }
 
     void ifs(int v, int p = -1) {
-        static int T = 0;
+        static int T = 0; T = p == -1 ? 0 : T;
         tin[v] = T++;
         pr[v] = p;
         sz[v] = 1;
@@ -158,6 +159,7 @@ struct tree {
     int is_descendant(int p, int v) {assert(is_prepared); return tin[p] <= tin[v] && tout[v] <= tout[p];}
     int kth_ancestor(int v, int k) {assert(is_prepared); assert(k <= dep[v]); for (; k;) {int u = jump[v], dfd = dep[v] - dep[u]; if (dfd <= k) v = u, k -= dfd; else v = pr[v], k--;} return v;}
     int LCA(int x, int y) {assert(is_prepared); if (dep[x] > dep[y]) swap(x, y); y = kth_ancestor(y, dep[y] - dep[x]); if (x == y) return x; for (; pr[x] != pr[y];) {int u1 = jump[x], u2 = jump[y]; if (u1 == u2) x = pr[x], y = pr[y]; else x = u1, y = u2;} return pr[x];}
+    vec<int> get_euler_traversal() {assert(is_prepared); vec<int> eul(V); int T = 0; auto dfs = [&](auto && dfs, int v, int p) -> void{eul[T++] = v; for (const auto &e : g[v]) {if (e.to == p) continue; dfs(dfs, e.to, v);}}; dfs(dfs, root, -1); return eul;}
     vec<int> get_path_betw_vrt(int x, int y) {assert(is_prepared); vec<int> fir, sec; while (!is_descendant(x, y)) fir.pb(x), x = pr[x]; while (x != y) sec.pb(y), y = pr[y]; fir.pb(x); reverse(all(sec)); for (int i : sec) fir.pb(i); return fir;}
     vec<int> get_furthest_vertex_unweighted() {assert(is_prepared); vec<int> deepest1(V), deepest2(V, -1); auto dfs = [&](auto dfs, int v, int p = -1) -> int {deepest1[v] = v; for (const auto &e : g[v]) {if (e.to == p) continue; int tyt = dfs(dfs, e.to, v); if (dep[tyt] >= dep[deepest1[v]]) {deepest2[v] = deepest1[v]; deepest1[v] = tyt;} else if (dep[tyt] > dep[deepest2[v]]) {deepest2[v] = tyt;}} return deepest1[v];}; dfs(dfs, root); vec<int> furthest(V); auto go = [&](auto go, int v, int u = -1, int dst_to_u = -1, int p = -1) -> void {furthest[v] = dst_to_u > dep[deepest1[v]] - dep[v] ? u : deepest1[v]; for (const auto &e : g[v]) {if (e.to == p) continue; int nwu = deepest1[e.to] == deepest1[v] ? deepest2[v] : deepest1[v]; int nwd = nwu == -1 ? -1 : dep[nwu] - dep[v]; if (nwu == -1 || dst_to_u > dep[nwu] - dep[v]) nwu = u, nwd = dst_to_u; go(go, e.to, nwu, nwd + 1, v);}}; go(go, root); return furthest;}
     template<typename D> vec<int> get_furthest_vertex_weighted() {assert(is_prepared); vec<int> deepest1(V), deepest2(V, -1); vec<D> wdep(V); auto dfs = [&](auto dfs, int v, int p = -1) -> int {deepest1[v] = v; for (const auto &e : g[v]) {if (e.to == p) continue; wdep[e.to] = wdep[v] + e.data; int tyt = dfs(dfs, e.to, v); if (wdep[tyt] >= wdep[deepest1[v]]) {deepest2[v] = deepest1[v]; deepest1[v] = tyt;} else if (wdep[tyt] > wdep[deepest2[v]]) {deepest2[v] = tyt;}} return deepest1[v];}; dfs(dfs, root); vec<int> furthest(V); auto go = [&](auto go, int v, int u = -1, D dst_to_u = -1, int p = -1) -> void {furthest[v] = dst_to_u > wdep[deepest1[v]] - wdep[v] ? u : deepest1[v]; for (const auto &e : g[v]) {if (e.to == p) continue; int nwu = deepest1[e.to] == deepest1[v] ? deepest2[v] : deepest1[v]; D nwd = nwu == -1 ? -1 : wdep[nwu] - wdep[v]; if (nwu == -1 || dst_to_u > wdep[nwu] - wdep[v]) nwu = u, nwd = dst_to_u; go(go, e.to, nwu, nwd + e.data, v);}}; go(go, root); return furthest;}
