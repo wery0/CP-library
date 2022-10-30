@@ -1,29 +1,29 @@
-// G must be at least 1 greater than the array size
+// N must be at least 1 greater than the array size
 template<typename T>
 struct fenwick {
-    int G;
+    int N;
     vec<T> fen;
-    //T fen[G] = {0};
-    //array<T, G> fen{};
+    //T fen[N] = {0};
+    //array<T, N> fen{};
 
-    fenwick() {}
+    fenwick() = default;
 
-    fenwick(int _G) {
-        G = _G;
-        fen.resize(G);
+    fenwick(int _N) {
+        N = _N;
+        fen.resize(N);
     }
 
     fenwick(vec<T> &n) {
-        G = n.size() + 1;
-        fen.resize(G);
+        N = n.size() + 1;
+        fen.resize(N);
         for (int q = 1; q <= n.size(); q++) {
             fen[q] += n[q - 1];
             const int nw = q + (q & -q);
-            if (nw < G) fen[nw] += fen[q];
+            if (nw < N) fen[nw] += fen[q];
         }
-        for (int q = n.size() + 1; q < G; q++) {
+        for (int q = n.size() + 1; q < N; q++) {
             const int nw = q + (q & -q);
-            if (nw < G) fen[nw] += fen[q];
+            if (nw < N) fen[nw] += fen[q];
         }
     }
 
@@ -33,9 +33,9 @@ struct fenwick {
 
     T operator[](int p) {
         p += 1;
-        assert(1 <= p && p < G);
+        assert(1 <= p && p < N);
         T o = 0;
-        for (; p < G; p += p & -p) {
+        for (; p < N; p += p & -p) {
             o += fen[p];
         }
         return o;
@@ -49,7 +49,7 @@ struct fenwick {
 
     void seg_add(int l, int r, T x) {
         l += 1, r += 1;
-        assert(1 <= l && r < G);
+        assert(1 <= l && r < N);
         pref_add(r, x);
         pref_add(l - 1, -x);
     }
