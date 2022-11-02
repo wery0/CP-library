@@ -4,12 +4,12 @@ struct dsu_w_rollbacks {
     vec<int> sz;
     vec<pii> store;
 
-    dsu_w_rollbacks() {}
+    dsu_w_rollbacks() = default;
 
     dsu_w_rollbacks(int x) {
         a = x;
-        sz = vec<int>(a, 1);
-        pr = vec<int>(a);
+        sz.resize(a, 1);
+        pr.resize(a);
         iota(all(pr), 0);
     }
 

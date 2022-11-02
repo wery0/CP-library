@@ -4,12 +4,12 @@ struct dsu {
     vec<int> sz;
     //vec<vec<int>> vrt;
 
-    dsu() {}
+    dsu() = default;
 
     dsu(int x) {
         a = x;
-        sz = vec<int>(a, 1);
-        pr = vec<int>(a);
+        sz.resize(a, 1);
+        pr.resize(a);
         //vrt.resize(a); for (int q = 0; q < a; ++q) vrt[q] = {q};
         iota(all(pr), 0);
     }
