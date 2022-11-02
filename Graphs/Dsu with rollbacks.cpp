@@ -6,8 +6,7 @@ struct dsu_w_rollbacks {
 
     dsu_w_rollbacks() = default;
 
-    dsu_w_rollbacks(int x) {
-        a = x;
+    dsu_w_rollbacks(int n): a(n) {
         sz.resize(a, 1);
         pr.resize(a);
         iota(all(pr), 0);
@@ -21,11 +20,9 @@ struct dsu_w_rollbacks {
 
     bool in_same_component(int x, int y) {return find(x) == find(y);}
 
-    int get_cur_version() {
-        return store.size();
-    }
+    int get_cur_version() {return store.size();}
 
-    int find(int x) { return x == pr[x] ? x : find(pr[x]); }
+    int find(int x) {return x == pr[x] ? x : find(pr[x]);}
 
     int unite(int x, int y) {
         int px = find(x);
