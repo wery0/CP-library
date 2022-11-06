@@ -2,8 +2,7 @@ template<typename T = ld>
 struct line {
     T A, B, C;
 
-    line(T AA, T BB, T CC) {
-        A = AA, B = BB, C = CC;
+    line(T A, T B, T C): A(A), B(B), C(C) {
         self_normalize();
     }
 
@@ -17,7 +16,6 @@ struct line {
 
     template<typename U>
     ld dst_to_pt(const pt<U>& p) const {
-        //self_normalize();
         return abs(A * p.x + B * p.y + C);
     }
 
