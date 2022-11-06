@@ -1,6 +1,6 @@
 template<typename T>
 bool is_convex_polygon(vec<pt<T>> m) {
-    int a = isz(m), sgn = 0;
+    int a = m.size(), sgn = 0;
     for (int q = 0; q < a; ++q) {
         pt<T> v1 = m[(q + 1) % a] - m[q];
         pt<T> v2 = m[(q + 2) % a] - m[(q + 1) % a];
