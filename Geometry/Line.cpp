@@ -2,6 +2,8 @@ template<typename T = ld>
 struct line {
     T A, B, C;
 
+    line() = default;
+
     line(T A, T B, T C): A(A), B(B), C(C) {
         self_normalize();
     }
