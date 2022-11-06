@@ -9,6 +9,7 @@ struct pt {
     pt<T> operator-(const pt &p) const { return {x - p.x, y - p.y}; }
     pt<T> operator*(const T c) const { return {x * c, y * c}; }
     pt<T> operator/(const T c) const { return {x / c, y / c}; }
+    pt<T> operator-() const {return { -x, -y};}
 
     void operator+=(const pt &p) { x += p.x, y += p.y; }
     void operator-=(const pt &p) { x -= p.x, y -= p.y; }
