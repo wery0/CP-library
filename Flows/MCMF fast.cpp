@@ -1,19 +1,23 @@
 template<typename flow_t = int, typename cost_t = int>
-struct mcSFlow {
+struct min_cost_max_flow {
+
     struct Edge {
         cost_t c;
         flow_t f;
         int to, rev;
-        Edge(int _to, cost_t _c, flow_t _f, int _rev): c(_c), f(_f), to(_to), rev(_rev) {}
+        Edge(int to, cost_t c, flow_t f, int rev): c(c), f(f), to(to), rev(rev) {}
     };
+
     static constexpr cost_t INFCOST = numeric_limits<cost_t>::max() / 2;
     cost_t eps;
     int N, S, T;
-    vector<vector<Edge> > G;
+    vector<vector<Edge>> G;
     vector<unsigned int> isq, cur;
     vector<flow_t> ex;
     vector<cost_t> h;
-    mcSFlow(int _N, int _S, int _T): eps(0), N(_N), S(_S), T(_T), G(_N) {}
+
+    min_cost_max_flow(int N, int S, int T): eps(0), N(N), S(S), T(T), G(N) {}
+
     void add_edge(int a, int b, flow_t cap, cost_t cost) {
         assert(cap >= 0);
         assert(a >= 0 && a < N && b >= 0 && b < N);
@@ -23,15 +27,19 @@ struct mcSFlow {
         G[a].emplace_back(b, cost, cap, G[b].size());
         G[b].emplace_back(a, -cost, 0, G[a].size() - 1);
     }
+
     void add_flow(Edge& e, flow_t f) {
         Edge &back = G[e.to][e.rev];
-        if (!ex[e.to] && f)
+        if (!ex[e.to] && f) {
             hs[h[e.to]].push_back(e.to);
+        }
         e.f -= f; ex[e.to] += f;
         back.f += f; ex[back.to] -= f;
     }
-    vector<vector<int> > hs;
+
+    vector<vector<int>> hs;
     vector<int> co;
+
     flow_t max_flow() {
         ex.assign(N, 0);
         h.assign(N, 0); hs.resize(2 * N);
@@ -54,25 +62,29 @@ struct mcSFlow {
                             }
                         }
                         if (++co[h[u]], !--co[hi] && hi < N)
-                            for (int i = 0; i < N; ++i)
+                            for (int i = 0; i < N; ++i) {
                                 if (hi < h[i] && h[i] < N) {
                                     --co[h[i]];
                                     h[i] = N + 1;
                                 }
+                            }
                         hi = h[u];
-                    } else if (G[u][cur[u]].f && h[u] == h[G[u][cur[u]].to] + 1)
+                    } else if (G[u][cur[u]].f && h[u] == h[G[u][cur[u]].to] + 1) {
                         add_flow(G[u][cur[u]], min(ex[u], G[u][cur[u]].f));
+                    }
                     else ++cur[u];
                 }
                 while (hi >= 0 && hs[hi].empty()) --hi;
             }
         return -ex[S];
     }
+
     void push(Edge &e, flow_t amt) {
         if (e.f < amt) amt = e.f;
         e.f -= amt; ex[e.to] += amt;
         G[e.to][e.rev].f += amt; ex[G[e.to][e.rev].to] -= amt;
     }
+
     void relabel(int vertex) {
         cost_t newHeight = -INFCOST;
         for (unsigned int i = 0; i < G[vertex].size(); ++i) {
@@ -84,6 +96,7 @@ struct mcSFlow {
         }
         h[vertex] = newHeight - eps;
     }
+
     static constexpr int scale = 1;
     pair<flow_t, cost_t> minCostMaxFlow() {
         cost_t retCost = 0;
@@ -138,6 +151,7 @@ struct mcSFlow {
         }
         return make_pair(retFlow, retCost / 2 / N);
     }
+
     flow_t getFlow(Edge const &e) {
         return G[e.to][e.rev].f;
     }
