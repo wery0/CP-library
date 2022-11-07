@@ -1,4 +1,4 @@
-template<typename INT = int, typename LL = ll, const INT MOD = 1000000007>
+template<typename INT, typename LL, const INT MOD>
 struct Mint {
     INT val = 0;
 
@@ -49,3 +49,4 @@ struct Mint {
     friend ostream& operator<<(ostream& out, const Mint& m) {return out << m.val;}
     friend ostream& operator<<(ostream& out, const Mint&& m) {return out << m.val;}
 };
+using mint = Mint<int, ll, 998244353>;
