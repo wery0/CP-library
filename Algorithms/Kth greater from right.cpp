@@ -1,5 +1,5 @@
 //For each element returns position of kth greater from right.
-//f([10, 20, 30, 30, 20, 10, 60, 90], 2) -> [2, 3, 7, 7, 7, 7, 8, 8]
+//kth_greater_from_right({10, 20, 30, 30, 20, 10, 60, 90}, 2) -> {2, 3, 7, 7, 7, 7, 8, 8}
 template<typename T>
 vector<int> kth_greater_from_right(const vector<T>& m, int k) {
     int a = m.size();
