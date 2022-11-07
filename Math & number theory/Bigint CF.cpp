@@ -236,7 +236,7 @@ struct bigint {
 
         int n = a.z.size();
 
-        int firstDigit = (int)::sqrt((double)a.z[n - 1] * base + a.z[n - 2]);
+        int firstDigit = (int)::sqrtl((long double)a.z[n - 1] * base + a.z[n - 2]);
         int norm = base / (firstDigit + 1);
         a *= norm;
         a *= norm;
@@ -244,7 +244,7 @@ struct bigint {
             a.z.push_back(0);
 
         bigint r = (long long)a.z[n - 1] * base + a.z[n - 2];
-        firstDigit = (int)::sqrt((double)a.z[n - 1] * base + a.z[n - 2]);
+        firstDigit = (int)::sqrtl((long double)a.z[n - 1] * base + a.z[n - 2]);
         int q = firstDigit;
         bigint res;
 
