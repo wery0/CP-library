@@ -17,17 +17,13 @@ public:
         ll y;
         ll sz = 0;
 
-        Node(K _x, V _val = UNDEF) {
-            x = _x;
+        Node(K x, V val = UNDEF): x(x), val(val), y(rnd()), sz(1) {
             mnk = x;
             mxk = x;
             smk = x;
-            y = rnd();
-            sz = 1;
-            val = _val;
-            mnv = _val;
-            mxv = _val;
-            smv = _val;
+            mnv = val;
+            mxv = val;
+            smv = val;
         }
     };
     Node *root = 0;
@@ -46,7 +42,11 @@ private:
 
     ll gsz(Node *n) const {return n ? n->sz : 0;}
 
-    void upd(Node *n) {
+    inline void push(Node *n) {
+        if (!n) return;
+    }
+
+    inline void upd(Node *n) {
         n->mnk = min({gmnk(n->l), n->x, gmnk(n->r)});
         n->mxk = max({gmxk(n->l), n->x, gmxk(n->r)});
         n->smk = gsmk(n->l) + n->x + gsmk(n->r);
@@ -61,15 +61,18 @@ private:
     Node* merge(Node *l, Node *r) {
         if (!l || !r) return l ? l : r;
         if (l->y > r->y) {
+            push(l);
             l->r = merge(l->r, r); upd(l);
             return l;
         }
+        push(r);
         r->l = merge(l, r->l); upd(r);
         return r;
     }
 
     pnn splitSz(Node *n, ll k) {
         if (!n) return {0, 0};
+        push(n);
         if (k <= gsz(n->l)) {
             pnn p = splitSz(n->l, k);
             n->l = p.S; upd(n);
@@ -84,6 +87,7 @@ private:
 
     pnn splitKey(Node *n, K k) {
         if (!n) return {0, 0};
+        push(n);
         if (k < n->x) {
             pnn p = splitKey(n->l, k);
             n->l = p.S; upd(n);
@@ -120,6 +124,7 @@ private:
     }
 
     void update_val_at_pos(Node *n, int pos, V new_val) {
+        push(n);
         if (pos == gsz(n->l)) {n->val = new_val; return;}
         if (pos < gsz(n->l)) update_val_at_pos(n->l, pos, new_val);
         else update_val_at_pos(n->r, pos - gsz(n->l) - 1, new_val);
@@ -127,6 +132,7 @@ private:
     }
 
     Node* erase_pos(Node *n, ll pos) {
+        push(n);
         if (gsz(n->l) == pos) {
             last_erased_key = n->x;
             last_erased_val = n->val;
@@ -141,6 +147,7 @@ private:
     }
 
     Node* insert_node(Node *n, Node *nw) {
+        push(n);
         if (!n || nw->y > n->y) {
             pnn p = splitKey(n, nw->x);
             nw->l = p.F;
@@ -155,6 +162,7 @@ private:
     }
 
     Node* erase_one_key(Node *n, K x) {
+        push(n);
         if (!n) return 0;
         if (n->x == x) {
             Node *l = n->l, *r = n->r;
@@ -169,6 +177,7 @@ private:
 
     void get_keys_on_subsegment(Node *n, int l, int &len, vec<K> &res) {
         if (!n || len <= 0) return;
+        push(n);
         if (l < gsz(n->l)) get_keys_on_subsegment(n -> l, l, len, res);
         if (l <= gsz(n->l) && len) res.pb(n->x), --len;
         get_keys_on_subsegment(n->r, max(0LL, l - gsz(n->l) - 1), len, res);
@@ -179,6 +188,7 @@ private:
         K mnk = gmnk(n);
         int ans = 0;
         for (; n;) {
+            push(n);
             if (gmnk(n->l) == mnk) n = n->l;
             else if (n->x == mnk) return ans + gsz(n->l);
             else {
@@ -190,11 +200,12 @@ private:
         return ans;
     }
 
-    void print_keys(Node *n) {if (!n) return; print_keys(n->l); cout << n->x << " "; print_keys(n->r);}
-    void print_vals(Node *n) {if (!n) return; print_vals(n->l); cout << n->val << " "; print_vals(n->r);}
+    void print_keys(Node *n) {if (!n) return; push(n); print_keys(n->l); cout << n->x << " "; print_keys(n->r);}
+    void print_vals(Node *n) {if (!n) return; push(n); print_vals(n->l); cout << n->val << " "; print_vals(n->r);}
 
     void delete_subtree(Node *n) {
         if (!n) return;
+        push(n);
         delete_subtree(n->l);
         delete_subtree(n->r);
         delete n;
@@ -207,11 +218,13 @@ public:
     template<typename I> treap(I f_key, I l_key) {root = build(f_key, l_key);}
     template<typename I1, typename I2> treap(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {assert(l_key - f_key == l_val - f_val); root = build(f_key, l_key, f_val, l_val);}
 
-    pair<K, V> operator[](ll pos) {Node *n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {const int szl = gsz(n->l); if (pos == szl) return {n->x, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
+    pair<K, V> operator[](ll pos) {Node *n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {push(n); const int szl = gsz(n->l); if (pos == szl) return {n->x, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
 
-    ll count_keys_leq(K x) {Node* n = root; ll o = 0; while (n) {if (n->x <= x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
-    ll count_keys_less(K x) {Node* n = root; ll o = 0; while (n) {if (n->x < x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    ll count_keys_leq(K x) {Node* n = root; ll o = 0; while (n) {push(n); if (n->x <= x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    ll count_keys_less(K x) {Node* n = root; ll o = 0; while (n) {push(n); if (n->x < x) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
     ll count_keys_in_seg(K l, K r) {return l > r ? 0 : count_keys_leq(r) - count_keys_less(l);}
+    ll count_keys_geq(K x) {return gsz(root) - count_keys_less(x);}
+    ll count_keys_greater(K x) {return gsz(root) - count_keys_leq(x);}
 
     int pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
 
