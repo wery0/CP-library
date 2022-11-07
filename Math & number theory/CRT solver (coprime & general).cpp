@@ -116,10 +116,10 @@ namespace CRT {
             if (rem[q] >= mod[q]) rem[q] %= mod[q];
             assert(rem[q] < mod[q]);
         }
-        umap(ll, pll) mp;
+        umap<ll, pll> mp;
         for (int q = 0; q < a; ++q) {
             auto m = pollardRho::factorize(mod[q]);
-            umap(ll, ll) res;
+            umap<ll, ll> res;
             for (ll i : m) {
                 if (res.count(i)) res[i] *= i;
                 else res[i] = i;
