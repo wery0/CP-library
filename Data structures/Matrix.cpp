@@ -4,18 +4,18 @@ struct Matrix {
     vec<vec<T>> m;
 
     Matrix() = default;
-    Matrix(int a, int b): a(a), b(b) {m = vec<vec<T>>(a, vec<T>(b));}
+    Matrix(int a, int b): a(a), b(b) {m.resize(a, vec<T>(b));}
     Matrix(const Matrix<T> &o) {a = o.a, b = o.b, m = o.m;}
     template<typename U>
     Matrix(const vec<vec<U>> &o) {
         a = o.size(), b = a ? o[0].size() : 0;
-        m = vec<vec<T>>(a, vec<T>(b));
+        m.resize(a, vec<T>(b));
         for (int q = 0; q < a; ++q) for (int w = 0; w < b; ++w) m[q][w] = o[q][w];
     }
     template<typename U>
     Matrix(const initializer_list<initializer_list<U>> &l) {
         a = l.size(), b = a ? (*l.begin()).size() : 0;
-        m = vec<vec<T>>(a, vec<T>(b));
+        m.resize(a, vec<T>(b));
         int q = 0;
         for (const auto &i : l) {
             assert(b == i.size());
