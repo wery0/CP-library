@@ -4,7 +4,7 @@ struct Matrix {
     vec<vec<T>> m;
 
     Matrix() = default;
-    Matrix(int _a, int _b): a(_a), b(_b) {m = vec<vec<T>>(a, vec<T>(b));}
+    Matrix(int a, int b): a(a), b(b) {m = vec<vec<T>>(a, vec<T>(b));}
     Matrix(const Matrix<T> &o) {a = o.a, b = o.b, m = o.m;}
     template<typename U>
     Matrix(const vec<vec<U>> &o) {
@@ -77,6 +77,27 @@ struct Matrix {
             x *= x;
         }
         *this = o;
+    }
+
+    T calc_determinant() {
+        assert(a == b);
+        T res = 1;
+        auto n = m;
+        for (int q = 0; q < a; ++q) {
+            int qq = q;
+            while (qq < a && n[qq][q] == 0) ++qq;
+            if (qq == a) return 0;
+            if (qq != q) swap(n[q], n[qq]), res *= T(-1);
+            res *= n[q][q];
+            T inv = T(1) / n[q][q];
+            for (int w = q; w < a; ++w) n[q][w] *= inv;
+            for (int i = q + 1; i < a; ++i) {
+                if (n[i][q] == 0) continue;
+                const T koef = n[i][q];
+                for (int w = q; w < a; ++w) n[i][w] -= n[q][w] * koef;
+            }
+        }
+        return res;
     }
 
     void self_transpose() {vec<vec<T>> n(b, vec<T>(a)); for (int w = 0; w < b; ++w) for (int q = 0; q < a; ++q) n[w][q] = m[q][w]; m = n; swap(a, b);}
