@@ -28,6 +28,7 @@ struct Matrix {
     Matrix& operator=(const Matrix<T> &o) {a = o.a, b = o.b, m = o.m; return *this;}
     Matrix& operator=(ll x) {for (int q = 0; q < min(a, b); ++q) m[q][q] = x; return *this;}
 
+    size_t size() {return a;}
     void fill(T x) {for (auto &i : m) std::fill(all(i), x);}
 
     inline bool is_sum_compatible(const Matrix& o) const {return a == o.a && b == o.b;}
@@ -92,12 +93,49 @@ struct Matrix {
             T inv = T(1) / n[q][q];
             for (int w = q; w < a; ++w) n[q][w] *= inv;
             for (int i = q + 1; i < a; ++i) {
-                if (n[i][q] == 0) continue;
                 const T koef = n[i][q];
+                if (koef == 0) continue;
                 for (int w = q; w < a; ++w) n[i][w] -= n[q][w] * koef;
             }
         }
         return res;
+    }
+
+    //Returns empty matrix, if no inverse
+    Matrix get_inverse() {
+        assert(a == b);
+        auto n = m;
+        for (int q = 0; q < a; ++q) {
+            n[q].resize(a * 2);
+            n[q][a + q] = 1;
+        }
+        for (int q = 0; q < a; ++q) {
+            int qq = q;
+            while (qq < a && n[qq][q] == 0) ++qq;
+            if (qq == a) return {};
+            if (qq != q) swap(n[q], n[qq]);
+            T inv = T(1) / n[q][q];
+            for (int w = q; w < a * 2; ++w) n[q][w] *= inv;
+            for (int i = q + 1; i < a; ++i) {
+                const T koef = n[i][q];
+                if (koef == 0) continue;
+                for (int w = q; w < a * 2; ++w) n[i][w] -= n[q][w] * koef;
+            }
+        }
+        for (int q = 1; q < a; ++q) {
+            for (int i = 0; i < q; ++i) {
+                const T koef = n[i][q];
+                if (koef == 0) continue;
+                for (int w = q; w < a * 2; ++w) {
+                    n[i][w] -= koef * n[q][w];
+                }
+            }
+        }
+        for (int q = 0; q < a; ++q) {
+            rotate(n[q].begin(), n[q].begin() + a, n[q].end());
+            n[q].resize(a);
+        }
+        return n;
     }
 
     void self_transpose() {vec<vec<T>> n(b, vec<T>(a)); for (int w = 0; w < b; ++w) for (int q = 0; q < a; ++q) n[w][q] = m[q][w]; m = n; swap(a, b);}
