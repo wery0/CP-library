@@ -21,8 +21,8 @@ struct sparse_table {
     void init_table(I fir, I last) {
         G = last - fir;
         K = __lg(G) + 1;
-        m = vec<vec<T>>(K);
-        for (int q = 0; q < K; q++) m[q] = vec<T>(max(0, G - (1 << q) + 1));
+        m.resize(K);
+        for (int q = 0; q < K; q++) m[q].resize(max(0, G - (1 << q) + 1));
         for (int q = 0; q < G; q++) m[0][q] = *(fir + q);
             for (int q = 1; q < K; q++) {
                 for (int w = 0; w + (1 << q) <= G; w++) {

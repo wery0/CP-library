@@ -4,7 +4,7 @@ struct offline_seg_add {
     int a;
     vec<T> m;
 
-    offline_seg_add() {}
+    offline_seg_add() = default;
 
     template<typename I>
     offline_seg_add(I first, I last) {

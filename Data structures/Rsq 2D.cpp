@@ -8,7 +8,7 @@ struct rsq2D {
     rsq2D(vec<vec<T>> &_m) {
         a = _m.size();
         b = a ? _m[0].size() : 0;
-        m = vec<vec<T>>(a + 1, vec<T>(b + 1));
+        m.resize(a + 1, vec<T>(b + 1));
         for (int q = 0; q < a; ++q) {
             for (int w = 0; w < b; ++w) {
                 m[q + 1][w + 1] = _m[q][w] + m[q + 1][w] + m[q][w + 1] - m[q][w];
