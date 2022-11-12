@@ -7,15 +7,13 @@ struct lichao {
         Node *l = 0, *r = 0;
         T k = 0, b = inf;
 
-        Node() {}
+        Node() = default;
     };
 
     T L, R;
     Node *root = new Node();
 
-    lichao(T _L, T _R) {
-        L = _L;
-        R = _R;
+    lichao(T L, T R): L(L), R(R) {
     }
 
     void add_seg(T ql, T qr, T l, T r, T k, T b, Node*& n) {
@@ -29,7 +27,6 @@ struct lichao {
         }
         add_line(l, r, k, b, n);
     }
-    void add_seg(T ql, T qr, T k, T b) {add_seg(ql, qr, L, R, k, b, root);}
 
     void add_line(T l, T r, T k, T b, Node*& n) {
         if (!n) n = new Node();
@@ -51,7 +48,6 @@ struct lichao {
         if (vl_new < vl_cur) add_line(l, md, k, b, n->l);
         else add_line(md + 1, r, k, b, n->r);
     }
-    void add_line(T k, T b) {add_line(L, R, k, b, root);}
 
     T get_min(T x) {
         Node *n = root;
@@ -64,6 +60,9 @@ struct lichao {
         }
         return o;
     }
+
+    void add_line(T k, T b) {add_line(L, R, k, b, root);}
+    void add_seg(T ql, T qr, T k, T b) {add_seg(ql, qr, L, R, k, b, root);}
 };
 //Add line - O(log(C))
 //Add seg - O(log(C)^2)

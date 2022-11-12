@@ -15,7 +15,7 @@ struct lichao_on_points {
         bl.resize(U * 2);
         br.resize(U * 2);
         vk.resize(U * 2);
-        vb = vec<T>(U * 2, inf);
+        vb.resize(U * 2, inf);
         for (uint q = 0; q < a; ++q) bl[U + q] = br[U + q] = points[q];
         for (uint q = a; q < U; ++q) bl[U + q] = br[U + q] = points[a - 1];
         for (int q = U; --q; ) {
@@ -34,7 +34,6 @@ struct lichao_on_points {
         add_seg(ql, qr, k, b, v << 1);
         add_seg(ql, qr, k, b, v << 1 | 1);
     }
-    void add_seg(T ql, T qr, T k, T b) {add_seg(ql, qr, k, b, 1);}
 
     void add_line(T k, T b, uint v) {
         for (;;) {
@@ -57,7 +56,6 @@ struct lichao_on_points {
             v = vl_new < vl_cur ? v << 1 : v << 1 | 1;
         }
     }
-    void add_line(T k, T b) {add_line(k, b, 1);}
 
     T get_min(T x) {
         uint v = 1;
@@ -69,4 +67,9 @@ struct lichao_on_points {
         }
         return o;
     }
+
+    void add_seg(T ql, T qr, T k, T b) {add_seg(ql, qr, k, b, 1);}
+    void add_line(T k, T b) {add_line(k, b, 1);}
 };
+//Add line - O(log(N))
+//Add seg - O(log(N)^2)
