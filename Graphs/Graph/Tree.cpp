@@ -3,35 +3,23 @@ struct edge {
     int to;
     Data data;
 
-    edge() {}
+    edge() = default;
+    edge(int to) : to(to) {}
+    edge(int to, Data data) : to(to), data(data) {}
 
-    edge(int _to) : to(_to) {}
-    edge(int _to, Data _data) : to(_to), data(_data) {}
-
-    bool operator<(const edge &other) const {
-        return to < other.to;
-    }
-
-    bool operator==(const edge &other) const {
-        return to == other.to && data == other.data;
-    }
+    bool operator<(const edge &other) const {return to < other.to;}
+    bool operator==(const edge &other) const {return to == other.to && data == other.data;}
 };
 
 template<>
 struct edge<void> {
     int to;
 
-    edge() {}
+    edge() = default;
+    edge(int to) : to(to) {}
 
-    edge(int _to) : to(_to) {}
-
-    bool operator<(const edge &other) const {
-        return to < other.to;
-    }
-
-    bool operator==(const edge &other) const {
-        return to == other.to;
-    }
+    bool operator<(const edge &other) const {return to < other.to;}
+    bool operator==(const edge &other) const {return to == other.to;}
 };
 
 template<typename Edge>
@@ -39,10 +27,9 @@ struct tree {
 
     struct edge_range {
         __gnu_cxx::__normal_iterator<Edge *, vector<Edge>> first, last;
-        auto begin() const { return first; }
-        auto end() const { return last; }
+        auto begin() const {return first;}
+        auto end() const {return last;}
 
-        int size() const {return last - first;}
         Edge& operator[](const int v) {return *(first + v);}
     };
 
@@ -89,8 +76,6 @@ struct tree {
         }
 
         edge_range operator[](const int v) {assert(is_prepared); return {store.begin() + fir[v], store.begin() + fir[v + 1]};}
-        int size() const {return V;}
-        inline int deg(const int v) const {assert(is_prepared); return fir[v + 1] - fir[v];}
     };
 
     graph g;
@@ -98,7 +83,7 @@ struct tree {
     bool is_prepared = false;
 
     tree() = default;
-    tree(int _V) {V = _V; g = graph(V, (V - 1) * 2);}
+    tree(int V): V(V) {g = graph(V, (V - 1) * 2);}
     tree(vec<int> &arr_parents) {
         V = arr_parents.size();
         g = graph(V, (V - 1) * 2);
@@ -117,7 +102,6 @@ struct tree {
     vec<int> dep;
     vec<int> sz;
     vec<int> tin, tout;
-    vi val;
     int root = -1;
     //vec<ll> wdep;
 
@@ -168,5 +152,5 @@ struct tree {
     ll sum_of_distances_between_all_pairs_of_vrt_weighted() {ll o = 0; auto dfs = [&](auto && dfs, int v, int pr) -> void {for (const auto &e : (*this)[v]) {if (e.to == pr) continue; dfs(dfs, e.to, v); o += 1ll * e.data * sz[e.to] * (V - sz[e.to]);}}; return o;}
     ll sum_of_distances_between_all_pairs_of_vrt_weighted_mod(const ll mod) {ll o = 0; auto dfs = [&](auto && dfs, int v, int pr) -> void {for (const auto &e : (*this)[v]) {if (e.to == pr) continue; dfs(dfs, e.to, v); o += 1ll * sz[e.to] * (V - sz[e.to]) % mod * e.data % mod;}}; return o % mod;}
     vec<int> get_rooted_isomorphic_subtrees_without_data_guaranteed() {vec<int> ans(V); map<vec<int>, int> mp; int cnt = 1; vec<pii> stq = {{root, 0}}; while (stq.size()) {pii p = stq.back(); const int pr = stq.size() == 1 ? -1 : stq[stq.size() - 2].F; int v = p.F; if (p.S < (*this)[v].size()) {++stq.back().S; if ((*this)[v][p.S].to != pr) stq.pb({(*this)[v][p.S].to, 0});} else {vec<int> tyt; tyt.reserve((*this)[v].size()); for (const auto &e : (*this)[v]) {if (e.to != pr) tyt.pb(ans[e.to]);} sort(all(tyt)); int& i = mp[tyt]; if (!i) i = cnt++; ans[v] = i - 1; stq.pop_back();}} return ans;}
-    int find_centroid() {assert(is_prepared); int v = root; int stv = v, p = -1; for (;;) {int mxsz = -1, h = -1; for (const auto &e : (*this)[v]) {if (e.to == p) continue; if (chmax(mxsz, sz[e.to])) h = e.to;} if (mxsz <= sz[stv] / 2) return v; p = v, v = h;} return -1;}
+    int get_centroid() {assert(is_prepared); int v = root; int stv = v, p = -1; for (;;) {int mxsz = -1, h = -1; for (const auto &e : (*this)[v]) {if (e.to == p) continue; if (chmax(mxsz, sz[e.to])) h = e.to;} if (mxsz <= sz[stv] / 2) return v; p = v, v = h;} return -1;}
 };
