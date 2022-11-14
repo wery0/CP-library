@@ -1,3 +1,4 @@
+
 //All functions are uniformly random, unless other is stated
 namespace Generator {
 
@@ -7,10 +8,10 @@ namespace Generator {
     template<typename T>
     T gen_val(T l = nlmin, T r = nlmax) {
         if constexpr(is_integral_v<T>) {
-            static uniform_int_distribution<T> gint(l, r);
+            uniform_int_distribution<T> gint(l, r);
             return gint(rndll);
         } else if constexpr(is_floating_point_v<T>) {
-            static uniform_real_distribution<T> greal(l, r);
+            uniform_real_distribution<T> greal(l, r);
             return greal(rndll);
         } else {
             assert(0);
@@ -101,6 +102,21 @@ namespace Generator {
             if (dep < 0 || (dep == 0 && s[q] == '(')) s[q] = '(' + ')' - s[q];
         }
         return s;
+    }
+
+    vector<pair<int, int>> gen_tree(int n) {
+        vector<pair<int, int>> ans(n - 1);
+        for (int q = 1; q < n; ++q) {
+            ans[q - 1] = {gen_val(0, q - 1), q};
+        }
+        vector<int> replacement(n);
+        iota(all(replacement), 0);
+        shuffle(all(replacement), rnd);
+        for (auto &[x, y] : ans) {
+            x = replacement[x];
+            y = replacement[y];
+        }
+        return ans;
     }
 
     template<typename T_arr>
