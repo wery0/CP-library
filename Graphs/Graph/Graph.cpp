@@ -1,27 +1,3 @@
-template<typename Data>
-struct edge {
-    int to;
-    Data data;
-
-    edge() = default;
-    edge(int to) : to(to) {}
-    edge(int to, Data data) : to(to), data(data) {}
-
-    bool operator<(const edge &other) const {return to < other.to;}
-    bool operator==(const edge &other) const {return to == other.to && data == other.data;}
-};
-
-template<>
-struct edge<void> {
-    int to;
-
-    edge() = default;
-    edge(int to) : to(to) {}
-
-    bool operator<(const edge &other) const {return to < other.to;}
-    bool operator==(const edge &other) const {return to == other.to;}
-};
-
 template<typename Edge>
 struct graph {
 
@@ -75,23 +51,7 @@ struct graph {
         }
     }
 
-    vec<int> get_nums_of_inv_edges() {
-        assert(is_prepared);
-        vec<int> ans(E, -1);
-        vec<bool> us(V); umap<ll, vec<int>> mp(E);
-        for (int v = 0; v < V; ++v) {
-            for (int i = fir[v]; i < fir[v + 1]; ++i) {
-                const auto& e = store[i]; ll hs = 1ll * v * V + e.to;
-                ll ihs = 1ll * e.to * V + v;
-                if (mp.count(ihs)) {
-                    vec<int>& kek = mp[ihs];
-                    int ips = kek.back(); kek.pop_back();
-                    if (kek.empty()) mp.erase(ihs);
-                    ans[i] = ips; ans[ips] = i;
-                } else mp[hs].pb(i);
-            }
-        } assert(mp.empty()); assert(count(all(ans), -1) == 0); return ans;
-    }
+    vec<int> get_nums_of_inv_edges() {assert(is_prepared); vec<int> ans(E, -1); vec<bool> us(V); umap<ll, vec<int>> mp(E); for (int v = 0; v < V; ++v) {for (int i = fir[v]; i < fir[v + 1]; ++i) {const auto& e = store[i]; ll hs = 1ll * v * V + e.to; ll ihs = 1ll * e.to * V + v; if (mp.count(ihs)) {vec<int>& kek = mp[ihs]; int ips = kek.back(); kek.pop_back(); if (kek.empty()) mp.erase(ihs); ans[i] = ips; ans[ips] = i;} else mp[hs].pb(i);}} assert(mp.empty()); assert(count(all(ans), -1) == 0); return ans;}
 
     edge_range operator[](const int v) {assert(is_prepared); return {store.begin() + fir[v], store.begin() + fir[v + 1]};}
     int size() const {return V;}
