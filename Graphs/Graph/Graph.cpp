@@ -1,3 +1,27 @@
+template<typename Data>
+struct edge {
+    int to;
+    Data data;
+
+    edge() = default;
+    edge(int to) : to(to) {}
+    edge(int to, Data data) : to(to), data(data) {}
+
+    bool operator<(const edge &other) const {return to < other.to;}
+    bool operator==(const edge &other) const {return to == other.to && data == other.data;}
+};
+
+template<>
+struct edge<void> {
+    int to;
+
+    edge() = default;
+    edge(int to) : to(to) {}
+
+    bool operator<(const edge &other) const {return to < other.to;}
+    bool operator==(const edge &other) const {return to == other.to;}
+};
+
 template<typename Edge>
 struct graph {
 
