@@ -48,5 +48,4 @@ class PrintWriter {
         }
         putChar('\n');
     }
-
 }
