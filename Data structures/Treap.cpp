@@ -70,31 +70,31 @@ private:
         return r;
     }
 
-    pnn splitSz(Node *n, ll k) {
+    pair<Node*, Node*> splitSz(Node *n, ll k) {
         if (!n) return {0, 0};
         push(n);
         if (k <= gsz(n->l)) {
-            pnn p = splitSz(n->l, k);
+            pair<Node*, Node*> p = splitSz(n->l, k);
             n->l = p.S; upd(n);
             p.S = n;
             return p;
         }
-        pnn p = splitSz(n->r, k - gsz(n->l) - 1);
+        pair<Node*, Node*> p = splitSz(n->r, k - gsz(n->l) - 1);
         n->r = p.F; upd(n);
         p.F = n;
         return p;
     }
 
-    pnn splitKey(Node *n, K k) {
+    pair<Node*, Node*> splitKey(Node *n, K k) {
         if (!n) return {0, 0};
         push(n);
         if (k < n->x) {
-            pnn p = splitKey(n->l, k);
+            pair<Node*, Node*> p = splitKey(n->l, k);
             n->l = p.S; upd(n);
             p.S = n;
             return p;
         }
-        pnn p = splitKey(n->r, k);
+        pair<Node*, Node*> p = splitKey(n->r, k);
         n->r = p.F; upd(n);
         p.F = n;
         return p;
@@ -149,7 +149,7 @@ private:
     Node* insert_node(Node *n, Node *nw) {
         push(n);
         if (!n || nw->y > n->y) {
-            pnn p = splitKey(n, nw->x);
+            pair<Node*, Node*> p = splitKey(n, nw->x);
             nw->l = p.F;
             nw->r = p.S;
             upd(nw);
@@ -237,11 +237,11 @@ public:
     K extract_pos_get_key(ll pos) {erase_pos(pos); return last_erased_key;}
     V extract_pos_get_val(ll pos) {erase_pos(pos); return last_erased_val;}
     void erase_one_key(K x) {root = erase_one_key(root, x);}
-    void remove_seg(int l, int len) {pnn p1 = splitSz(root, l); pnn p2 = splitSz(p1.S, len); root = merge(p1.F, p2.S);}
+    void remove_seg(int l, int len) {pair<Node*, Node*> p1 = splitSz(root, l); pair<Node*, Node*> p2 = splitSz(p1.S, len); root = merge(p1.F, p2.S);}
 
-    template<typename I> void insert_array(int pos, I first, I last) {pnn p = splitSz(root, pos); root = merge(merge(p.F, build(first, last)), p.S);}
+    template<typename I> void insert_array(int pos, I first, I last) {pair<Node*, Node*> p = splitSz(root, pos); root = merge(merge(p.F, build(first, last)), p.S);}
     void insert_array_at_pos(int pos, vec<K> arr) {insert_array(pos, all(arr));}
-    void insert_elem_at_pos(int pos, K x, V val = UNDEF) {pnn p = splitSz(root, pos); root = merge(merge(p.F, new Node(x, val)), p.S);}
+    void insert_elem_at_pos(int pos, K x, V val = UNDEF) {pair<Node*, Node*> p = splitSz(root, pos); root = merge(merge(p.F, new Node(x, val)), p.S);}
     void insert_key(K x, V val = UNDEF) {root = insert_node(root, new Node(x, val));}
     void update_val_at_pos(int pos, V new_val) {update_val_at_pos(root, pos, new_val);}
 

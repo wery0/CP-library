@@ -11,7 +11,6 @@
 #define pll pair<ll, ll>
 #define pdd pair<ld, ld>
 #define pii pair<int, int>
-#define pnn pair<Node*, Node*>
 #define all(m) m.begin(), m.end()
 #define rall(m) m.rbegin(), m.rend()
 #define uid uniform_int_distribution
