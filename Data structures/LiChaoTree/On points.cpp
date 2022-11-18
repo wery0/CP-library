@@ -73,7 +73,7 @@ struct lichao_on_points {
 };
 //add_line - O(log(|points|))
 //add_seg - O(log(|points|) ^ 2)
-//Usage: lichao<X, Y> kek(points), where
+//Usage: lichao_on_points<X, Y> kek(points), where
 //X - type of coordinates,
 //Y - type of K and B in linear function y = Kx + B,
 //points - vector of possible values of X.
