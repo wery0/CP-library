@@ -1,7 +1,7 @@
 template<typename T>
 struct disjoint_sparse_table {
     int K, G;
-    vec<vec<T>> m;
+    vector<vector<T>> m;
 
     T merge(T x, T y) {
         return min(x, y);
@@ -21,7 +21,7 @@ struct disjoint_sparse_table {
     void init_table(I fir, I last) {
         G = last - fir;
         K = __lg(G) + 1 + (!!(G & (G - 1)));
-        m.resize(K - 1, vec<T>(G));
+        m.resize(K - 1, vector<T>(G));
         for (int q = 1; q < K; q++) {
             for (int l = 0, md = (1 << q) / 2, r = (1 << q); md < G; l += 1 << q, md += 1 << q, r += 1 << q) {
                 m[q - 1][md - 1] = *(fir + md - 1);
