@@ -26,7 +26,6 @@ struct EERTREE {
 
     EERTREE() {r0->sl = r1->sl = r1;}
 
-
     int vertex_count = 0;
 
     void add_char(char c) {
