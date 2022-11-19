@@ -1,6 +1,6 @@
 //Sum of all elements must fit in T
 template<typename T>
-T kth_lowest_subsequence(vector<T> m, ll k) {
+T kth_lowest_subsequence_sum(vector<T> m, ll k) {
     T o = 0;
     for (T &i : m) if (i < 0) o += i, i *= -1;
     if (k-- == 0) return o;
