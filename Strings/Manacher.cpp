@@ -1,8 +1,8 @@
 template<typename T_arr>
 ll manacher(const T_arr& t) {
     int a = t.size();
-    vec<int> odd(a);   //odd("aaaaa")  = {1, 2, 3, 2, 1}
-    vec<int> even(a);  //even("aaaaa") = {0, 1, 2, 2, 1}
+    vector<int> odd(a);   //odd("aaaaa")  = {1, 2, 3, 2, 1}
+    vector<int> even(a);  //even("aaaaa") = {0, 1, 2, 2, 1}
     for (int q = 0, l = 0, r = 0; q < a; ++q) {
         int& d = odd[q];
         d = q > r ? 1 : max(0, min(r - q, odd[r - q + l]));

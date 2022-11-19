@@ -1,10 +1,10 @@
-vec<int> sufmas(str &t) {
+vector<int> sufmas(str &t) {
     t += (char)(0);           //This symbol must not appear in the string
     int a = t.size(), cnt[a] = {0}, cl[a], pcl[a], kek[256] = {0};
     for (char c : t) kek[c] = 1;
     for (int q = 0, i = 0; q < 256; q++) if (kek[q]) kek[q] = i++;
     for (int q = 0; q < a; q++) cl[q] = kek[t[q]], cnt[cl[q]]++;
-    pair<pii, int> ncl[a];
+    vector<pair<pii, int>> ncl(a);
     for (int d = 1; d < a; d *= 2) {
         for (int q = 1; q < a; q++) cnt[q] += cnt[q - 1];
         for (int q = 0; q < a; q++) pcl[--cnt[cl[(q + d) % a]]] = q;
@@ -13,14 +13,14 @@ vec<int> sufmas(str &t) {
         memset(cnt, 0, sizeof(cnt));
         for (int i : cl) cnt[i]++;
     }
-    vec<int> suf(a - 1);
+    vector<int> suf(a - 1);
     for (int q = 0; q < a; q++) if (cl[q]) suf[cl[q] - 1] = q;
     return suf;
 }
 
-vec<int> calc_lcp(str &t, vec<int> &suf) {
+vector<int> calc_lcp(str &t, vector<int> &suf) {
     int a = suf.size();
-    vec<int> pos_in_sufmas(a), lcp(a - 1);
+    vector<int> pos_in_sufmas(a), lcp(a - 1);
     for (int q = 0; q < a; q++) pos_in_sufmas[suf[q]] = q;
     for (int q = 0; q < a - 1; q++) {
         int i = pos_in_sufmas[q];

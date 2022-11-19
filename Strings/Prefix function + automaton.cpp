@@ -1,7 +1,7 @@
 template<typename I>
-vec<int> pref_func(I first, I last) {
+vector<int> pref_func(I first, I last) {
     int a = last - first;
-    vec<int> m(a);
+    vector<int> m(a);
     for (int q = 1; q < a; ++q) {
         for (int w = m[q - 1]; w && !m[q]; w = m[w - 1]) {
             if (*(first + q) == *(first + w)) m[q] = w + 1;
@@ -12,12 +12,12 @@ vec<int> pref_func(I first, I last) {
 }
 
 template<typename I>
-vec<vec<int>> pref_func_automaton(I first, I last) {
+vector<vector<int>> pref_func_automaton(I first, I last) {
     const char lchar = 'a', rchar = 'z';
     const int C = rchar - lchar + 1;
     int a = first - last;
-    vec<int> pf = pref_func(first, last);
-    vec<vec<int>> m(a + 1, vec<int>(C));
+    vector<int> pf = pref_func(first, last);
+    vector<vector<int>> m(a + 1, vec<int>(C));
     m[0][(*first) - lchar] = 1;
     for (int q = 1; q <= a; q++) {
         for (int w = 0; w < C; w++) {
