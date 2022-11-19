@@ -1,8 +1,8 @@
 template<typename T>
-vec<int> LIS_positions(vec<T> &m) {
+vector<int> LIS_positions(vector<T> &m) {
     int a = m.size(), len = 0, cur_pos = a - 1;
-    vec<T> mn(a + 1);
-    vec<int> cur_num(a + 1), pr(a + 1);
+    vector<T> mn(a + 1);
+    vector<int> cur_num(a + 1), pr(a + 1);
     cur_num[0] = pr[0] = -1;
     for (int q = 0; q < a; ++q) {
         int ps = lower_bound(mn.begin() + 1, mn.begin() + len + 1, m[q]) - mn.begin();
@@ -12,7 +12,7 @@ vec<int> LIS_positions(vec<T> &m) {
         chmax(len, ps);
     }
     while (m[cur_pos] != mn[len]) --cur_pos;
-    vec<int> ans(len);
+    vector<int> ans(len);
     for (int i = len - 1; i >= 0; --i, cur_pos = pr[cur_pos]) ans[i] = cur_pos;
     return ans;
 }
