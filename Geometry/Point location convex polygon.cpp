@@ -5,13 +5,11 @@ bool pis(pt<T> p1, pt<T> p2, pt<T> p) {
 
 //1 - inside, 0 - border, -1 - outside
 template<typename T>
-int point_location_convex_polygon(vec<pt<T>> &ch, pt<T> &p) {
-    int a = isz(ch);
+int point_location_convex_polygon(vector<pt<T>> &ch, pt<T> &p) {
+    int a = ch.size();
     if (a == 0) return -1;
-    if (a == 1) return -1; //could be 0 if p == ch[0]?
-    if (a == 2) {
-        return cross(ch[0] - p, ch[1] - p) == 0 && pis(ch[0], ch[1], p) ? 0 : -1;
-    }
+    if (a == 1) return -1;                   //could be 0 if (p == ch[0])?
+    if (a == 2) return cross(ch[0] - p, ch[1] - p) == 0 && pis(ch[0], ch[1], p) ? 0 : -1;
     if (p.x < ch[0].x) return -1;
     if (cross(p - ch[0], ch[1] - ch[0]) > 0) return -1;
     if (cross(ch.back() - ch[0], p - ch[0]) > 0) return -1;
