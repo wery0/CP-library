@@ -3,7 +3,7 @@ private:
     int L, R;
     vector<vector<int>> l;
     vector<int> mtl, mtr;
-    vec<bool> us;
+    vector<bool> us;
     bool sw = 0;
 
     int dfs(int v) {
@@ -15,7 +15,7 @@ private:
     }
 
 public:
-    MaxBipartiteMatchingKyhn(int _L, int _R): L(_L), R(_R) {
+    MaxBipartiteMatchingKyhn(int L, int R): L(L), R(R) {
         if (L > R) swap(L, R), sw = 1;
         l.resize(L);
         mtl.resize(L, -1);
