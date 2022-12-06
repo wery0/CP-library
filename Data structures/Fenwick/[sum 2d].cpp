@@ -1,72 +1,76 @@
-// A, B must be at least 1 greater than the corresponding dimensions size
+// N, M must be at least 1 greater than the corresponding dimensions size
 template<typename T>
 struct fenwick {
-    int A, B;
-    vec<vec<T>> fen;
+	int N, M;
+	vector<vector<T>> fen;
 
-    fenwick() {}
+	fenwick() = default;
 
-    fenwick(int _A, int _B) {
-        A = _A, B = _B;
-        fen = vec<vec<T>>(A, vec<T>(B));
-    }
+	fenwick(int N, int M): N(N), M(M) {fen.resize(N, vector<T>(M));}
 
-    fenwick(vec<vec<T>> &n) {
-        A = n.size() + 1;
-        B = n.size() ? n[0].size() + 1 : 1;
-        fen = vec<vec<T>>(A, vec<T>(B));
-        for (int q = 1; q <= n.size(); q++) {
-            for (int w = 1; w <= n[0].size(); w++) {
-                const int nx = q + (q & -q);
-                const int ny = w + (w & -w);
-                fen[q][w] += n[q - 1][w - 1];
-                if (nx < A) fen[nx][w] += fen[q][w];
-                if (ny < B) fen[q][ny] += fen[q][w];
-                if (nx < A && ny < B) fen[nx][ny] -= fen[q][w];
-            }
-        }
-        for (int q = n.size() + 1; q < A; q++) {
-            for (int w = n[0].size() + 1; w < B; w++) {
-                const int nx = q + (q & -q);
-                const int ny = w + (w & -w);
-                if (nx < A) fen[nx][w] += fen[q][w];
-                if (ny < B) fen[q][ny] += fen[q][w];
-                if (nx < A && ny < B) fen[nx][ny] -= fen[q][w];
-            }
-        }
-    }
+	//O(NM) initialization
+	template <typename U>
+	fenwick(vector<vector<U>> &n) {
+		N = n.size() + 1;
+		M = n.size() ? n[0].size() + 1 : 1;
+		fen.resize(N, vector<T>(M));
+		for (int q = 1; q <= n.size(); q++) {
+			for (int w = 1; w <= n[0].size(); w++) {
+				const int nx = q + (q & -q);
+				const int ny = w + (w & -w);
+				fen[q][w] += n[q - 1][w - 1];
+				if (nx < N) fen[nx][w] += fen[q][w];
+				if (ny < M) fen[q][ny] += fen[q][w];
+				if (nx < N && ny < M) fen[nx][ny] -= fen[q][w];
+			}
+		}
+		for (int q = n.size() + 1; q < N; q++) {
+			for (int w = n[0].size() + 1; w < M; w++) {
+				const int nx = q + (q & -q);
+				const int ny = w + (w & -w);
+				if (nx < N) fen[nx][w] += fen[q][w];
+				if (ny < M) fen[q][ny] += fen[q][w];
+				if (nx < N && ny < M) fen[nx][ny] -= fen[q][w];
+			}
+		}
+	}
 
-    void clear() {
-        for (int q = 0; q < A; ++q) fill(all(fen[q]), 0);
-    }
+	void clear() {
+		for (int q = 0; q < N; ++q) {
+			fill(fen[q].begin(), fen[q].end(), 0);
+		}
+	}
 
-    void point_add(int px, int py, T x) {
-        assert(0 <= px && px < A - 1); assert(0 <= py && py < B - 1);
-        for (px += 1; px < A; px += px & -px) {
-            for (int cpy = py + 1; cpy < B; cpy += cpy & -cpy) {
-                fen[px][cpy] += x;
-            }
-        }
-    }
+	void point_add(int x, int y, T val) {
+		assert(0 <= x && x < N - 1); assert(0 <= y && y < M - 1);
+		for (x += 1; x < N; x += x & -x) {
+			for (int cpy = y + 1; cpy < M; cpy += cpy & -cpy) {
+				fen[x][cpy] += val;
+			}
+		}
+	}
 
-    T pref_sum(int px, int py) {
-        assert(-1 <= px && px < A - 1); assert(-1 <= py && py < B - 1);
-        T o = 0;
-        for (px += 1; px; px -= px & -px) {
-            for (int cpy = py + 1; cpy; cpy -= cpy & -cpy) {
-                o += fen[px][cpy];
-            }
-        }
-        return o;
-    }
+	//Sum on [0, x] x [0, y]
+	T pref_sum(int x, int y) {
+		assert(-1 <= x && x < N - 1); assert(-1 <= y && y < M - 1);
+		T o = 0;
+		for (x += 1; x; x -= x & -x) {
+			for (int cpy = y + 1; cpy; cpy -= cpy & -cpy) {
+				o += fen[x][cpy];
+			}
+		}
+		return o;
+	}
 
-    T suf_sum(int px, int py) {
-        return rect_sum(px, py, A - 2, B - 2);
-    }
+	//Sum on [x, N - 1] x [y, M - 1]
+	T suf_sum(int x, int y) {
+		return rect_sum(x, y, N - 2, M - 2);
+	}
 
-    T rect_sum(int x1, int y1, int x2, int y2) {
-        assert(0 <= x1 && x2 < A - 1); assert(0 <= y1 && y2 < B - 1); assert(x1 <= x2 && y1 <= y2);
-        return pref_sum(x2, y2) - pref_sum(x2, y1 - 1) -
-               pref_sum(x1 - 1, y2) + pref_sum(x1 - 1, y1 - 1);
-    }
+	//Sum on [x1, x2] x [y1, y2]
+	T rect_sum(int x1, int y1, int x2, int y2) {
+		assert(0 <= x1 && x2 < N - 1); assert(0 <= y1 && y2 < M - 1); assert(x1 <= x2 && y1 <= y2);
+		return pref_sum(x2, y2) - pref_sum(x2, y1 - 1) -
+		       pref_sum(x1 - 1, y2) + pref_sum(x1 - 1, y1 - 1);
+	}
 };
