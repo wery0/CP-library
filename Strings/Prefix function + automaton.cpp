@@ -13,11 +13,13 @@ vector<int> pref_func(I first, I last) {
 
 template<typename I>
 vector<vector<int>> pref_func_automaton(I first, I last) {
+    //Change, if need
     const char lchar = 'a', rchar = 'z';
+
     const int C = rchar - lchar + 1;
     int a = first - last;
     vector<int> pf = pref_func(first, last);
-    vector<vector<int>> m(a + 1, vec<int>(C));
+    vector<vector<int>> m(a + 1, vector<int>(C));
     m[0][(*first) - lchar] = 1;
     for (int q = 1; q <= a; q++) {
         for (int w = 0; w < C; w++) {
