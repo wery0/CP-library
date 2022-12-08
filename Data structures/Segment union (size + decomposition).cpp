@@ -9,9 +9,9 @@ struct segment_union {
         auto it = s.upper_bound({l, numeric_limits<T>::min()});
         if (it != s.begin() && (--it)->second < l) ++it;
         while (it != s.end() && it->first <= r) {
-            chmin(l, it->F);
-            chmax(r, it->S);
-            sz -= it->S - it->F + 1;
+            chmin(l, it->first);
+            chmax(r, it->second);
+            sz -= it->second - it->first + 1;
             it = s.erase(it);
         }
         s.insert({l, r});
@@ -20,21 +20,21 @@ struct segment_union {
 
     inline T size() {return sz;}
 
-    //returns list of segments of minimal size, which union equals to the union of containing segments
+    //Returns list of segments of minimal size, which union equals to the union of containing segments.
     //{[1, 2], [2, 3], [5, 8], [7, 10]} -> {[1, 3], [5, 10]}
-    vector<pair<T, T>> get_segmentaton() {
+    vector<pair<T, T>> get_segmentation() {
         if (s.empty()) return {};
         vector<pair<T, T>> m;
         auto [l, r] = *(s.begin());
         for (auto it = next(s.begin()); it != s.end(); ++it) {
-            if ((*it).F - 1 == r) r = (*it).S;
+            if ((*it).first - 1 == r) r = (*it).second;
             else {
-                m.push_back({l, r});
-                l = (*it).F;
-                r = (*it).S;
+                m.emplace_back(l, r);
+                l = (*it).first;
+                r = (*it).second;
             }
         }
-        m.push_back({l, r});
+        m.emplace_back(l, r);
         return m;
     }
 };
