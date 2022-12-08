@@ -17,7 +17,7 @@ vector<vector<int>> pref_func_automaton(I first, I last) {
     const char lchar = 'a', rchar = 'z';
 
     const int C = rchar - lchar + 1;
-    int a = first - last;
+    int a = last - first;
     vector<int> pf = pref_func(first, last);
     vector<vector<int>> m(a + 1, vector<int>(C));
     m[0][(*first) - lchar] = 1;
