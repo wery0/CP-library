@@ -1,19 +1,14 @@
-// N, M must be at least 1 greater than the corresponding dimensions size
 template<typename T>
 struct fenwick {
     int N, M;
     vector<vector<T>> fen;
 
     fenwick() = default;
-
-    fenwick(int N, int M): N(N), M(M) {fen.resize(N, vector<T>(M));}
+    fenwick(int N, int M): N(N + 1), M(M + 1), fen(N + 1, vector<T>(M + 1)) {}
 
     //O(NM) initialization
-    template <typename U>
-    fenwick(vector<vector<U>> &n) {
-        N = n.size() + 1;
-        M = n.size() ? n[0].size() + 1 : 1;
-        fen.resize(N, vector<T>(M));
+    template<typename U>
+    fenwick(vector<vector<U>> &n): N(n.size() + 1), M(N ? n[0].size() + 1 : 1), fen(N, vector<T>(M)) {
         for (int q = 1; q <= n.size(); q++) {
             for (int w = 1; w <= n[0].size(); w++) {
                 const int nx = q + (q & -q);

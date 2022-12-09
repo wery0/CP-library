@@ -1,20 +1,11 @@
-// N must be at least 1 greater than the array size
 template<typename T>
 struct fenwick {
     int N;
-    vec<T> fen;
-    //T fen[N] = {0};
-    //array<T, N> fen{};
+    vector<T> fen;
 
     fenwick() = default;
-
-    fenwick(int N): N(N) {
-        fen.resize(N);
-    }
-
-    fenwick(vec<T> &n) {
-        N = n.size() + 1;
-        fen.resize(N);
+    fenwick(int N): N(N + 1), fen(N + 1) {}
+    fenwick(vector<T> &n): N(n.size() + 1), fen(N) {
         for (int q = 1; q <= n.size(); q++) {
             fen[q] += n[q - 1];
             const int nw = q + (q & -q);
