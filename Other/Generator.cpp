@@ -1,4 +1,3 @@
-
 //All functions are uniformly random, unless other is stated
 namespace Generator {
 
@@ -104,6 +103,7 @@ namespace Generator {
         return s;
     }
 
+    //Not uniformly random
     vector<pair<int, int>> gen_tree(int n) {
         vector<pair<int, int>> ans(n - 1);
         for (int q = 1; q < n; ++q) {
@@ -116,6 +116,28 @@ namespace Generator {
             x = replacement[x];
             y = replacement[y];
         }
+        return ans;
+    }
+
+    //Uniformly random among all labeled trees
+    vector<pair<int, int>> gen_tree_prufer(int n) {
+        if (n == 1) return {};
+        vector<int> pcode = gen_vector(n - 2, 0, n - 1);
+        vector<int> cnt(n);
+        for (int v : pcode) ++cnt[v];
+        vector<pair<int, int>> ans(n - 1);
+        int leaf = find(all(cnt), 0) - cnt.begin();
+        for (int q = 0, ptr = leaf + 1; q < n - 2; q++) {
+            int p = pcode[q];
+            ans[q] = {p, leaf};
+            if (--cnt[p] == 0 && p < ptr) {
+                leaf = p;
+            } else {
+                for (; cnt[ptr]; ) ++ptr;
+                leaf = ptr++;
+            }
+        }
+        ans.back() = {leaf, n - 1};
         return ans;
     }
 
