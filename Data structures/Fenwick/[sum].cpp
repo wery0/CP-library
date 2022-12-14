@@ -42,7 +42,7 @@ struct fenwick {
         return pref_sum(r) - pref_sum(l - 1);
     }
 
-    //[1, 2, 3] -> f(0) = -1, f(1) = 1, f(4) = 1, f(6) = 2
+    //[1, 2, 3] -> f(0) = -1, f(1) = 0, f(4) = 1, f(6) = 2
     int max_pref_with_sum_leq_k(T k) {
         int p = 0, step = 1 << __lg(N);
         T s = 0;
