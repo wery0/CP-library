@@ -1,5 +1,6 @@
 template<typename T, const int BIT_LEN>
-struct multiset_xor_min {
+struct multiset_xor_min_max {
+private:
     struct Node {
         Node *m[2];
         int sm = 0;
@@ -22,9 +23,7 @@ struct multiset_xor_min {
         insert(n->m[c >> bit_num & 1], c, bit_num - 1);
         n->sm += last_insert_res;
     }
-    void insert(T c) {insert(root, c, BIT_LEN - 1);}
 
-    //erases only one occurence, if exists
     int last_erase_res;
     void erase(Node *n, T c, int bit_num) {
         if (!n) {
@@ -39,6 +38,14 @@ struct multiset_xor_min {
         erase(n->m[c >> bit_num & 1], c, bit_num - 1);
         n->sm -= last_erase_res;
     }
+
+public:
+
+    multiset_xor_min_max() = default;
+
+    void insert(T c) {insert(root, c, BIT_LEN - 1);}
+
+    //Erases only one occurence, if exists
     void erase(T c) {erase(root, c, BIT_LEN - 1);}
 
     T xor_min(T c) {
@@ -67,3 +74,6 @@ struct multiset_xor_min {
         return best ^ c;
     }
 };
+//Works as std::multiset, but also supports xor_min and xor_max operations.
+//Xor_min(max)(C) finds min(max) xor of C and element from set.
+//O(log(C)) time per any operation.

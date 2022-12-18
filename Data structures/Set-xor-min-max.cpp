@@ -1,10 +1,11 @@
 template<typename T, const int BIT_LEN>
-struct set_xor_min {
+struct set_xor_min_max {
+private:
     struct Node {
         Node *m[2];
         int sm = 0;
 
-        Node() {for (auto &i : m) i = nullptr;}
+        Node() {for (auto& i : m) i = nullptr;}
     };
 
     inline int gsm(Node *n) {return n ? n->sm : 0;}
@@ -12,7 +13,7 @@ struct set_xor_min {
     Node* root = new Node();
 
     int last_insert_res;
-    void insert(Node *&n, T c, int bit_num) {
+    void insert(Node*& n, T c, int bit_num) {
         if (!n) n = new Node();
         if (bit_num == -1) {
             last_insert_res = n->sm == 0;
@@ -22,7 +23,6 @@ struct set_xor_min {
         insert(n->m[c >> bit_num & 1], c, bit_num - 1);
         n->sm += last_insert_res;
     }
-    void insert(T c) {insert(root, c, BIT_LEN - 1);}
 
     int last_erase_res;
     void erase(Node *n, T c, int bit_num) {
@@ -38,11 +38,17 @@ struct set_xor_min {
         erase(n->m[c >> bit_num & 1], c, bit_num - 1);
         n->sm -= last_erase_res;
     }
+
+public:
+
+    set_xor_min_max() = default;
+
+    void insert(T c) {insert(root, c, BIT_LEN - 1);}
     void erase(T c) {erase(root, c, BIT_LEN - 1);}
 
     T xor_min(T c) {
         assert(root->sm);
-        Node *n = root;
+        Node* n = root;
         T best = 0;
         for (int bit_num = BIT_LEN - 1; bit_num >= 0; --bit_num) {
             int bt = c >> bit_num & 1;
@@ -55,7 +61,7 @@ struct set_xor_min {
 
     T xor_max(T c) {
         assert(root->sm);
-        Node *n = root;
+        Node* n = root;
         T best = 0;
         for (int bit_num = BIT_LEN - 1; bit_num >= 0; --bit_num) {
             int bt = ~c >> bit_num & 1;
@@ -66,3 +72,6 @@ struct set_xor_min {
         return best ^ c;
     }
 };
+//Works as std::set, but also supports xor_min and xor_max operations.
+//Xor_min(max)(C) finds min(max) xor of C and element from set.
+//O(log(C)) time per any operation.
