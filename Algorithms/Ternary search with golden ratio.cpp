@@ -1,19 +1,18 @@
-const ld FI = (sqrt(5) + 1) / 2.0;
-ld SUPERternarka(ld L, ld R) {
-    ld p1 = L + (R - L) / (FI + 1), p2 = R - (R - L) / (FI + 1);
-    ld v1 = FUNC(p1), v2 = FUNC(p2);
-    for (; R - L > EPSILON;) {
+//Faster than usual ternary search in 2log_{1.5}(FI) ~ 2.37 times.
+ld ternary_search_with_golden_ratio_argmin(auto f, ld l, ld r) {
+    const ld FI = 1.6180339887498948482045868343656381177203;    //(sqrtl(5) + 1) / 2.0
+    ld p1 = l + (r - l) / (FI + 1), p2 = r - (r - l) / (FI + 1);
+    ld v1 = f(p1), v2 = f(p2);
+    for (; r - l > 1e-9;) {    //Change epsilon, if need, or put fixed amount of iterations
         if (v1 < v2) {
-            R = p2;
+            r = p2;
             p2 = p1, v2 = v1;
-            p1 = L + (R - L) / (FI + 1), v1 = FUNC(p1);
+            p1 = l + (r - l) / (FI + 1), v1 = f(p1);
         } else {
-            L = p1;
+            l = p1;
             p1 = p2, v1 = v2;
-            p2 = R - (R - L) / (FI + 1), v2 = FUNC(p2);
+            p2 = r - (r - l) / (FI + 1), v2 = f(p2);
         }
     }
-    return (L + R) / 2;
+    return (l + r) / 2;
 }
-
-//faster than usual ternary search in 2log_{1.5}(FI) ~ 2.37 times.
