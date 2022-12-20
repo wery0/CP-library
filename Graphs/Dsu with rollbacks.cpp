@@ -1,14 +1,11 @@
 struct dsu_w_rollbacks {
-    int a;
-    vec<int> pr;
-    vec<int> sz;
-    vec<pii> store;
+    int n;
+    vector<int> pr;
+    vector<int> sz;
+    vector<pair<int, int>> store;
 
     dsu_w_rollbacks() = default;
-
-    dsu_w_rollbacks(int n): a(n) {
-        sz.resize(a, 1);
-        pr.resize(a);
+    dsu_w_rollbacks(int n): n(n), sz(n, 1), pr(n) {
         iota(all(pr), 0);
     }
 
@@ -18,7 +15,7 @@ struct dsu_w_rollbacks {
         store.clear();
     }
 
-    bool in_same_component(int x, int y) {return find(x) == find(y);}
+    bool is_in_same_component(int x, int y) {return find(x) == find(y);}
 
     int get_cur_version() {return store.size();}
 
@@ -29,16 +26,16 @@ struct dsu_w_rollbacks {
         int py = find(y);
         if (px == py) return 0;
         if (sz[px] > sz[py]) swap(px, py);
-        store.pb({px, py});
+        store.emplace_back(px, py);
         pr[px] = py;
         sz[py] += sz[px];
         return 1;
     }
 
     void rollback() {
-        pii p = store.back(); store.pop_back();
-        pr[p.F] = p.F;
-        sz[p.S] -= sz[p.F];
+        auto [px, py] = store.back(); store.pop_back();
+        pr[px] = px;
+        sz[py] -= sz[px];
     }
 
     void revert_to_version(int version) {

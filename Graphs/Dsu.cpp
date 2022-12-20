@@ -1,25 +1,23 @@
 //Uncomment commented lines, if you want to maintain set of vertexes for each component.
 struct dsu {
-    int a;
-    vec<int> pr;
-    vec<int> sz;
-    //vec<vec<int>> vrt;
+    int n;
+    vector<int> pr;
+    vector<int> sz;
+    //vector<vector<int>> vrt;
 
     dsu() = default;
-
-    dsu(int n): a(n) {
-        sz.resize(a, 1);
-        pr.resize(a); iota(all(pr), 0);
-        //vrt.resize(a); for (int q = 0; q < a; ++q) vrt[q] = {q};
+    dsu(int n): n(n), sz(n, 1), pr(n) {
+        iota(all(pr), 0);
+        //vrt.resize(n); for (int q = 0; q < n; ++q) vrt[q] = {q};
     }
 
     void clear() {
         fill(all(sz), 1);
         iota(all(pr), 0);
-        //for (int q = 0; q < a; ++q;) vrt[q] = {q}, vrt[q].shrink_to_fit();
+        //for (int q = 0; q < n; ++q;) vrt[q] = {q}, vrt[q].shrink_to_fit();
     }
 
-    bool in_same_component(int x, int y) {return find(x) == find(y);}
+    bool is_in_same_component(int x, int y) {return find(x) == find(y);}
 
     int find(int x) {return x == pr[x] ? x : pr[x] = find(pr[x]);}
 
@@ -30,7 +28,7 @@ struct dsu {
         if (sz[px] > sz[py]) swap(px, py);
         pr[px] = py;
         sz[py] += sz[px];
-        //for(int v : vrt[px]) vrt[py].pb(v);
+        //for(int v : vrt[px]) vrt[py].push_back(v);
         //vrt[px].clear(); vrt[px].shrink_to_fit();
         return 1;
     }
