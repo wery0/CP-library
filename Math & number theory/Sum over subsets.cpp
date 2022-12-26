@@ -1,3 +1,5 @@
+//Returns array ans s. t. ans[x] = sum{m[y] : (x & y) == y}
+//O(nlog(n))
 template<typename T>
 vector<T> sum_over_subsets(vector<T> m) {
     int n = m.size(), lg = __lg(geq_pow2(n));
