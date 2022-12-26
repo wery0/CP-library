@@ -1,15 +1,15 @@
+//Returns minimal set of points, s. t. each segment [l, r] contains at least one point inside.
 template<typename T>
-vec<T> covering_segments_with_points(vec<pair<T, T>> m) {
-    int a = m.size();
-    if (a == 0) return {};
+vector<T> covering_segments_with_points(vector<pair<T, T>> m) {
+    if (m.empty()) return {};
+    int n = m.size();
     sort(all(m));
-    vec<T> ans;
-    T r = m[0].S;
-    for (const auto &p : m) {
-        if (p.F > r) ans.pb(r), r = p.S;
-        else chmin(r, p.S);
+    vector<T> ans;
+    T r = m[0].second;
+    for (const auto& p : m) {
+        if (p.F > r) ans.push_back(r), r = p.second;
+        else chmin(r, p.second);
     }
-    if (ans.empty() || ans.back() != r) ans.pb(r);
+    if (ans.empty() || ans.back() != r) ans.push_back(r);
     return ans;
 }
-//returns minimal set of points, s. t. each segment contains at least one point inside (including borders).
