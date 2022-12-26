@@ -1,51 +1,43 @@
 template<typename T>
 struct offline_seg_add {
 
-    int a;
-    vec<T> m;
+    int n;
+    vector<T> store;
 
     offline_seg_add() = default;
-
+    offline_seg_add(int n): n(n), store(n + 1) {}
     template<typename I>
-    offline_seg_add(I first, I last) {
-        a = last - first;
-        m.resize(a + 1);
-        for (int q = 0; q < a; ++q) {
-            m[q] += *(first + q);
-            m[q + 1] -= *(first + q);
+    offline_seg_add(I first, I last): n(last - first), store(n + 1) {
+        for (int q = 0; q < n; ++q) {
+            store[q] += *(first + q);
+            store[q + 1] -= *(first + q);
         }
     }
-
     template<typename T_arr>
-    offline_seg_add(T_arr &n) {
-        (*this) = offline_seg_add(all(n));
-    }
-
-    offline_seg_add(int _a) {
-        a = _a;
-        m.resize(a + 1);
+    offline_seg_add(T_arr& m) {
+        (*this) = offline_seg_add(all(m));
     }
 
     void seg_add(int l, int r, T val) {
-        m[l] += val;
-        m[r + 1] -= val;
+        store[l] += val;
+        store[r + 1] -= val;
     }
 
     void clear() {
-        fill(all(m), 0);
+        fill(store.begin(), store.end(), 0);
     }
 
-    void get_result(vec<T> &n) {
-        assert(a <= n.size());
-        n[0] = m[0];
-        for (int q = 1; q < a; ++q) {
-            n[q] = n[q - 1] + m[q];
+    void get_result(vector<T>& m) {
+        assert(n <= m.size());
+        m[0] = store[0];
+        for (int q = 1; q < n; ++q) {
+            m[q] = m[q - 1] + store[q];
         }
     }
 
-    vec<T> get_result() {
-        vec<T> n(a);
-        get_result(n);
-        return n;
+    vector<T> get_result() {
+        vector<T> m(n);
+        get_result(m);
+        return m;
     }
 };
