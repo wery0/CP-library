@@ -16,6 +16,7 @@ vector<int> min_divisors(int n) {
     return min_div;
 }
 
+//Example: n = 60 -> {{2, 2}, {3, 1}, {5, 1}}
 //O(# of multipliers in the factorization of n) <= O(log_2(n))
 vector<pair<int, int>> get_factorization(vector<int>& min_div, int n) {
     assert(1 <= n && n < min_div.size());
