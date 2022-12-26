@@ -1,5 +1,5 @@
 template<typename T>
-struct closest_pair_of_points_2d {
+class closest_pair_of_points_2d {
     using ptt = pair<T, T>;
 
     ull hash_pair(ull x, ull y) {
@@ -21,9 +21,11 @@ struct closest_pair_of_points_2d {
         }
     }
 
+public:
     closest_pair_of_points_2d() = default;
-    closest_pair_of_points_2d(int n) {m.reserve(n);}
+    closest_pair_of_points_2d(int n): m(n) {}
     closest_pair_of_points_2d(vector<ptt> m): m(m) {}
+
     void add_point(T x, T y) {m.emplace_back(x, y);}
 
     //Expected O(n) with big constant
