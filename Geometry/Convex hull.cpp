@@ -1,23 +1,21 @@
-//Returns set of points of minimal size, generating CH, sorted in counter-clockwise order.
+//Returns set of points of minimal size, generating CH, sorted in CCW order.
 template<typename T>
 vector<pt<T>> convex_hull(vector<pt<T>> m) {
-    constexpr T inf = numeric_limits<T>::max();
-    pt mnp = {inf, inf};
-    for (auto &p : m) chmin(mnp, p);
-    for (auto &p : m) p -= mnp;
+    pt<T> mnp = *min_element(all(m));
+    for (auto& p : m) p -= mnp;
     pt<T> origin = {0, 0};
-    sort(all(m), [&](const auto & p1, const auto & p2) {
+    sort(all(m), [&](const auto& p1, const auto& p2) {
         T c = cross(p1, p2);
         return c ? c > 0 : mhdst(origin, p1) < mhdst(origin, p2);
     });
-    vector<pt<T>> o;
-    for (int q = 0; q < isz(m); ++q) {
-        for (; isz(o) > 1;) {
-            if (cross(o.back() - o[o.size() - 2], m[q] - o.back()) > 0) break;
-            o.pop_back();
+    vector<pt<T>> ch;
+    for (int q = 0; q < m.size(); ++q) {
+        for (; ch.size() > 1;) {
+            if (cross(ch.back() - ch[ch.size() - 2], m[q] - ch.back()) > 0) break;
+            ch.pop_back();
         }
-        o.push_back(m[q]);
+        ch.push_back(m[q]);
     }
-    for (auto &p : o) p += mnp;
-    return o;
+    for (auto& p : ch) p += mnp;
+    return ch;
 };
