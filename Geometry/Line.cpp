@@ -25,8 +25,8 @@ struct line {
         if constexpr(is_integral_v<T>) {
             assert(abs(A) + abs(B) > 0);
             T gc = __gcd(__gcd(abs(A), abs(B)), abs(C));
+            if (A < 0 || (A == 0 && B < 0)) gc *= -1;
             A /= gc, B /= gc, C /= gc;
-            if (A < 0 || (A == 0 && B < 0)) A *= -1, B *= -1, C *= -1;
         } else {
             assert(abs(A) + abs(B) > EPS);
             ld u = sqrtl(A * A + B * B);
