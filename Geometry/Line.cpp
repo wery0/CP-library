@@ -30,8 +30,8 @@ struct line {
         } else {
             assert(abs(A) + abs(B) > EPS);
             ld u = sqrtl(A * A + B * B);
+            if (A < -EPS || (abs(A) < EPS && B < -EPS)) u *= -1;
             A /= u, B /= u, C /= u;
-            if (A < -EPS || (abs(A) < EPS && B < -EPS)) A *= -1, B *= -1, C *= -1;
         }
     }
 
