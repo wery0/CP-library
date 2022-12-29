@@ -1,6 +1,5 @@
 template<typename K, typename V>
-struct treap {
-public:
+class treap {
     static const V inf = std::numeric_limits<V>::max();
     static const V UNDEF = 0;
     struct Node {
@@ -33,7 +32,6 @@ public:
     };
     Node* root = 0;
 
-private:
     K last_erased_key;
     V last_erased_val;
 
