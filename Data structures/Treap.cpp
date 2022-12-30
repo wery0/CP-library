@@ -54,6 +54,7 @@ class treap {
     }
 
     inline void upd(Node* n) {
+        if (!n) return;
         n->mnk = min({gmnk(n->l), n->key, gmnk(n->r)});
         n->mxk = max({gmxk(n->l), n->key, gmxk(n->r)});
         n->smk = gsmk(n->l) + n->key + gsmk(n->r);
