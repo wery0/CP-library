@@ -1,9 +1,7 @@
 namespace hamil {
     namespace LCT {
-
-        vec<vec<int>> ch;
-        vec<int> fa, rev;
-
+        vector<vector<int>> ch;
+        vector<int> fa, rev;
         void init(int n) {
             ch.resize(n + 1);
             fa.resize(n + 1);
@@ -13,7 +11,9 @@ namespace hamil {
                 ch[i][0] = ch[i][1] = fa[i] = rev[i] = 0;
         }
 
-        bool isr(int a) {return !(ch[fa[a]][0] == a || ch[fa[a]][1] == a);}
+        bool isr(int a) {
+            return !(ch[fa[a]][0] == a || ch[fa[a]][1] == a);
+        }
 
         void pushdown(int a) {
             if (rev[a]) {
@@ -34,10 +34,8 @@ namespace hamil {
             int son = ch[a][tp ^ 1];
             if (!isr(f)) ch[gf][ch[gf][1] == f] = a;
             fa[a] = gf;
-
             ch[f][tp] = son;
             if (son) fa[son] = f;
-
             ch[a][tp ^ 1] = f, fa[f] = a;
         }
 
@@ -97,9 +95,31 @@ namespace hamil {
         }
     }
 
-    vec<int> out, in;
-    mt19937 x(timeStamp().time_since_epoch().count());
-    vec<int> work(int n, vector<pii> eg, ll mx_ch = -1) {
+    vector<vector<int>> used;
+    unordered_set<int> caneg;
+    void cut(int a, int b) {
+        LCT::cut(a, b);
+        for (int s = 0; s < 2; s++) {
+            for (int i = 0; i < used[a].size(); i++)
+                if (used[a][i] == b) {
+                    used[a].erase(used[a].begin() + i);
+                    break;
+                }
+            if (used[a].size() == 1) caneg.insert(a);
+            swap(a, b);
+        }
+    }
+
+    void link(int a, int b) {
+        LCT::link(a, b);
+        for (int s = 0; s < 2; s++) {
+            used[a].push_back(b);
+            if (used[a].size() == 2) caneg.erase(a);
+            swap(a, b);
+        }
+    }
+
+    vector<int> work(int n, vector<pair<int, int>> eg, ll mx_ch = -1) {
         // mx_ch : max number of adding/replacing. Default is (n + 100) * (n + 50)
         // n : number of vertices
         // eg: vector<pair<int, int>> storing all the edges
@@ -107,71 +127,64 @@ namespace hamil {
         // This version finds some random hamiltonian path.
         // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
         // If you need cycle - enumerate the edge, remove it, and check previous line.
-        out.resize(n + 1), in.resize(n + 1);
         LCT::init(n);
-        for (int i = 0; i <= n; i++) in[i] = out[i] = 0;
         if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50); //default
-        vec<vec<int>> from(n + 1), to(n + 1);
-        for (auto &p : eg) ++p.F, ++p.S;
-        for (auto v : eg) {
-            from[v.F].pb(v.S);
-            to[v.S].pb(v.F);
+        used.resize(n + 1);
+        caneg.clear();
+        for (int i = 1; i <= n; i++) used[i].clear();
+        vector<vector<int>> edges(n + 1);
+        for (auto& [x, y] : eg) {
+            ++x, ++y;
+            edges[x].push_back(y);
+            edges[y].push_back(x);
         }
-        uset<int> canin, canout;
-        for (int i = 1; i <= n; i++) {
-            canin.insert(i);
-            canout.insert(i);
-        }
+        for (int i = 1; i <= n; i++) caneg.insert(i);
+        mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
         int tot = 0;
         while (mx_ch >= 0) {
-            vec<pii> eg;
-            for (auto v : canout) for (auto s : from[v]) if (in[s]) eg.pb({v, s});
-            for (auto v : canin) for (auto s : to[v]) eg.pb({s, v});
-            shuffle(all(eg), x);
-            if (eg.empty()) break;
-            for (auto v : eg) {
+            vector<pair<int, int>> eg;
+            for (auto v : caneg) {
+                for (auto s : edges[v]) {
+                    eg.emplace_back(v, s);
+                }
+            }
+            shuffle(eg.begin(), eg.end(), rnd);
+            if (eg.size() == 0) break;
+            for (auto [x, y] : eg) {
                 mx_ch--;
-                if (in[v.S] && out[v.F]) continue;
-                if (LCT::fdr(v.F) == LCT::fdr(v.S)) continue;
-                if ((in[v.S] || out[v.F]) && (x() & 1)) continue;
-                tot += !in[v.S] && !out[v.F];
-                if (in[v.S]) {
-                    LCT::cut(in[v.S], v.S);
-                    canin.insert(v.S);
-                    canout.insert(in[v.S]);
-                    out[in[v.S]] = 0;
-                    in[v.S] = 0;
+                if (used[x].size() < used[y].size()) swap(x, y);
+                if (used[y].size() >= 2 || (rnd() & 1) || LCT::fdr(x) == LCT::fdr(y)) continue;
+                if (used[x].size() < 2 && used[y].size() < 2) ++tot;
+                if (used[x].size() == 2) {
+                    int p = used[x][rnd() & 1];
+                    cut(x, p);
                 }
-                if (out[v.F]) {
-                    LCT::cut(v.F, out[v.F]);
-                    canin.insert(out[v.F]);
-                    canout.insert(v.F);
-                    in[out[v.F]] = 0;
-                    out[v.F] = 0;
-                }
-                LCT::link(v.F, v.S);
-                canin.erase(v.S);
-                canout.erase(v.F);
-                in[v.S] = v.F;
-                out[v.F] = v.S;
+                link(x, y);
             }
             if (tot == n - 1) {
-                vec<int> cur;
-                for (int i = 1; i <= n; i++) {
-                    if (!in[i]) {
-                        int pl = i;
+                vector<int> cur;
+                for (int i = 1; i <= n; i++)
+                    if (used[i].size() <= 1) {
+                        int pl = i, ls = 0;
                         while (pl) {
-                            cur.pb(pl);
-                            pl = out[pl];
+                            cur.push_back(pl - 1);
+                            int flag = 0;
+                            for (auto v : used[pl]) {
+                                if (v != ls) {
+                                    ls = pl;
+                                    pl = v;
+                                    flag = 1;
+                                    break;
+                                }
+                            }
+                            if (!flag) break;
                         }
                         break;
                     }
-                }
-                for (auto &v : cur) --v;
                 return cur;
             }
         }
-        //failed to find a path
-        return vec<int>();
+        //Failed to find a path
+        return {};
     }
 }
