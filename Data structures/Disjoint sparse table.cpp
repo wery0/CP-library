@@ -1,21 +1,7 @@
 template<typename T>
-struct disjoint_sparse_table {
+class disjoint_sparse_table {
     int K, G;
     vector<vector<T>> m;
-
-    T merge(T x, T y) {
-        return min(x, y);
-    }
-
-    template<typename T_arr>
-    disjoint_sparse_table(T_arr &n) {
-        init_table(all(n));
-    }
-
-    template<typename I>
-    disjoint_sparse_table(I fir, I last) {
-        init_table(fir, last);
-    }
 
     template<typename I>
     void init_table(I fir, I last) {
@@ -32,6 +18,17 @@ struct disjoint_sparse_table {
             }
         }
     }
+
+    //Change, if need
+    T merge(T x, T y) {
+        return min(x, y);
+    }
+
+public:
+    template<typename T_arr>
+    disjoint_sparse_table(T_arr& n) {init_table(all(n));}
+    template<typename I>
+    disjoint_sparse_table(I fir, I last) {init_table(fir, last);}
 
     T query(int l, int r) {
         const int u = l == r ? 0 : __lg(l ^ r);
