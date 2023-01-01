@@ -39,7 +39,7 @@ namespace pollardRho {
     ull pollard(const ull n, ull seed = rnd()) {
         if (n == 1) return 1;
         if (MillerRabin::is_prime(n)) return n;
-        const ull K = (uid<ull>(0, ULLONG_MAX)(rndll) << 1) | 1;
+        const ull K = (uniform_int_distribution<ull>(0, ULLONG_MAX)(rndll) << 1) | 1;
         auto func = [&](__uint128_t x) -> ull {
             return (x * x + K) % n;
         };
@@ -68,24 +68,25 @@ namespace pollardRho {
         return dvs;
     }
 
-    void go(ull x, vec<ull> &res) {
+    void go(ull x, vector<ull>& res) {
         if (x == 1) return;
         ull d = pollard(x);
         for (; d == -1;) d = pollard(x);
-        if (d == x) res.pb(x);
+        if (d == x) res.push_back(x);
         else {
             go(d, res);
             go(x / d, res);
         }
     }
 
-    vec<ull> factorize(ull x) {
-        vec<ull> res;
+    vector<ull> factorize(ull x) {
+        vector<ull> res;
         for (ull i : {2, 3, 5, 7, 11, 13, 17, 19}) {
-            while (x % i == 0) res.pb(i), x /= i;
+            while (x % i == 0) res.push_back(i), x /= i;
         }
         go(x, res);
         sort(all(res));
         return res;
     }
 };
+//Usage: pollardRho::factorize(x)
