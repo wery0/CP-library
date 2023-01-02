@@ -249,9 +249,9 @@ public:
     ll count_keys_greater(K key) {return gsz(root) - count_keys_leq(key);}
     ll count_keys_eq(K key) {return count_keys_leq(key) - count_keys_less(key);}
 
-    K pref_sum(ll p) {Node* n = root; K sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmk(n->l) + n->key; if (gsz(n->l) < p) sm += gsmk(n->l) + n->key, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
-    K seg_sum_fast(ll l, ll r) {return pref_sum(r) - (l ? pref_sum(l - 1) : 0);}
-    K seg_sum_slow(int l, int r) {
+    K pref_sumkey(ll p) {Node* n = root; K sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmk(n->l) + n->key; if (gsz(n->l) < p) sm += gsmk(n->l) + n->key, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
+    K seg_sumkey_fast(ll l, ll r) {return pref_sumkey(r) - (l ? pref_sumkey(l - 1) : 0);}
+    K seg_sumkey_slow(int l, int r) {
         auto [lf, tmp] = split_size(root, l);
         auto [mid, rg] = split_size(tmp, r - l + 1);
         K ans = gsmk(mid);
