@@ -1,5 +1,4 @@
-struct MaxBipartiteMatchingKyhn {
-private:
+class MaxBipartiteMatchingKyhn {
     int L, R;
     vector<vector<int>> l;
     vector<int> mtl, mtr;
@@ -31,7 +30,7 @@ public:
     vector<pair<int, int>> calc() {
         int mt_size = 0;
         for (;;) {
-            fill(all(us), 0);
+            fill(us.begin(), us.end(), 0);
             int was = mt_size;
             for (int q = 0; q < L; ++q) {
                 if (mtl[q] == -1) mt_size += dfs(q);
@@ -44,7 +43,7 @@ public:
                 ans[i++] = {q, mtl[q]};
             }
         }
-        if (sw) for (auto &p : ans) swap(p.F, p.S);
+        if (sw) for (auto& [x, y] : ans) swap(x, y);
         return ans;
     }
 };
