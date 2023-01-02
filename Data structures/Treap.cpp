@@ -1,6 +1,5 @@
 template<typename K, typename V>
 class treap {
-    static const V inf = std::numeric_limits<V>::max();
     static const V UNDEF = 0;
     struct Node {
         Node* l = 0;
@@ -35,12 +34,12 @@ class treap {
     K last_erased_key;
     V last_erased_val;
 
-    K gmnk(Node* n) const {return n ? n->mnk : inf;}
-    K gmxk(Node* n) const {return n ? n->mxk : -inf;}
+    K gmnk(Node* n) const {return n ? n->mnk : std::numeric_limits<K>::max();}
+    K gmxk(Node* n) const {return n ? n->mxk : std::numeric_limits<K>::min();}
     K gsmk(Node* n) const {return n ? n->smk : 0;}
 
-    V gmnv(Node* n) const {return n ? n->mnv : inf;}
-    V gmxv(Node* n) const {return n ? n->mxv : -inf;}
+    V gmnv(Node* n) const {return n ? n->mnv : std::numeric_limits<V>::max();}
+    V gmxv(Node* n) const {return n ? n->mxv : std::numeric_limits<V>::min();}
     V gsmv(Node* n) const {return n ? n->smv : 0;}
 
     ll gsz(Node* n) const {return n ? n->sz : 0;}
@@ -208,7 +207,7 @@ class treap {
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
     void print_vals(Node* n) {if (!n) return; push(n); print_vals(n->l); cout << n->val << ' '; print_vals(n->r);}
 
-    void delete_subtree(Node *n) {
+    void delete_subtree(Node* n) {
         if (!n) return;
         push(n);
         delete_subtree(n->l);
@@ -239,7 +238,7 @@ public:
     V extract_pos_get_val(ll pos) {erase_pos(pos); return last_erased_val;}
     pair<K, V> extract_pos(ll pos) {erase_pos(pos); return {last_erased_key, last_erased_val};}
 
-    pair<K, V> operator[](ll pos) {Node *n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {push(n); const int szl = gsz(n->l); if (pos == szl) return {n->key, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
+    pair<K, V> operator[](ll pos) {Node* n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {push(n); const int szl = gsz(n->l); if (pos == szl) return {n->key, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
     V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
     ll get_leftest_pos_of_key(K key) {Node* n = root; ll pos = 0, o = size; while (n) {push(n); if (key == n->x) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->x) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size()); return o;}
 
