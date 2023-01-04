@@ -49,7 +49,11 @@ public:
         memcpy(m, other.m, sizeof(other.m));
     }
 
+    bool empty() const {return kek[1];}
+
     void clear() {fill(kek + 1, kek + U * 2, 0); fill(m, m + SZ, 0);}
+
+    bool count(uint p) const {return m[p >> 6] >> (p & 63) & 1;}
 
     void insert(uint p) {
         m[p >> 6] |= 1ull << (p & 63);
@@ -66,10 +70,6 @@ public:
             kek[p] = 0;
             if (kek[p ^ 1]) break;
         }
-    }
-
-    bool count(uint p) const {
-        return m[p >> 6] >> (p & 63) & 1;
     }
 
     uint lower_bound(uint x) const {return right_go(x, 0);}

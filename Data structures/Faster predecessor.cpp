@@ -53,11 +53,11 @@ public:
         setbit(62);
     }
 
+    bool empty() const {return getbit(63);}
+
     void clear() {fill(m, m + SZ, 0); setbit(62);}
 
-    bool count(uint x) const {
-        return m[PREF + (x >> 6)] >> (x & 63) & 1;
-    }
+    bool count(uint x) const {return m[PREF + (x >> 6)] >> (x & 63) & 1;}
 
     void insert(uint x) {
         for (uint v = PREF * 64 + x; !getbit(v); v = parent(v)) {

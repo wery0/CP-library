@@ -32,7 +32,10 @@ public:
     my_priority_queue() = default;
     my_priority_queue(size_t n): store(n + 1) {}
 
-    size_t size() {return sz;}
+    size_t size() const {return sz;}
+    bool empty() const {return sz == 0;}
+
+    void clear() {sz = 0;}
 
     void push(T x) {
         if (++sz >= store.size()) store.resize(sz * 2);
@@ -40,7 +43,7 @@ public:
         sift_up(sz);
     }
 
-    T top() {
+    T top() const {
         assert(sz);
         return store[1];
     }
