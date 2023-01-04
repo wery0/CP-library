@@ -53,7 +53,7 @@ public:
         setbit(62);
     }
 
-    void clear() {fill(m, m + SZ, 0);}
+    void clear() {fill(m, m + SZ, 0); setbit(62);}
 
     bool count(uint x) const {
         return m[PREF + (x >> 6)] >> (x & 63) & 1;
