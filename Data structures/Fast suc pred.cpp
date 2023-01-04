@@ -1,5 +1,4 @@
 constexpr ull lowest_bitsll[] = {0ull, 1ull, 3ull, 7ull, 15ull, 31ull, 63ull, 127ull, 255ull, 511ull, 1023ull, 2047ull, 4095ull, 8191ull, 16383ull, 32767ull, 65535ull, 131071ull, 262143ull, 524287ull, 1048575ull, 2097151ull, 4194303ull, 8388607ull, 16777215ull, 33554431ull, 67108863ull, 134217727ull, 268435455ull, 536870911ull, 1073741823ull, 2147483647ull, 4294967295ull, 8589934591ull, 17179869183ull, 34359738367ull, 68719476735ull, 137438953471ull, 274877906943ull, 549755813887ull, 1099511627775ull, 2199023255551ull, 4398046511103ull, 8796093022207ull, 17592186044415ull, 35184372088831ull, 70368744177663ull, 140737488355327ull, 281474976710655ull, 562949953421311ull, 1125899906842623ull, 2251799813685247ull, 4503599627370495ull, 9007199254740991ull, 18014398509481983ull, 36028797018963967ull, 72057594037927935ull, 144115188075855871ull, 288230376151711743ull, 576460752303423487ull, 1152921504606846975ull, 2305843009213693951ull, 4611686018427387903ull, 9223372036854775807ull, 18446744073709551615ull};
-constexpr uint lowest_bits[] = {0u, 1u, 3u, 7u, 15u, 31u, 63u, 127u, 255u, 511u, 1023u, 2047u, 4095u, 8191u, 16383u, 32767u, 65535u, 131071u, 262143u, 524287u, 1048575u, 2097151u, 4194303u, 8388607u, 16777215u, 33554431u, 67108863u, 134217727u, 268435455u, 536870911u, 1073741823u, 2147483647u, 4294967295u};
 const uint NO = UINT32_MAX;   //This value will be returned in lower_bound functions, if no answer exists. Change, if need.
 template<uint MAXN>           //Can correctly work with numbers in range [0; MAXN]
 class god_suc_pred {
@@ -7,6 +6,40 @@ class god_suc_pred {
     static const uint U = geq_pow2(SZ);
     bool kek[U * 2] = {0};
     ull m[SZ] = {0};
+
+    inline uint left_go(uint x, const uint c) const {
+        const ull rem = x & 63;
+        ull num = m[x >> 6] & lowest_bitsll[rem + c];
+        if (num) return (x ^ rem) | __lg(num);
+        for (x = (x >> 6) + U; x; x >>= 1) {
+            x >>= __builtin_ctzll(x);
+            if (kek[x ^ 1]) {x ^= 1; break;}
+        }
+        if (x == 0) return NO;
+        while (x < U) {
+            x <<= 1;
+            x += kek[x | 1];
+        }
+        x -= U;
+        return (x << 6) | __lg(m[x]);
+    }
+
+    inline uint right_go(uint x, const uint c) const {
+        const ull rem = x & 63;
+        ull num = m[x >> 6] & ~lowest_bitsll[rem + c];
+        if (num) return (x ^ rem) | __builtin_ctzll(num);
+        x = (x >> 6) + U;
+        for (x >>= __builtin_ctzll(~x); x; x >>= 1, x >>= __builtin_ctzll(~x)) {
+            if (kek[x ^ 1]) {x ^= 1; break;}
+        }
+        if (x == 0) return NO;
+        while (x < U) {
+            x <<= 1;
+            x += !kek[x];
+        }
+        x -= U;
+        return (x << 6) | __builtin_ctzll(m[x]);
+    }
 
 public:
     god_suc_pred() {kek[0] = 1;}
@@ -39,73 +72,10 @@ public:
         return m[p >> 6] >> (p & 63) & 1;
     }
 
-    uint inverse_upper_bound(uint x) const {
-        const ull rem = x & 63;
-        ull num = m[x >> 6] & lowest_bitsll[rem];
-        if (num) return (x ^ rem) | __lg(num);
-        for (x = (x >> 6) + U; x; x >>= 1) {
-            x >>= __builtin_ctzll(x);
-            if (kek[x ^ 1]) {x ^= 1; break;}
-        }
-        if (x == 0) return NO;
-        while (x < U) {
-            x <<= 1;
-            x += kek[x | 1];
-        }
-        x -= U;
-        return (x << 6) | __lg(m[x]);
-    }
-
-    uint upper_bound(uint x) const {
-        const ull rem = x & 63;
-        ull num = m[x >> 6] & ~lowest_bitsll[rem + 1];
-        if (num) return (x ^ rem) | __builtin_ctzll(num);
-        x = (x >> 6) + U;
-        for (x >>= __builtin_ctzll(~x); x; x >>= 1, x >>= __builtin_ctzll(~x)) {
-            if (kek[x ^ 1]) {x ^= 1; break;}
-        }
-        if (x == 0) return NO;
-        while (x < U) {
-            x <<= 1;
-            x += !kek[x];
-        }
-        x -= U;
-        return (x << 6) | __builtin_ctzll(m[x]);
-    }
-
-    uint inverse_lower_bound(uint x) const {
-        const ull rem = x & 63;
-        ull num = m[x >> 6] & lowest_bitsll[rem + 1];
-        if (num) return (x ^ rem) | __lg(num);
-        for (x = (x >> 6) + U; x; x >>= 1) {
-            x >>= __builtin_ctzll(x);
-            if (kek[x ^ 1]) {x ^= 1; break;}
-        }
-        if (x == 0) return NO;
-        while (x < U) {
-            x <<= 1;
-            x += kek[x | 1];
-        }
-        x -= U;
-        return (x << 6) | __lg(m[x]);
-    }
-
-    uint lower_bound(uint x) const {
-        const ull rem = x & 63;
-        ull num = m[x >> 6] & ~lowest_bitsll[rem];
-        if (num) return (x ^ rem) | __builtin_ctzll(num);
-        x = (x >> 6) + U;
-        for (x >>= __builtin_ctzll(~x); x; x >>= 1, x >>= __builtin_ctzll(~x)) {
-            if (kek[x ^ 1]) {x ^= 1; break;}
-        }
-        if (x == 0) return NO;
-        while (x < U) {
-            x <<= 1;
-            x += !kek[x];
-        }
-        x -= U;
-        return (x << 6) | __builtin_ctzll(m[x]);
-    }
+    uint lower_bound(uint x) const {return right_go(x, 0);}
+    uint upper_bound(uint x) const {return right_go(x, 1);}
+    uint inverse_lower_bound(uint x) const {return left_go(x, 1);}
+    uint inverse_upper_bound(uint x) const {return left_go(x, 0);}
 };
 //Supports all std::set operations in O(1) on random queries / dense arrays, O(log_2(N/64)) in worst case (sparce array).
 //Count operation works in O(1) always.
