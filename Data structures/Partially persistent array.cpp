@@ -20,7 +20,7 @@ public:
 
     int get_cur_version() const {return cur_version;}
 
-    //O(1)
+    //<O(1), O(1)>
     void set_value(int pos, T val) {
         assert(0 <= pos && pos < store.size());
         store[pos].emplace_back(++cur_version, val);
