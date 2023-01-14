@@ -2,34 +2,30 @@
 struct dsu {
     int n;
     vector<int> pr;
-    vector<int> sz;
     //vector<vector<int>> vrt;
 
     dsu() = default;
-    dsu(int n): n(n), sz(n, 1), pr(n) {
-        iota(all(pr), 0);
+    dsu(int n): n(n), pr(n, -1) {
         //vrt.resize(n); for (int q = 0; q < n; ++q) vrt[q] = {q};
     }
 
     void clear() {
-        fill(all(sz), 1);
-        iota(all(pr), 0);
+        fill(all(pr), -1);
         //for (int q = 0; q < n; ++q;) vrt[q] = {q}, vrt[q].shrink_to_fit();
     }
 
+    int get_component_size(int x) {return -pr[find(x)];}
+    int find(int x) {return pr[x] < 0 ? x : pr[x] = find(pr[x]);}
     bool is_in_same_component(int x, int y) {return find(x) == find(y);}
-
-    int find(int x) {return x == pr[x] ? x : pr[x] = find(pr[x]);}
-
-    int unite(int x, int y) {
+    bool unite(int x, int y) {
         int px = find(x);
         int py = find(y);
-        if (px == py) return 0;
-        if (sz[px] > sz[py]) swap(px, py);
+        if (px == py) return false;
+        if (pr[px] < pr[py]) swap(px, py);
+        pr[py] += pr[px];
         pr[px] = py;
-        sz[py] += sz[px];
         //for(int v : vrt[px]) vrt[py].push_back(v);
         //vrt[px].clear(); vrt[px].shrink_to_fit();
-        return 1;
+        return true;
     }
 };
