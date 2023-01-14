@@ -1,41 +1,35 @@
 struct dsu_w_rollbacks {
     int n;
     vector<int> pr;
-    vector<int> sz;
     vector<pair<int, int>> store;
 
     dsu_w_rollbacks() = default;
-    dsu_w_rollbacks(int n): n(n), sz(n, 1), pr(n) {
-        iota(all(pr), 0);
-    }
+    dsu_w_rollbacks(int n): n(n), pr(n, -1) {}
 
     void clear() {
-        fill(all(sz), 1);
-        iota(all(pr), 0);
+        fill(all(pr), -1);
         store.clear();
     }
 
-    bool is_in_same_component(int x, int y) {return find(x) == find(y);}
-
-    int get_cur_version() {return store.size();}
-
-    int find(int x) {return x == pr[x] ? x : find(pr[x]);}
-
-    int unite(int x, int y) {
+    int get_component_size(int x) const {return -pr[find(x)];}
+    int find(int x) const {return x == pr[x] ? x : find(pr[x]);}
+    int get_cur_version() const {return store.size();}
+    bool is_in_same_component(int x, int y) const {return find(x) == find(y);}
+    bool unite(int x, int y) {
         int px = find(x);
         int py = find(y);
-        if (px == py) return 0;
-        if (sz[px] > sz[py]) swap(px, py);
-        store.emplace_back(px, py);
+        if (px == py) return false;
+        if (pr[px] < pr[py]) swap(px, py);
+        store.emplace_back(px, pr[px]);
+        pr[py] += pr[px];
         pr[px] = py;
-        sz[py] += sz[px];
-        return 1;
+        return true;
     }
 
     void rollback() {
-        auto [px, py] = store.back(); store.pop_back();
-        pr[px] = px;
-        sz[py] -= sz[px];
+        auto [px, prpx] = store.back(); store.pop_back();
+        pr[pr[px]] -= prpx;
+        pr[px] = -1;
     }
 
     void revert_to_version(int version) {
