@@ -12,7 +12,7 @@ struct dsu_w_rollbacks {
     }
 
     int get_component_size(int x) const {return -pr[find(x)];}
-    int find(int x) const {return x == pr[x] ? x : find(pr[x]);}
+    int find(int x) const {return pr[x] < 0 ? x : find(pr[x]);}
     int get_cur_version() const {return store.size();}
     bool is_in_same_component(int x, int y) const {return find(x) == find(y);}
     bool unite(int x, int y) {
