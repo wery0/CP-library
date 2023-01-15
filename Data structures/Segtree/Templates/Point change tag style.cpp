@@ -1,72 +1,68 @@
 template<typename T>
-struct segtree_point_upd {
+class segtree_point_upd {
 
     struct tag {
 
         tag() = default;
 
-        friend inline bool is_neutral(const tag &t) {
-            //write neutral if need, or remove it
+        friend inline bool is_neutral(const tag& t) {
+            //Write neutral if need, or remove it
             return false;
         }
 
-        friend inline void merge(const tag &l, const tag &r, tag &res) {
+        friend inline void merge(const tag& l, const tag& r, tag& res) {
             if (is_neutral(l)) {res = r; return;} if (is_neutral(r)) {res = l; return;}
-            //write merge
+            //Write merge
         }
 
-        friend inline tag merge(const tag &l, const tag &r) {
+        friend inline tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;
         }
 
-//        friend inline void merge_to_left(tag &l, const tag &r) {
+//        friend inline void merge_to_left(tag& l, const tag& r) {
 //            if (is_neutral(l)) {l = r; return;}if (is_neutral(r)) return;
 //
 //        }
 //
-//        friend inline void merge_to_right(const tag &l, tag &r) {
+//        friend inline void merge_to_right(const tag& l, tag& r) {
 //            if (is_neutral(l)) return;if (is_neutral(r)) {r = l; return;}
 //
 //        }
     };
 
-    tag neutral_tag;
+    tag neutral_tag;    //Init neutral tag
 
-    uint a, U;
-    vec<tag> m;
+    const uint a, U;
+    vector<tag> m;
 
+    inline void upd(uint v) {
+        merge(m[v << 1], m[v << 1 | 1], m[v]);
+    }
+
+public:
     segtree_point_upd() = default;
-
     template<typename I>
-    segtree_point_upd(I first, I last) {
-        a = last - first;
-        U = geq_pow2(a);
+    segtree_point_upd(I first, I last): a(last - first), U(geq_pow2(a)) {
         m.resize(U * 2);
         for (uint q = 0; q < a; ++q) {
-            tag &t = m[U + q];
+            tag& t = m[U + q];
             const T val = *(first + q);
-            //write init of last layer
+            //Write init of last layer
         }
         for (uint q = U; --q;) {
             const tag &l = m[q << 1], &r = m[q << 1 | 1];
             merge(l, r, m[q]);
         }
     }
-
     template<typename T_arr>
-    segtree_point_upd(T_arr &n) {
-        (*this) = segtree_point_upd<T>(all(n));
+    segtree_point_upd(T_arr& n) {
+        (*this) = segtree_point_upd<T>(n.begin(), n.end());
     }
-
     segtree_point_upd(uint a) {
-        vec<T> m(a);
+        vector<T> m(a);
         (*this) = segtree_point_upd<T>(m);
-    }
-
-    inline void upd(uint v) {
-        merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
     inline tag seg_statistic(uint ql, uint qr) {
