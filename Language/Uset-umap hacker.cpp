@@ -1,70 +1,74 @@
-str gen_str_with_divisible_hash(int len, int mod, str alphabet, str pref = "") {
-    uid<int> gen(0, isz(alphabet) - 1);
-    for (;;) {
-        str s = pref;
-        while (isz(s) < len) {
-            s += alphabet[gen(rnd)];
-        }
-        if (hash<str> {}(s) % mod == 0) return s;
-    }
-    return "LOX";
-}
-
 //Just run it on the same compiler and same options as the solution you want to hack.
+//Works for integral types, and std::string. Slow for std::string.
 template<typename T>
-vec<T> uset_hacker(const int N) {
-    auto get_bucket_counts = [&]() -> vec<int> {
-        vec<int> ans;
+vector<T> unordered_hacker(const int N) {
+    auto get_bucket_counts = [&]() -> vector<int> {
+        vector<int> ans;
         unordered_set<int> s;
-        uid<int> gen(0, INT32_MAX);
+        uniform_int_distribution<int> gen(0, INT32_MAX);
         for (; s.size() < N;) {
             if (ans.empty() || ans.back() != s.bucket_count()) {
-                ans.pb(s.bucket_count());
+                ans.push_back(s.bucket_count());
             }
             s.insert(gen(rnd));
         }
         return ans;
     };
-    vec<int> bc = get_bucket_counts();
-    if constexpr(is_same<string, T>::value) {
+    vector<int> bc = get_bucket_counts();
+    if constexpr(is_same_v<string, T>) {
+        //Edit these, if need
         const int len = 15;
-        const str pref = "";
-        const str alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
-        vec<T> ans1; ll op1 = 0;
+        const string pref = "";
+        const string alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+        
+        uniform_int_distribution<int> gen(0, alphabet.size() - 1);
+        auto gen_str_with_divisible_hash = [&](int mod) -> string{
+            for (;;) {
+                string s = pref;
+                while (s.size() < len) {
+                    s += alphabet[gen(rnd)];
+                }
+                if (hash<string> {}(s) % mod == 0) return s;
+            }
+            return "";
+        };
+        vector<T> ans1; ll op1 = 0;
         for (ll i = 0, psb = 0, cnt = 0, lst = bc[0]; i < N; ++i) {
-            T nw = gen_str_with_divisible_hash(len, lst, alphabet, pref);
-            ans1.pb(nw);
+            T nw = gen_str_with_divisible_hash(lst);
+            ans1.push_back(nw);
             op1 += cnt;
             if (i >= lst) {
                 lst = bc[++psb];
                 cnt = 1;
             } else ++cnt;
         }
-        vec<T> ans2; ll op2 = 0;
-        for (ll i = 0, cnt = 0, pr = isz(bc) > 1 ? bc[isz(bc) - 2] : 0, lst = bc.back(); i < N; ++i) {
-            T nw = gen_str_with_divisible_hash(len, lst, alphabet, pref);
-            ans2.pb(nw);
+        vector<T> ans2; ll op2 = 0;
+        for (ll i = 0, cnt = 0, pr = bc.size() > 1 ? bc[bc.size() - 2] : 0, lst = bc.back(); i < N; ++i) {
+            T nw = gen_str_with_divisible_hash(lst);
+            ans2.push_back(nw);
             op2 += i < pr ? 1 : cnt;
             ++cnt;
         }
         return op1 > op2 ? ans1 : ans2;
-    } else {
+    } else if constexpr(is_integral_v<T>) {
         const T mx = numeric_limits<T>::max();
-        vec<T> ans1; ll op1 = 0;
+        vector<T> ans1; ll op1 = 0;
         for (ll i = 0, psb = 0, cnt = 0, lst = bc[0]; i < N; ++i) {
-            ans1.pb(lst * cnt);
+            ans1.push_back(lst * cnt);
             op1 += cnt;
             if (i >= lst) {
                 lst = bc[++psb];
                 cnt = 1;
             } else ++cnt;
         }
-        vec<T> ans2; ll op2 = 0;
-        for (ll i = 0, cnt = 0, pr = isz(bc) > 1 ? bc[isz(bc) - 2] : 0, lst = bc.back(); i < N; ++i) {
-            ans2.pb(lst * cnt);
+        vector<T> ans2; ll op2 = 0;
+        for (ll i = 0, cnt = 0, pr = bc.size() > 1 ? bc[bc.size() - 2] : 0, lst = bc.back(); i < N; ++i) {
+            ans2.push_back(lst * cnt);
             op2 += i < pr ? 1 : cnt;
             ++cnt;
         }
         return op1 > op2 ? ans1 : ans2;
     }
+    assert(0);
+    return {};
 }
