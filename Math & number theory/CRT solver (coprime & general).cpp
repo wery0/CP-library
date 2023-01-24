@@ -29,10 +29,6 @@ namespace CRT {
             }
         };
 
-        inline ull func(__uint128_t x, ull mod) {
-            return (x * x + 1) % mod;
-        }
-
         inline ull gcd(ull x, ull y) {
             for (; x && y;) {
                 y %= x;
@@ -41,42 +37,62 @@ namespace CRT {
             return x + y;
         }
 
-        ull pollard(ull n, ull seed = rnd()) {
-            if (n == 1 || MillerRabin::is_prime(n)) return n;
-            if (n % 2 == 0) return 2;
-            if (n % 5 == 0) return 5;
-            int IT = 200000;
-            ull x = seed, y = seed, divisor = 1;
-            for (int q = 0; divisor == 1 || divisor == n; q++) {
-                if (q == IT) return -1;
-                x = func(x, n);
-                y = func(func(y, n), n);
-                divisor = gcd(n, x < y ? y - x : x - y);
+        ull pollard(const ull n, ull seed = rnd()) {
+            if (n == 1) return 1;
+            if (MillerRabin::is_prime(n)) return n;
+            const ull K = (uniform_int_distribution<ull>(0, ULLONG_MAX)(rndll) << 1) | 1;
+            auto func = [&](__uint128_t x) -> ull {
+                return (x * x + K) % n;
+            };
+            const ull IT = 2e5, C = 64;
+            ull x = seed, y = seed, dvs = 1;
+            for (int q = 0; dvs == 1 || dvs == n; ++q) {
+                if (q == IT / C) return -1;
+                ull p = 1, sx = x, sy = y;
+                for (int i = 0; i < C; ++i) {
+                    x = func(x);
+                    y = func(func(y));
+                    ull d = x > y ? x - y : y - x;
+                    d %= n;
+                    if (d) p = (__uint128_t)p * d % n;
+                }
+                if (p == 0) {
+                    for (x = sx, y = sy; dvs == 1 || dvs == n;) {
+                        x = func(x);
+                        y = func(func(y));
+                        dvs = gcd(n, x > y ? x - y : y - x);
+                    }
+                    return dvs;
+                }
+                dvs = gcd(n, p);
             }
-            return divisor;
+            return dvs;
         }
 
-        void go(ull x, vec<ull> &res) {
+        void go(ull x, vector<ull>& res) {
             if (x == 1) return;
             ull d = pollard(x);
             for (; d == -1;) d = pollard(x);
-            if (d == x) res.pb(x);
+            if (d == x) res.push_back(x);
             else {
                 go(d, res);
                 go(x / d, res);
             }
         }
 
-        vec<ull> factorize(ull x) {
-            vec<ull> res;
+        vector<ull> factorize(ull x) {
+            vector<ull> res;
+            for (ull i : {2, 3, 5, 7, 11, 13, 17, 19}) {
+                while (x % i == 0) res.push_back(i), x /= i;
+            }
             go(x, res);
             sort(all(res));
             return res;
         }
     };
 
-    ll solve_coprime(vec<ll> mod, vec<ll> rem) {
-        auto gcd = [&](auto && gcd, ll a, ll b, ll & x, ll & y) {
+    ll solve_coprime(vector<ll> mods, vector<ll> remainders) {
+        auto gcd = [&](auto&& gcd, ll a, ll b, ll& x, ll& y) {
             if (!a) {
                 x = 0, y = 1;
                 return b;
@@ -88,57 +104,59 @@ namespace CRT {
         };
         auto extended_inv = [&](ll a, ll md) {
             ll x, y, g = gcd(gcd, a, md, x, y);
-            if (g != 1) return (ll)-1;
+            if (g != 1) return (ll) - 1;
             if (x < 0) x += (-x + md - 1) / md * md;
             x %= md;
             return x;
         };
-        ll a = mod.size();
-        assert(rem.size() == a);
+        ll n = mods.size();
+        assert(remainders.size() == n);
         ull P = 1, ans = 0;
-        for (ull i : mod) {
+        for (ull i : mods) {
             assert(__gcd(P, i) == 1);
             P *= i;
         }
-        for (int q = 0; q < a; q++) {
-            ll u = P / mod[q];
-            ans += rem[q] * u % P * extended_inv(u, mod[q]);  //be careful with overflow, use binmul if need.
+        for (int q = 0; q < n; q++) {
+            assert(mods[q] > 0);
+            ll u = P / mods[q];
+            ans += remainders[q] * u % P * extended_inv(u, mods[q]);  //be careful with overflow, use binmul if need.
             ans %= P;
         }
         return ans;
     }
 
-    ll solve_general(vec<ll> mod, vec<ll> rem) {
-        ll a = mod.size(); assert(rem.size() == a);
-        for (int q = 0; q < a; ++q) {
-            if (rem[q] < 0) rem[q] += (-rem[q] + mod[q] - 1) / mod[q] * mod[q];
-            assert(rem[q] >= 0);
-            if (rem[q] >= mod[q]) rem[q] %= mod[q];
-            assert(rem[q] < mod[q]);
+    ll solve_general(vector<ll> mods, vector<ll> remainders) {
+        ll n = mods.size(); assert(remainders.size() == n);
+        for (int q = 0; q < n; ++q) {
+            assert(mods[q] > 0);
+            if (remainders[q] < 0) remainders[q] += (-remainders[q] + mods[q] - 1) / mods[q] * mods[q];
+            assert(remainders[q] >= 0);
+            if (remainders[q] >= mods[q]) remainders[q] %= mods[q];
+            assert(remainders[q] < mods[q]);
         }
-        umap<ll, pll> mp;
-        for (int q = 0; q < a; ++q) {
-            auto m = pollardRho::factorize(mod[q]);
+        umap<ll, pair<ll, ll>> mp;
+        for (int q = 0; q < n; ++q) {
+            auto m = pollardRho::factorize(mods[q]);
             umap<ll, ll> res;
             for (ll i : m) {
                 if (res.count(i)) res[i] *= i;
                 else res[i] = i;
             }
-            for (auto &[p, prod] : res) {
+            for (auto& [p, prod] : res) {
                 if (!mp.count(p)) {
-                    mp[p] = {prod, rem[q] % prod};
-                } else if (prod <= mp[p].F) {
-                    if (mp[p].S % prod != rem[q] % prod) return -1;
+                    mp[p] = {prod, remainders[q] % prod};
+                } else if (prod <= mp[p].first) {
+                    if (mp[p].second % prod != remainders[q] % prod) return -1;
                 } else {
-                    if (rem[q] % mp[p].F != mp[p].S) return -1;
-                    mp[p] = {prod, rem[q] % prod};
+                    if (remainders[q] % mp[p].first != mp[p].second) return -1;
+                    mp[p] = {prod, remainders[q] % prod};
                 }
             }
         }
-        vec<ll> nmod, nrem;
-        for (auto &p : mp) {
-            nmod.pb(p.S.F);
-            nrem.pb(p.S.S);
+        vector<ll> nmod, nrem;
+        for (auto& [x, p] : mp) {
+            nmod.push_back(p.first);
+            nrem.push_back(p.second);
         }
         return solve_coprime(nmod, nrem);
     }
