@@ -52,10 +52,7 @@ public:
     void prepare() {
         if (V == -1) {
             int mxn = -1;
-            for (const auto& [v, e] : acc_edge) {
-                chmax(mxn, v);
-                chmax(mxn, e.to);
-            }
+            for (const auto& [v, e] : acc_edge) mxn = max({mxn, v, e.to});
             V = mxn + 1;
         }
         E = acc_edge.size();
@@ -117,5 +114,5 @@ public:
 
     vector<int> maximal_independent_set_greedy() {vector<int> dg(V); set<pair<int, int>> s; for (int q = 0; q < V; ++q) {dg[q] = deg(q); s.insert({dg[q], q});} vector<int> ans; while (s.size()) {auto [d, v] = *s.begin(); s.erase(s.begin()); ans.push_back(v); dg[v] = -1; for (const auto& e : (*this)[v]) {if (dg[e.to] != -1) {s.erase({dg[e.to], e.to}); dg[e.to] = -2;}} for (const auto& e : (*this)[v]) {if (dg[e.to] == -2) {for (const auto& ee : (*this)[e.to]) {if (dg[ee.to] > 0) {s.erase({dg[ee.to], ee.to}); --dg[ee.to]; s.insert({dg[ee.to], ee.to});}} dg[e.to] = -1;}}} return ans;}
 };
-//Usage: graph<edge<T>> g(V, [E]), where T is the type of info you want to wtore on edges, T could be void.
-//Before using graph, add all edges and call g.prepare().
+//Usage: graph<edge<T>> g(V, [E]), where T is the type of info you want to store on edges, T could be void.
+//Before using graph, add all edges and then call g.prepare().
