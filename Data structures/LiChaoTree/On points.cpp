@@ -1,28 +1,11 @@
 template<typename X, typename Y>
-struct lichao_on_points {
+class lichao_on_points {
 
     static constexpr Y inf = numeric_limits<Y>::max();
 
     uint a, U;
-    vec<X> bl, br;
-    vec<Y> vk, vb;
-
-    lichao_on_points(vec<X> points) {
-        if (points.empty()) points = {0};
-        unify(points);
-        a = points.size();
-        U = geq_pow2(a);
-        bl.resize(U * 2);
-        br.resize(U * 2);
-        vk.resize(U * 2);
-        vb.resize(U * 2, inf);
-        for (uint q = 0; q < a; ++q) bl[U + q] = br[U + q] = points[q];
-        for (uint q = a; q < U; ++q) bl[U + q] = br[U + q] = points[a - 1];
-        for (int q = U; --q; ) {
-            bl[q] = bl[q << 1];
-            br[q] = br[q << 1 | 1];
-        }
-    }
+    vector<X> bl, br;
+    vector<Y> vk, vb;
 
     void add_seg(X ql, X qr, Y k, Y b, uint v) {
         const X l = bl[v], r = br[v];
@@ -57,13 +40,32 @@ struct lichao_on_points {
         }
     }
 
+public:
+    lichao_on_points(vector<X> points) {
+        if (points.empty()) points = {0};
+        sort(points.begin(), points.end());
+        points.erase(unique(points.begin(), points.end()), points.end());
+        a = points.size();
+        U = geq_pow2(a);
+        bl.resize(U * 2);
+        br.resize(U * 2);
+        vk.resize(U * 2);
+        vb.resize(U * 2, inf);
+        for (uint q = 0; q < a; ++q) bl[U + q] = br[U + q] = points[q];
+        for (uint q = a; q < U; ++q) bl[U + q] = br[U + q] = points[a - 1];
+        for (int q = U; --q; ) {
+            bl[q] = bl[q << 1];
+            br[q] = br[q << 1 | 1];
+        }
+    }
+
     Y get_min(X x) {
         uint v = 1;
         Y o = vk[v] * x + vb[v];
         while (v < U) {
             v <<= 1;
             v += x > br[v];
-            chmin(o, vk[v] * x + vb[v]);
+            o = min(o, vk[v] * x + vb[v]);
         }
         return o;
     }

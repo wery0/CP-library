@@ -1,5 +1,5 @@
 template<typename X, typename Y>
-struct lichao {
+class lichao {
 
     static constexpr Y inf = numeric_limits<Y>::max();
 
@@ -12,8 +12,6 @@ struct lichao {
 
     X L, R;
     Node *root = new Node();
-
-    lichao(X L, X R): L(L), R(R) {}
 
     void add_seg(X ql, X qr, X l, X r, Y k, Y b, Node*& n) {
         if (qr < l || r < ql) return;
@@ -48,12 +46,15 @@ struct lichao {
         else add_line(md + 1, r, k, b, n->r);
     }
 
+public:
+    lichao(X L, X R): L(L), R(R) {}
+
     Y get_min(X x) {
         Node *n = root;
         X l = L, r = R;
         Y o = inf;
         while (n) {
-            chmin(o, n->k * x + n->b);
+            o = min(o, n->k * x + n->b);
             X md = l + (r - l) / 2;
             (x <= md ? r : l) = md + (x > md);
             n = x <= md ? n->l : n->r;
