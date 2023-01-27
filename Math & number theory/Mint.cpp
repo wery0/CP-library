@@ -3,7 +3,6 @@ struct Mint {
     INT val = 0;
 
     Mint() = default;
-
     template<typename T>
     Mint(T c) {
         static_assert(is_integral<T>::value);
@@ -27,23 +26,23 @@ struct Mint {
         return binpow(m, M - 2);
     }
 
-    Mint operator+(const Mint &o) const {return val + o.val >= MOD ? val + o.val - MOD : val + o.val;}
-    Mint operator-(const Mint &o) const {return val < o.val ? MOD - o.val + val : val - o.val;}
-    Mint operator*(const Mint &o) const {return (LL)1 * val * o.val % MOD;}
-    Mint operator/(const Mint &o) const {return (LL)1 * val * inv(o).val % MOD;}
+    Mint operator+(const Mint& o) const {return val + o.val >= MOD ? val + o.val - MOD : val + o.val;}
+    Mint operator-(const Mint& o) const {return val < o.val ? MOD - o.val + val : val - o.val;}
+    Mint operator*(const Mint& o) const {return (LL)1 * val * o.val % MOD;}
+    Mint operator/(const Mint& o) const {return (LL)1 * val * inv(o).val % MOD;}
 
-    void operator+=(const Mint &o) {val += o.val; val -= val < MOD ? 0 : MOD;}
-    void operator-=(const Mint &o) {val -= o.val; val += val < 0 ? MOD : 0;}
-    void operator*=(const Mint &o) {val = (LL)1 * val * o.val % MOD;}
-    void operator/=(const Mint &o) {val = (LL)1 * val * inv(o).val % MOD;}
+    void operator+=(const Mint& o) {val += o.val; val -= val < MOD ? 0 : MOD;}
+    void operator-=(const Mint& o) {val -= o.val; val += val < 0 ? MOD : 0;}
+    void operator*=(const Mint& o) {val = (LL)1 * val * o.val % MOD;}
+    void operator/=(const Mint& o) {val = (LL)1 * val * inv(o).val % MOD;}
 
-    Mint &operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
+    Mint& operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
     Mint operator++(int) {Mint res = *this; ++*this; return res;}
 
-    bool operator==(const Mint &o) const {return val == o.val;}
-    bool operator!=(const Mint &o) const {return val != o.val;}
-    bool operator<(const Mint &o) const {return val < o.val;}
-    bool operator>(const Mint &o) const {return val > o.val;}
+    bool operator==(const Mint& o) const {return val == o.val;}
+    bool operator!=(const Mint& o) const {return val != o.val;}
+    bool operator<(const Mint& o) const {return val < o.val;}
+    bool operator>(const Mint& o) const {return val > o.val;}
 
     friend istream& operator>>(istream& in, Mint& m) {return in >> m.val;}
     friend ostream& operator<<(ostream& out, const Mint& m) {return out << m.val;}
