@@ -1,15 +1,15 @@
-template<typename T>
-ll count_distinct_subseq(vec<T> &m, const ll mod) {  //including empty
-    int a = m.size();
-    vec<ll> dp(a + 1);
+//Including empty subsequence.
+template<typename T, typename I>
+T count_distinct_subsequences(I first, I last) {
+    const int n = last - first;
+    vector<T> dp(n + 1);
     umap<T, int> mp;
     dp[0] = 1;
-    for (int q = 1; q <= a; ++q) {
-        const T x = m[q - 1];
-        dp[q] = dp[q - 1] * 2 + mod - (mp.count(x) ? dp[mp[x] - 1] : 0);
-        if (dp[q] > mod) dp[q] -= mod;
-        if (dp[q] > mod) dp[q] -= mod;
+    auto cit = first;
+    for (int q = 1; q <= n; ++q, ++cit) {
+        const auto x = *cit;
+        dp[q] = dp[q - 1] * 2 - (mp.count(x) ? dp[mp[x] - 1] : 0);
         mp[x] = q;
     }
-    return dp[a];
+    return dp[n];
 }
