@@ -1,31 +1,31 @@
-//if no such exist, returns -1
+//If no such exists, returns -1.
 template<typename I>
-vec<int> closest_left_less(I first, I last) {
+vector<int> closest_left_less(I first, I last) {
     using T = typename iterator_traits<I>::value_type;
-    int a = last - first;
-    vec<int> ans(a, -1);
+    const int n = last - first;
+    vector<int> ans(n, -1);
     stack<pair<T, int>> st;
-    for (int q = 0; q < a; ++q, ++first) {
+    for (int q = 0; q < n; ++q, ++first) {
         const auto cur = *first;
-        while (st.size() && cur <= st.top().F) st.pop();
-        if (!st.empty()) ans[q] = st.top().S;
-        st.push({cur, q});
+        while (!st.empty() && cur <= st.top().first) st.pop();
+        if (!st.empty()) ans[q] = st.top().second;
+        st.emplace(cur, q);
     }
     return ans;
 }
 
-//if no such exist, returns arr.size()
+//If no such exists, returns n.
 template<typename I>
-vec<int> closest_right_less(I first, I last) {
+vector<int> closest_right_less(I first, I last) {
     using T = typename iterator_traits<I>::value_type;
-    int a = last - first;
-    vec<int> ans(a, a);
+    const int n = last - first;
+    vector<int> ans(n, n);
     stack<pair<T, int>> st;
-    for (int q = a - 1; q >= 0; --q) {
+    for (int q = n - 1; q >= 0; --q) {
         const auto cur = *(--last);
-        while (st.size() && cur <= st.top().F) st.pop();
-        if (!st.empty()) ans[q] = st.top().S;
-        st.push({cur, q});
+        while (!st.empty() && cur <= st.top().first) st.pop();
+        if (!st.empty()) ans[q] = st.top().second;
+        st.emplace(cur, q);
     }
     return ans;
 }
