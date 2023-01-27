@@ -9,12 +9,12 @@ namespace compressor {
     struct is_pair_d : is_pair<typename std::decay<T>::type> {};
 
     template<typename K, const K first_val, typename H>
-    void unit_compress(H &h, vec<K> &store) {
+    void unit_compress(H& h, vector<K>& store) {
         if constexpr(is_fundamental<H>::value) {
-            h = first_val + lower_bound(all(store), h) - store.begin();
+            h = first_val + lower_bound(store.begin(), store.end(), h) - store.begin();
         } else if constexpr(is_pair_d<decltype(h)>::value) {
-            unit_compress<K, first_val>(h.F, store);
-            unit_compress<K, first_val>(h.S, store);
+            unit_compress<K, first_val>(h.first, store);
+            unit_compress<K, first_val>(h.second, store);
         } else {
             auto it = h.begin();
             while (it != h.end()) {
@@ -24,17 +24,17 @@ namespace compressor {
         }
     }
     template<typename K, const K first_val, typename H, typename... T>
-    void do_compress(vec<K> &store, H &h, T &... t) {
+    void do_compress(vector<K>& store, H& h, T&... t) {
         unit_compress<K, first_val> (h, store);
         if constexpr(sizeof...(t)) do_compress<K, first_val>(store, t...);
     }
 
     template<typename K, typename H>
-    void extract(H &h, vec<K> &store) {
-        if constexpr(is_fundamental<H>::value) store.pb(h);
+    void extract(H& h, vector<K>& store) {
+        if constexpr(is_fundamental<H>::value) store.push_back(h);
         else if constexpr(is_pair_d<decltype(h)>::value) {
-            extract(h.F, store);
-            extract(h.S, store);
+            extract(h.first, store);
+            extract(h.second, store);
         } else {
             auto it = h.begin();
             while (it != h.end()) {
@@ -43,18 +43,20 @@ namespace compressor {
             }
         }
     }
+
     template<typename K, typename H, typename... T>
-    void extract_data(vec<K> &store, H &h, T &... t) {
+    void extract_data(vector<K>& store, H& h, T&... t) {
         extract(h, store);
         if constexpr(sizeof...(t)) extract_data(store, t...);
     }
 
     template<typename K, const K first_val, typename H, typename... T>
-    void inline_compress(H &h, T &... t) {
-        vec<K> store;
+    void inline_compress(H& h, T&... t) {
+        vector<K> store;
         extract_data(store, h, t...);
-        unify(store);
+        sort(store.begin(), store.end())
+        store.erase(unique(store.begin(), store.end()), store.end());
         do_compress<K, first_val>(store, h, t...);
     }
 }
-//usage: compressor::inline_compress<value_type, first_val>(args)
+//Usage: compressor::inline_compress<value_type, first_val>(args)
