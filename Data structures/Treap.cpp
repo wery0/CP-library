@@ -204,6 +204,33 @@ class treap {
         return ans;
     }
 
+    int pos_of_rightest_min_key(Node* n) {
+        assert(n);
+        K mnk = gmnk(n);
+        int ans = 0;
+        for (; n;) {
+            push(n);
+            if (gmnk(n->r) == mnk) ans += gsz(n->l) + 1, n = n->r;
+            else if (n->key == mnk) return ans + gsz(n->l);
+            else n = n->l;
+        }
+        assert(0);
+        return ans;
+    }
+
+    pair<K, V> kth_elem(Node* n, ll k) {
+        assert(0 <= k && k < gsz(n));
+        for (;;) {
+            push(n);
+            const int szl = gsz(n->l);
+            if (k == szl) return {n->key, n->val};
+            if (k < szl) n = n->l;
+            else {k -= szl + 1; n = n->r;}
+        }
+        assert(0);
+        return { -1, -1};
+    }
+
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
     void print_vals(Node* n) {if (!n) return; push(n); print_vals(n->l); cout << n->val << ' '; print_vals(n->r);}
 
@@ -238,7 +265,7 @@ public:
     V extract_pos_get_val(ll pos) {erase_pos(pos); return last_erased_val;}
     pair<K, V> extract_pos(ll pos) {erase_pos(pos); return {last_erased_key, last_erased_val};}
 
-    pair<K, V> operator[](ll pos) {Node* n = root; assert(0 <= pos && pos < gsz(n)); for (;;) {push(n); const int szl = gsz(n->l); if (pos == szl) return {n->key, n->val}; if (pos < szl) n = n->l; else {pos -= szl + 1; n = n->r;}} assert(0); return { -1, -1};}
+    pair<K, V> operator[](ll pos) {return kth_elem(root, pos);}
     V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
     ll get_leftest_pos_of_key(K key) {Node* n = root; ll pos = 0, o = size; while (n) {push(n); if (key == n->x) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->x) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size()); return o;}
 
@@ -260,6 +287,7 @@ public:
     }
 
     int get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
+    int get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
     vector<K> get_keys_from_seg(int l, int len) {vector<K> res; get_keys_on_subsegment(root, l, len, res); return res;}
 
     void print_keys(string end_string = "") {print_keys(root); cout << end_string;}
