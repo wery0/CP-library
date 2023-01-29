@@ -1,54 +1,59 @@
 template<typename T>
-struct fenwick {
-    int N;
+class fenwick {
+    int n;
     vector<T> fen;
 
+public:
     fenwick() = default;
-    fenwick(int N): N(N + 1), fen(N + 1) {}
-    fenwick(vector<T> &n): N(n.size() + 1), fen(N) {
-        for (int q = 1; q <= n.size(); q++) {
-            fen[q] += n[q - 1];
-            const int nw = q + (q & -q);
-            if (nw < N) fen[nw] += fen[q];
+    fenwick(int n): n(n + 1), fen(n + 1) {}
+    template<typename I>
+    fenwick(I first, I last): n(last - first + 1), fen(n) {
+        auto it = first;
+        for (int i = 1; i < n; ++i, ++it) {
+            fen[i] += *it;
+            const int nw = i + (i & -i);
+            if (nw < n) fen[nw] += fen[i];
         }
-        for (int q = n.size() + 1; q < N; q++) {
-            const int nw = q + (q & -q);
-            if (nw < N) fen[nw] += fen[q];
-        }
+    }
+    template<typename T_arr>
+    fenwick(const T_arr& m) {
+        (*this) = fenwick(m.begin(), m.end());
     }
 
     void clear() {
-        fill(all(fen), 0);
+        fill(fen.begin(), fen.end(), 0);
     }
 
     void point_add(int p, T x) {
-        assert(0 <= p && p < N - 1);
-        for (p += 1; p < N; p += p & -p) fen[p] += x;
+        ++p;
+        assert(1 <= p && p < n);
+        for (; p < n; p += p & -p) fen[p] += x;
     }
 
-    T pref_sum(int p) {
-        assert(-1 <= p && p < N - 1);
-        T o = 0;
-        for (p += 1; p; p -= p & -p) o += fen[p];
-        return o;
+    T pref_sum(int p) const {
+        ++p;
+        assert(0 <= p && p < n);
+        T ans = 0;
+        for (; p; p -= p & -p) ans += fen[p];
+        return ans;
     }
 
-    T suf_sum(int p) {
-        return pref_sum(N - 2) - pref_sum(p - 1);
+    T suf_sum(int p) const {
+        return pref_sum(n - 2) - pref_sum(p - 1);
     }
 
-    T seg_sum(int l, int r) {
-        assert(0 <= l && r < N - 1);
+    T seg_sum(int l, int r) const {
+        assert(0 <= l && r < n - 1);
         return pref_sum(r) - pref_sum(l - 1);
     }
 
     //[1, 2, 3] -> f(0) = -1, f(1) = 0, f(4) = 1, f(6) = 2
-    int max_pref_with_sum_leq_k(T k) {
-        int p = 0, step = 1 << __lg(N);
+    int max_pref_with_sum_leq_k(T k) const {
+        int p = 0, step = 1 << __lg(n);
         T s = 0;
         for (; step; step >>= 1) {
             int nw = p + step;
-            if (nw < N && s + fen[nw] <= k) p = nw, s += fen[nw];
+            if (nw < n && s + fen[nw] <= k) p = nw, s += fen[nw];
         }
         return p - 1;
     }

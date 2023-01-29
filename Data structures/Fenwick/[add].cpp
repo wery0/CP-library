@@ -1,45 +1,42 @@
 template<typename T>
-struct fenwick {
-    int N;
+class fenwick {
+    int n;
     vector<T> fen;
 
+public:
     fenwick() = default;
-    fenwick(int N): N(N + 1), fen(N + 1) {}
-    fenwick(vector<T> &n): N(n.size() + 1), fen(N) {
-        for (int q = 1; q <= n.size(); q++) {
-            fen[q] += n[q - 1];
-            const int nw = q + (q & -q);
-            if (nw < N) fen[nw] += fen[q];
+    fenwick(int n): n(n + 1), fen(n + 1) {}
+    template<typename I>
+    fenwick(I first, I last): n(last - first + 1), fen(n) {
+        auto it = first;
+        for (int i = 1; i < n; ++i, ++it) {
+            seg_add(i - 1, i - 1, *it);
         }
-        for (int q = n.size() + 1; q < N; q++) {
-            const int nw = q + (q & -q);
-            if (nw < N) fen[nw] += fen[q];
-        }
+    }
+    template<typename T_arr>
+    fenwick(const T_arr& m) {
+        (*this) = fenwick(m.begin(), m.end());
     }
 
     void clear() {
-        fill(all(fen), 0);
+        fill(fen.begin(), fen.end(), 0);
     }
 
     T operator[](int p) {
-        p += 1;
-        assert(1 <= p && p < N);
-        T o = 0;
-        for (; p < N; p += p & -p) {
-            o += fen[p];
-        }
-        return o;
+        ++p;
+        assert(1 <= p && p < n);
+        T res = 0;
+        for (; p < n; p += p & -p) res += fen[p];
+        return res;
     }
 
     void pref_add(int p, T x) {
-        for (; p; p -= p & -p) {
-            fen[p] += x;
-        }
+        for (; p; p -= p & -p) fen[p] += x;
     }
 
     void seg_add(int l, int r, T x) {
-        l += 1, r += 1;
-        assert(1 <= l && r < N);
+        ++l, ++r;
+        assert(1 <= l && r < n);
         pref_add(r, x);
         pref_add(l - 1, -x);
     }
