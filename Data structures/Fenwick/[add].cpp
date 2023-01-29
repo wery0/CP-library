@@ -14,7 +14,7 @@ public:
         }
     }
     template<typename T_arr>
-    fenwick(const T_arr& m) {
+    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
         (*this) = fenwick(m.begin(), m.end());
     }
 
@@ -22,7 +22,7 @@ public:
         fill(fen.begin(), fen.end(), 0);
     }
 
-    T operator[](int p) {
+    T operator[](int p) const {
         ++p;
         assert(1 <= p && p < n);
         T res = 0;
