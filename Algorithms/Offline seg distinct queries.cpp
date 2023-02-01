@@ -1,92 +1,48 @@
-struct offline_seg_distinct_queries {
+class offline_seg_distinct_queries {
 
-    struct fenv {
-        int G;
-        vec<int> fen;
-
-        fenv() {}
-
-        fenv(int _G) {
-            G = _G;
-            fen.resize(G);
-        }
-
-        fenv(vec<int> &n) {
-            G = n.size() + 1;
-            fen.resize(G);
-            for (int q = 1; q <= n.size(); q++) {
-                fen[q] += n[q - 1];
-                const int nw = q + (q & -q);
-                if (nw < G) fen[nw] += fen[q];
-            }
-            for (int q = n.size() + 1; q < G; q++) {
-                const int nw = q + (q & -q);
-                if (nw < G) fen[nw] += fen[q];
-            }
-        }
-
-        void clear() {
-            fill(all(fen), 0);
-        }
-
-        void point_add(int p, int x) {
-            for (p += 1; p < G; p += p & -p) fen[p] += x;
-        }
-
-        int pref_sum(int p) {
-            int o = 0;
-            for (p += 1; p; p -= p & -p) o += fen[p];
-            return o;
-        }
-
-        int suf_sum(int p) {
-            return pref_sum(G - 2) - pref_sum(p - 1);
-        }
-
-        int seg_sum(int l, int r) {
-            return pref_sum(r) - pref_sum(l - 1);
-        }
-    };
-
-    int a;
-    vec<int> closest_left_eq;
-    fenv fen;
+    int n;
+    vector<int> closest_left_eq;
 
     template<typename I>
-    vec<int> get_closest_left_eq(I first, I last) {
+    vector<int> get_closest_left_eq(I first, I last) {
         using T = typename iterator_traits<I>::value_type;
-        int a = last - first;
-        vec<int> ans(a, -1);
+        const int n = last - first;
+        vector<int> ans(n, -1);
         umap<T, int> mp;
         auto cit = first;
-        for (int q = 0; q < a; ++q, ++cit) {
+        for (int q = 0; q < n; ++q, ++cit) {
             T cur = *cit;
-            if (mp.count(cur)) {
-                ans[q] = mp[cur];
-            }
+            if (mp.count(cur)) ans[q] = mp[cur];
             mp[cur] = q;
         }
         return ans;
     }
 
+public:
     template<typename T>
-    offline_seg_distinct_queries(vec<T> &n) {
-        a = n.size();
-        closest_left_eq = get_closest_left_eq(all(n));
+    offline_seg_distinct_queries(vector<T>& arr): n(arr.size()) {
+        closest_left_eq = get_closest_left_eq(arr.begin(), arr.end());
     }
 
-    vec<int> process_queries(vec<pii> _que) {
-        int z = _que.size();
-        vec<int> ans(z);
-        vec<array<int, 3>> que(z);
-        for (int q = 0; q < z; ++q) que[q] = {_que[q].F, _que[q].S, q};
-        sort(all(que), [&](const auto & l, const auto & r) {return l[1] < r[1];});
-        fen = fenv(a + 1);
-        for (int r = 0, i = 0; r < a; r++) {
-            fen.point_add(r, 1);
-            if (closest_left_eq[r] != -1) fen.point_add(closest_left_eq[r], -1);
-            for (; i < z && que[i][1] == r; ++i) {
-                ans[que[i][2]] = fen.seg_sum(que[i][0], que[i][1]);
+    vector<int> process_queries(vector<pair<int, int>> queries) {
+        int z = queries.size();
+        vector<int> ans(z);
+        vector<array<int, 3>> queriess(z);
+        for (int q = 0; q < z; ++q) queriess[q] = {queries[q].first, queries[q].second, q};
+        sort(queriess.begin(), queriess.end(), [&](const auto& l, const auto& r) {
+            return l[1] < r[1];
+        });
+        vector<int> fen(n + 1);
+        for (int r = 0, i = 0; r < n; r++) {
+            for (int p = r + 1; p <= n; p += p & -p) ++fen[p];
+            if (closest_left_eq[r] != -1) {
+                for (int p = closest_left_eq[r] + 1; p <= n; p += p & -p) --fen[p];
+            }
+            for (; i < z && queriess[i][1] == r; ++i) {
+                int sum = 0;
+                for (int p = queriess[i][1] + 1; p; p -= p & -p) sum += fen[p];
+                for (int p = queriess[i][0]; p; p -= p & -p) sum -= fen[p];
+                ans[queriess[i][2]] = sum;
             }
         }
         return ans;
