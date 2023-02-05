@@ -56,3 +56,5 @@ int time_to_minutes(int h, int m) {return h * 60 + m;}
 int time_to_minutes(str s) {int ps = s.find(':'); assert(ps != string::npos); return time_to_minutes(stoi(s.substr(0, ps)), stoi(s.substr(ps + 1)));}
 str minutes_to_time(int m, bool h0 = true, bool m0 = true) {int h = m / 60; m %= 60; str o; if (h0) o += (h < 10 ? "0" : ""); o += to_string(h); o += ':'; if (m0) o += (m < 10 ? "0" : ""); o += to_string(m); return o;}
 ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}
+bool is_vowel_lowercase(char c) {return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';}
+bool is_consonant_lowercase(char c) {return !is_vowel_lowercase(c);}
