@@ -1,10 +1,12 @@
+//Example: f({2, 2, 3, 5}) = {1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60}
+//O(#divisors) for their generation, O((#divisors)log(#divisors)) for their sorting afterwards.
 template<typename T>
-vector<T> get_divisors_by_factorization(vector<T> fc) {
-    sort(fc.begin(), fc.end());
+vector<T> get_divisors_by_factorization(vector<T> factorization) {
+    sort(factorization.begin(), factorization.end());
     vector<T> dvz, cnt;
-    for (int i = 0; i < fc.size(); ++i) {
-        if (i == 0 || fc[i] != dvz.back()) {
-            dvz.push_back(fc[i]);
+    for (int i = 0; i < factorization.size(); ++i) {
+        if (i == 0 || factorization[i] != dvz.back()) {
+            dvz.push_back(factorization[i]);
             cnt.push_back(1);
         } else ++cnt.back();
     }
@@ -21,6 +23,6 @@ vector<T> get_divisors_by_factorization(vector<T> fc) {
             while (--kek[i]) c /= dvz[i];
         }
     }
-    sort(ans.begin(), ans.end());
+    sort(ans.begin(), ans.end());         //Remove this line if the order of divisors doesn't matter.
     return ans;
 }
