@@ -1,5 +1,5 @@
 template<typename T>
-struct segtree {
+class segtree {
 
     struct Node {
 
@@ -8,24 +8,42 @@ struct segtree {
 
         Node() = default;
 
-        Node(Node *n) {
+        Node(Node* n) {
             l = n->l, r = n->r;
             sm = n->sm;
         }
     };
 
-    inline T gsm(Node *n) {return n ? n->sm : 0;}
+    inline T gsm(Node* n) {return n ? n->sm : 0;}
 
-    uint a;
-    vec<Node*> store;
+    size_t a;
+    vector<Node*> store;
     Node* root;
-    vec<T> was;
+    vector<T> was;
 
     segtree() = default;
 
-    template<typename TT>
-    segtree(vec<TT> m) {
-        auto build = [&](auto && build, Node *&n, int l, int r) -> void{
+    void upd(Node* n) {
+        n->sm = gsm(n->l) + gsm(n->r);
+    }
+
+    Node* point_add(size_t pos, size_t l, size_t r, Node* n, T add_val) {
+        Node* nw = new Node(n);
+        if (l == r) {
+            nw->sm += add_val;
+            return nw;
+        }
+        size_t md = (l + r) >> 1;
+        if (pos <= md) nw->l = point_add(pos, l, md, n->l, add_val);
+        else nw->r = point_add(pos, md + 1, r, n->r, add_val);
+        upd(nw);
+        return nw;
+    }
+
+public:
+    template<typename U>
+    segtree(vector<U> m) {
+        auto build = [&](auto&& build, Node*& n, int l, int r) -> void{
             if (l > r) return;
             n = new Node();
             if (l == r) {
@@ -38,39 +56,24 @@ struct segtree {
             upd(n);
         };
         a = m.size();
-        vec<pii> wwas(a);
+        vector<pair<int, int>> wwas(a);
         for (int q = 0; q < a; ++q) wwas[q].S = m[q];
         {
-            vec<T> n = m;
-            unify(n);
-            for (T& c : m) c = lower_bound(all(n), c) - n.begin();
+            vector<T> n = m;
+            sort(n.begin(), n.end());
+            n.erase(unique(n.begin(), n.end()), n.end());
+            for (T& c : m) c = lower_bound(n.begin(), n.end(), c) - n.begin();
         }
         for (int q = 0; q < a; ++q) wwas[q].F = m[q];
-        unify(wwas);
+        sort(wwas.begin(), wwas.end());
+        wwas.erase(unique(wwas.begin(), wwas.end()), wwas.end());
         was.reserve(wwas.size());
-        for (auto [nw, old] : wwas) was.pb(old);
+        for (auto [nw, old] : wwas) was.push_back(old);
         build(build, root, 0, a - 1);
-        store.pb(root);
+        store.push_back(root);
         for (int q = 0; q < a; q++) {
-            store.pb(point_add(m[q], 0, a - 1, store[q], 1));
+            store.push_back(point_add(m[q], 0, a - 1, store[q], 1));
         }
-    }
-
-    void upd(Node *n) {
-        n->sm = gsm(n->l) + gsm(n->r);
-    }
-
-    Node* point_add(uint pos, uint l, uint r, Node *n, T add_val) {
-        Node *nw = new Node(n);
-        if (l == r) {
-            nw->sm += add_val;
-            return nw;
-        }
-        uint md = (l + r) >> 1;
-        if (pos <= md) nw->l = point_add(pos, l, md, n->l, add_val);
-        else nw->r = point_add(pos, md + 1, r, n->r, add_val);
-        upd(nw);
-        return nw;
     }
 
     T seg_kth_order_statistics(int ql, int qr, int k) {
