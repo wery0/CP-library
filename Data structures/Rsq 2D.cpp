@@ -5,9 +5,7 @@ struct rsq2D {
 
     rsq2D() = default;
 
-    rsq2D(vector<vector<T>> &arr) {
-        n = arr.size();
-        m = n ? arr[0].size() : 0;
+    rsq2D(vector<vector<T>>& arr): n(arr.size()), m(n ? arr[0].size() : 0) {
         store.resize(n + 1, vector<T>(m + 1));
         for (int q = 0; q < n; ++q) {
             for (int w = 0; w < m; ++w) {
