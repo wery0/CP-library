@@ -2,31 +2,35 @@
 //Each meeting is defined by [start_time, duration]
 /*Each meeting wiil be arranged in the room with the smallest number among free rooms
 at the moment max(start_time, (when the first free room appears)) and will lasts duration time units*/
-//This function for every meeting calculates the room, where it will be.
+//This function for every meeting calculates its starting time and room, where it will be.
+//ALL start_time SHOULD BE DIFFERENT FOR UNIQUE ANSWER!
 template<typename T>
-vec<int> meeting_simulator(T rooms, vec<pair<T, T>> meetings) {
-    //chmin(rooms, meetings.size());           //<- uncomment if it may help
-    sort(all(meetings), [&](const auto & l, const auto & r) {
-        return l.F < r.F;
+vector<pair<T, T>> meeting_simulator(T rooms, vector<pair<T, T>> meetings) {
+    //rooms = mint(rooms, (T)meetings.size());           //<- uncomment if it may help
+    const int n = meetings.size();
+    vector<size_t> nums(n);
+    iota(nums.begin(), nums.end(), (size_t)0);
+    sort(nums.begin(), nums.end(), [&meetings](const auto& l, const auto& r) {
+        return meetings[l].first < meetings[r].first;
     });
-    priority_queue<pair<ll, T>, vec<pair<ll, T>>, greater<pair<ll, T>>> pq;
-    priority_queue<int, vec<int>, greater<int>> free;
-    for (int q = 0; q < rooms; ++q) free.push(q);
-    ll cur_t = 0;
-    vec<int> where(meetings.size());
-    for (int i = 0; i < meetings.size(); ++i) {
-        auto [start_time, duration] = meetings[i];
-        chmax(cur_t, start_time);
-        if (free.empty()) chmax(cur_t, pq.top().F);
-        for (; pq.size() && pq.top().F <= cur_t;) {
-            free.push(pq.top().S);
+    priority_queue<pair<T, T>, vector<pair<T, T>>, greater<pair<T, T>>> pq;
+    priority_queue<T, vector<T>, greater<T>> free;
+    for (size_t q = 0; q < rooms; ++q) free.push(q);
+    T cur_t = 0;
+    vector<pair<T, T>> when_where(n);
+    for (size_t i = 0; i < n; ++i) {
+        auto [start_time, duration] = meetings[nums[i]];
+        cur_t = max(cur_t, start_time);
+        if (free.empty()) cur_t = max(cur_t, pq.top().first);
+        while (pq.size() && pq.top().first <= cur_t) {
+            free.push(pq.top().second);
             pq.pop();
         }
         //i-th meeting will be in room room_num
-        int room_num = free.top(); free.pop();
-        pq.push({cur_t + duration, room_num});
-        where[i] = room_num;
+        T room_num = free.top(); free.pop();
+        pq.emplace(cur_t + duration, room_num);
+        when_where[nums[i]] = {cur_t, room_num};
     }
-    return where;
+    return when_where;
 }
 //Can test here: https://leetcode.com/problems/meeting-rooms-iii/
