@@ -57,7 +57,7 @@ public:
 
     segtree_on_points(vector<T> points) {
         if (points.empty()) return;
-        sort(points.begin(), points.end())
+        sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
         vector<pair<T, T>> gr;
         for (int q = 0; q < points.size(); ++q) {
