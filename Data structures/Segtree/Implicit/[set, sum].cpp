@@ -48,22 +48,23 @@ class implicit_segtree {
     T seg_sum(ll ql, ll qr, ll l, ll r, Node*& n) {
         if (!n || qr < l || r < ql) return 0;
         if (n->ps_set != NO) return (max(ql, l) - min(qr, r) + 1) * n->ps_set;
-        if (ql <= l && r <= qr) {
-            return n->sm;
-        }
+        if (ql <= l && r <= qr) return n->sm;
         const ll md = (l + r) >> 1;
         return seg_sum(ql, qr, l, md, n->l) +
                seg_sum(ql, qr, md + 1, r, n->r);
     }
 
+    void destroy(Node* n){
+        if(!n) return;
+        destroy(n->l);
+        destroy(n->r);
+        delete n;
+    }
+
 public:
     implicit_segtree() = default;
+    ~implicit_segtree() {destroy(root);}
 
-    T seg_sum(ll ql, ll qr) {
-        return seg_sum(ql, qr, 0, N, root);
-    }
-
-    void seg_set(ll ql, ll qr, T val) {
-        seg_set(ql, qr, val, 0, N, root);
-    }
+    T seg_sum(ll ql, ll qr) {return seg_sum(ql, qr, 0, N, root);}
+    void seg_set(ll ql, ll qr, T val) {seg_set(ql, qr, val, 0, N, root);}
 };
