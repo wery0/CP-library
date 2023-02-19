@@ -1,22 +1,19 @@
 template<const ll MOD, const ll P>
 struct hasher {
-    uint a;
-    vec<ll> pref_hash;
-    vec<ll> pows;
+    size_t a;
+    vector<ll> pref_hash;
+    vector<ll> pows;
 
-    hasher() {}
+    hasher() = default;
 
     template<typename Iterator>
-    hasher(Iterator first, Iterator last) {
+    hasher(Iterator first, Iterator last): a(last - first), pref_hash(a), pows(a) {
         using T = typename iterator_traits<Iterator>::value_type;
-        a = last - first;
-        pref_hash.resize(a);
-        pows.resize(a);
         pows[0] = 1;
-        pref_hash[0] = hash<T> {}(*first); ++first;
-        for (int q = 1; q < a; ++q, ++first) {
+        pref_hash[0] = hash<T>{}(*first); ++first;
+        for (size_t q = 1; q < a; ++q, ++first) {
             pows[q] = pows[q - 1] * P % MOD;
-            pref_hash[q] = (pref_hash[q - 1] + hash<T> {}(*first) * pows[q]) % MOD;
+            pref_hash[q] = (pref_hash[q - 1] + hash<T>{}(*first) * pows[q]) % MOD;
         }
     }
 
@@ -39,11 +36,10 @@ struct multiple_hasher {
     hasher<mod[0], p[0]> h0;
     hasher<mod[1], p[1]> h1;
 
-    multiple_hasher() {}
+    multiple_hasher() = default;
 
     template<typename Iterator>
     multiple_hasher(Iterator first, Iterator last) {
-        using T = typename iterator_traits<Iterator>::value_type;
         h0 = hasher<mod[0], p[0]>(first, last);
         h1 = hasher<mod[1], p[1]>(first, last);
     }
