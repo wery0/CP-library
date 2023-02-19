@@ -1,17 +1,17 @@
 template<const ll MOD, const ll P>
 struct hasher {
-    size_t a;
+    size_t n;
     vector<ll> pref_hash;
     vector<ll> pows;
 
     hasher() = default;
 
     template<typename Iterator>
-    hasher(Iterator first, Iterator last): a(last - first), pref_hash(a), pows(a) {
+    hasher(Iterator first, Iterator last): n(last - first), pref_hash(n), pows(n) {
         using T = typename iterator_traits<Iterator>::value_type;
         pows[0] = 1;
         pref_hash[0] = hash<T>{}(*first); ++first;
-        for (size_t q = 1; q < a; ++q, ++first) {
+        for (size_t q = 1; q < n; ++q, ++first) {
             pows[q] = pows[q - 1] * P % MOD;
             pref_hash[q] = (pref_hash[q - 1] + hash<T>{}(*first) * pows[q]) % MOD;
         }
@@ -20,7 +20,7 @@ struct hasher {
     ll calc_hash(int l, int r) {
         ll o = pref_hash[r] - (l ? pref_hash[l - 1] : 0);
         if (o < 0) o += MOD;
-        return o * pows[a - 1 - r] % MOD;
+        return o * pows[n - 1 - r] % MOD;
     }
 
     bool is_substrings_equal(int l1, int r1, int l2, int r2) {
