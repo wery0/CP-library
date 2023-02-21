@@ -1,225 +1,141 @@
-//For every rectangle counting number of others, with which we are intersecting by non-zero surface area.
-//O(Nlog(N)) offline
-
-#pragma GCC optimize("Ofast")
-// #pragma GCC target("avx,avx2,fma")
-
-#include <bits/stdc++.h>
-
-#define F first
-#define S second
-#define vec vector
-#define pb push_back
-#define cld complex<ld>
-#define pll pair<ll, ll>
-#define pdd pair<ld, ld>
-#define umap unordered_map
-#define uset unordered_set
-#define pii pair<int, int>
-#define pnn pair<Node*, Node*>
-#define all(m) m.begin(), m.end()
-#define uid uniform_int_distribution
-#define init(m, x) memset(m, x, sizeof(m));
-#define pripii(p) cout << "{" << p.F << ", " << p.S << "} "
-#define fast cin.tie(0); cout.tie(0); cin.sync_with_stdio(0); cout.sync_with_stdio(0);
-using namespace std;
-using str = string;
-using ll = long long;
-using ld = long double;
-using uint = unsigned int;
-using ull = unsigned long long;
-mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
-
 template<typename T>
-bool chmin(T &a, const T &b) { return b < a ? a = b, 1 : 0; }
+class rectangle_intersections_counting {
+    template<typename U>
+    class fenwick {
+        int n;
+        vector<U> fen;
 
-template<typename T>
-bool chmax(T &a, const T &b) { return b > a ? a = b, 1 : 0; }
+    public:
+        fenwick() = default;
+        fenwick(int n): n(n + 1), fen(n + 1) {}
 
-template<typename T, int G>
-struct fenv {
-    vec<T> fen = vec<T>(G);
-    //T fen[G] = {0};
-    //array<T, G> fen{};
-
-    fenv() {}
-
-    fenv(vec<T> &n) {
-        for (int q = 1; q <= n.size(); q++) {
-            fen[q] += n[q - 1];
-            const int nw = q + (q & -q);
-            if (nw < G) fen[nw] += fen[q];
+        void clear() {
+            fill(fen.begin(), fen.end(), 0);
         }
-    }
 
-    fenv(T val) {
-        for (int q = 1; q < G; q++) {
-            fen[q] += val;
-            const int nw = q + (q & -q);
-            if (nw < G) fen[nw] += fen[q];
+        U operator[](int p) const {
+            U res = 0;
+            for (++p; p < n; p += p & -p) res += fen[p];
+            return res;
         }
-    }
 
-    void clear() {
-        fill(fen.begin(), fen.end(), 0);
-    }
-
-    T sum(int p) {
-        T o = 0;
-        for (; p < G; p += p & -p) {
-            o += fen[p];
+        void pref_add(int p, U x) {
+            for (++p; p; p -= p & -p) fen[p] += x;
         }
-        return o;
-    }
 
-    void pref_add(int p, T x) {
-        for (; p; p -= p & -p) {
-            fen[p] += x;
+        void suf_add(int p, U x) {
+            pref_add(n - 2, x);
+            pref_add(p - 1, -x);
         }
+    };
+
+    struct rect {
+        T x1, y1, x2, y2;
+        size_t n;
+    };
+
+    struct query {
+        T p, l, r, sign;
+        size_t n;
+    };
+
+    vector<rect> rect_store;
+
+    vector<rect> compress() const {
+        vector<int> nx(rect_store.size() * 2);
+        vector<int> ny(rect_store.size() * 2);
+        for (size_t q = 0; const auto& [x1, y1, x2, y2, n] : rect_store) {
+            nx[q] = x1;
+            nx[q | 1] = x2;
+            ny[q] = y1;
+            ny[q | 1] = y2;
+            q += 2;
+        }
+        sort(nx.begin(), nx.end());
+        sort(ny.begin(), ny.end());
+        nx.erase(unique(nx.begin(), nx.end()), nx.end());
+        ny.erase(unique(ny.begin(), ny.end()), ny.end());
+        vector<rect> new_m(rect_store.size());
+        for (size_t q = 0; auto [x1, y1, x2, y2, n] : rect_store) {
+            x1 = lower_bound(nx.begin(), nx.end(), x1) - nx.begin();
+            x2 = lower_bound(nx.begin(), nx.end(), x2) - nx.begin();
+            y1 = lower_bound(ny.begin(), ny.end(), y1) - ny.begin();
+            y2 = lower_bound(ny.begin(), ny.end(), y2) - ny.begin();
+            new_m[q++] = {x1, y1, x2, y2, n};
+        }
+        return new_m;
     }
 
-    void add_lr(int l, int r, T x) {
-        pref_add(r, x);
-        pref_add(l - 1, -x);
+public:
+    rectangle_intersections_counting() = default;
+
+    void clear() {rect_store.clear();}
+
+    void add_rect(T x1, T y1, T x2, T y2) {
+        rect_store.emplace_back(x1, y1, x2, y2, rect_store.size());
+    }
+
+    //For each rectangle, counts the number of other rectangles with which there is an intersection by a positive area.
+    //Coordinates of rectangle endpoints are lattice points, i. e. rect(0, 0, 3, 3) has area 9.
+    //O(nlog(n))
+    vector<int> calc() const {
+        const int n = rect_store.size();
+        if (n == 0) return {};
+        int all_segs = 0;
+        fenwick<int> fen_pref(n * 2);
+        fenwick<int> fen_suf(n * 2);
+        auto add_seg = [&](int l, int r) -> void {
+            fen_pref.suf_add(r, 1);
+            fen_suf.pref_add(l, 1);
+            ++all_segs;
+        };
+        auto rem_seg = [&](int l, int r) -> void {
+            fen_pref.suf_add(r, -1);
+            fen_suf.pref_add(l, -1);
+            --all_segs;
+        };
+        auto cnt_intersections = [&](int l, int r) -> int {
+            return all_segs - fen_pref[l] - fen_suf[r];
+        };
+        auto m = compress();
+        sort(m.begin(), m.end(), [](const auto& r1, const auto& r2) {return r1.x1 < r2.x1;});
+        vector<int> ans(n, -1);
+        vector<vector<pair<T, T>>> del_seg(n * 2);
+        for (int x = 0, l = 0; l < n; ++x) {
+            while (!del_seg[x].empty()) {
+                auto [l, r] = del_seg[x].back();
+                del_seg[x].pop_back();
+                rem_seg(l, r);
+            }
+            if (m[l].x1 != x) continue;
+            int r = l;
+            for (; r + 1 < n && m[r + 1].x1 == x;) ++r;
+            for (int w = l; w <= r; ++w) ans[m[w].n] += cnt_intersections(m[w].y1, m[w].y2);
+            for (int w = l; w <= r; ++w) {
+                add_seg(m[w].y1, m[w].y2);
+                del_seg[m[w].x2].emplace_back(m[w].y1, m[w].y2);
+            }
+            l = r + 1;
+        }
+        vector<query> store;
+        for (const auto& [x1, y1, x2, y2, n] : m) {
+            store.emplace_back(x1, y1, y2, 1, n);
+            store.emplace_back(x2, y1, y2, -1, n);
+        }
+        sort(store.begin(), store.end(), [](const auto& q1, const auto& q2) {return q1.p > q2.p;});
+        reverse(m.begin(), m.end());
+        all_segs = 0;
+        fen_pref.clear();
+        fen_suf.clear();
+        for (int x = n * 2, l = 0, ql = 0; l < n || ql < store.size(); --x) {
+            int r = l - 1;
+            while (r + 1 < n && m[r + 1].x1 == x) ++r;
+            for (int w = l; w <= r; ++w) add_seg(m[w].y1, m[w].y2);
+            for (; ql < store.size() && store[ql].p == x; ++ql) {
+                ans[store[ql].n] += cnt_intersections(store[ql].l, store[ql].r) * store[ql].sign;
+            }
+            l = r + 1;
+        }
+        return ans;
     }
 };
-
-struct rect {
-    int x1, y1, x2, y2, n;
-
-    rect() {}
-
-    rect(int a, int b, int c, int d, int e) {
-        x1 = a, y1 = b;
-        x2 = c, y2 = d;
-        n = e;
-    }
-};
-
-
-const int G = 1e5 + 5, U = 200020;
-int a;
-rect m[G];
-int ans[G] = {0};
-
-void compress() {
-    vec<int> nx, ny;
-    for (int q = 0; q < a; q++) {
-        nx.pb(m[q].x1);
-        nx.pb(m[q].x2);
-        ny.pb(m[q].y1);
-        ny.pb(m[q].y2);
-    }
-    sort(all(nx));
-    sort(all(ny));
-    for (int q = 0; q < a; q++) {
-        m[q].x1 = lower_bound(all(nx), m[q].x1) - nx.begin() + 2;
-        m[q].x2 = lower_bound(all(nx), m[q].x2) - nx.begin() + 2;
-
-        m[q].y1 = lower_bound(all(ny), m[q].y1) - ny.begin() + 2;
-        m[q].y2 = lower_bound(all(ny), m[q].y2) - ny.begin() + 2;
-    }
-}
-
-struct que {
-    int p, n;
-    int l, r;
-    int sign;
-
-    que() {}
-
-    que(int a, int b, int c, int d, int e) {
-        p = a, n = b;
-        l = c, r = d;
-        sign = e;
-    }
-};
-
-int all_segs = 0;
-fenv<int, 200200> fen_pref = 0;
-fenv<int, 200200> fen_suf = 0;
-
-void clear() {
-    all_segs = 0;
-    fen_pref.clear();
-    fen_suf.clear();
-}
-
-void add_seg(int l, int r) {
-    fen_pref.add_lr(r, U, 1);
-    fen_suf.add_lr(1, l, 1);
-    all_segs += 1;
-}
-
-void rem_seg(int l, int r) {
-    fen_pref.add_lr(r, U, -1);
-    fen_suf.add_lr(1, l, -1);
-    all_segs -= 1;
-}
-
-int cnt_intersections(int l, int r) {
-    return all_segs - fen_pref.sum(l) - fen_suf.sum(r);
-}
-
-vec<pii > del_seg[U];
-
-int main() {
-    fast;
-    cin >> a;
-    for (int q = 0; q < a; q++) {
-        int x1, y1, x2, y2;
-        cin >> x1 >> y1 >> x2 >> y2;
-        m[q] = rect(x1, y1, x2, y2, q);
-    }
-    compress();
-    sort(m, m + a, [](rect &r1, rect &r2) {
-        return r1.x1 < r2.x1;
-    });
-    for (int x = 0, l = 0; l < a; x++) {
-        for (; del_seg[x].size();) {
-            pii p = del_seg[x].back();
-            del_seg[x].pop_back();
-            rem_seg(p.F, p.S);
-        }
-        if (m[l].x1 != x) continue;
-        int r = l;
-        for (; r + 1 < a && m[r + 1].x1 == x;) {
-            r++;
-        }
-        for (int w = l; w <= r; w++) {
-            ans[m[w].n] += cnt_intersections(m[w].y1, m[w].y2);
-        }
-        for (int w = l; w <= r; w++) {
-            add_seg(m[w].y1, m[w].y2);
-            del_seg[m[w].x2].pb({m[w].y1, m[w].y2});
-        }
-        l = r + 1;
-    }
-    vec<que> n;
-    for (int q = 0; q < a; q++) {
-        n.pb(que(m[q].x1, m[q].n, m[q].y1, m[q].y2, 1));
-        n.pb(que(m[q].x2, m[q].n, m[q].y1, m[q].y2, -1));
-    }
-    sort(all(n), [](que &q1, que &q2) {
-        return q1.p > q2.p;
-    });
-    reverse(m, m + a);
-    clear();
-    for (int x = U - 1, l = 0, ql = 0; l < a || ql < n.size(); x--) {
-        int r = l - 1;
-        for (; r + 1 < a && m[r + 1].x1 == x;) {
-            r++;
-        }
-        for (int w = l; w <= r; w++) {
-            add_seg(m[w].y1, m[w].y2);
-        }
-        for (; ql < n.size() && n[ql].p == x; ql++) {
-            int res = cnt_intersections(n[ql].l, n[ql].r);
-            ans[n[ql].n] += res * n[ql].sign;
-        }
-        l = r + 1;
-    }
-    for (int q = 0; q < a; q++) {
-        cout << ans[q] - 1 << " ";
-    }
-}
