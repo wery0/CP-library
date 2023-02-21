@@ -14,7 +14,7 @@ public:
         }
     }
     template<typename T_arr>
-    fenwick(const T_arr& m, typename enable_if <!is_integral_v<T_arr >>::type* = 0) {
+    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr >>::type* = 0) {
         (*this) = fenwick(m.begin(), m.end());
     }
 
