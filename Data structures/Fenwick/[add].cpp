@@ -14,7 +14,7 @@ public:
         }
     }
     template<typename T_arr>
-    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
+    fenwick(const T_arr& m, typename enable_if <!is_integral_v<T_arr >>::type* = 0) {
         (*this) = fenwick(m.begin(), m.end());
     }
 
@@ -23,20 +23,23 @@ public:
     }
 
     T operator[](int p) const {
-        ++p;
-        assert(1 <= p && p < n);
+        assert(0 <= p && p < n - 1);
         T res = 0;
-        for (; p < n; p += p & -p) res += fen[p];
+        for (++p; p < n; p += p & -p) res += fen[p];
         return res;
     }
 
     void pref_add(int p, T x) {
-        for (; p; p -= p & -p) fen[p] += x;
+        assert(-1 <= p && p < n - 1);
+        for (++p; p; p -= p & -p) fen[p] += x;
+    }
+
+    void suf_add(int p, T x) {
+        pref_add(n - 2, x);
+        pref_add(p - 1, -x);
     }
 
     void seg_add(int l, int r, T x) {
-        ++l, ++r;
-        assert(1 <= l && r < n);
         pref_add(r, x);
         pref_add(l - 1, -x);
     }
