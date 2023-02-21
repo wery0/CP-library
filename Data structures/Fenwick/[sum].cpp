@@ -25,16 +25,14 @@ public:
     }
 
     void point_add(int p, T x) {
-        ++p;
-        assert(1 <= p && p < n);
-        for (; p < n; p += p & -p) fen[p] += x;
+        assert(0 <= p && p < n - 1);
+        for (++p; p < n; p += p & -p) fen[p] += x;
     }
 
     T pref_sum(int p) const {
-        ++p;
-        assert(0 <= p && p < n);
+        assert(-1 <= p && p < n - 1);
         T ans = 0;
-        for (; p; p -= p & -p) ans += fen[p];
+        for (++p; p; p -= p & -p) ans += fen[p];
         return ans;
     }
 
@@ -43,7 +41,6 @@ public:
     }
 
     T seg_sum(int l, int r) const {
-        assert(0 <= l && r < n - 1);
         return pref_sum(r) - pref_sum(l - 1);
     }
 
