@@ -1,140 +1,167 @@
-//calculates distances between any pair of set {point, segment, ray, line}
+//Calculates distance between any pair of {point, segment, ray, line}
 
 const ld EPS = 1e-9;
-
-template<typename T = ld>
+//T - type for coordinates
+//D - floating point type for noninteger calculations (sqrt for example)
+template<typename T, typename D = long double>
 struct pt {
+    static_assert(is_floating_point_v<D>);
     T x = 0, y = 0;
 
     pt() = default;
-
     pt(T a, T b): x(a), y(b) {}
 
-    pt<T> operator+(const pt &p) const { return {x + p.x, y + p.y}; }
+    pt<T> operator+(const pt& p) const {return {x + p.x, y + p.y};}
+    pt<T> operator-(const pt& p) const {return {x - p.x, y - p.y};}
+    pt<T> operator*(const T c) const {return {x * c, y * c};}
+    pt<T> operator/(const T c) const {return {x / c, y / c};}
+    pt<T> operator-() const {return {-x, -y};}
 
-    pt<T> operator-(const pt &p) const { return {x - p.x, y - p.y}; }
+    void operator+=(const pt& p) {x += p.x, y += p.y;}
+    void operator-=(const pt& p) {x -= p.x, y -= p.y;}
+    void operator*=(const T c) {x *= c, y *= c;}
+    void operator/=(const T c) {x /= c, y /= c;}
 
-    pt<T> operator*(const T c) const { return {x * c, y * c}; }
+    bool operator==(const pt& p) const {return p.x == x && p.y == y;}
+    bool operator!=(const pt& p) const {return p.x != x || p.y != y;}
+    bool operator<(const pt& p) const {return x < p.x || (x == p.x && y < p.y);}
 
-    pt<T> operator/(const T c) const { return {x / c, y / c}; }
+    T dot(const pt& p) const {return x * p.x + y * p.y;}
+    T cross(const pt& p) const {return x * p.y - y * p.x;}
+    D dist(const pt& p) const {return hypotl(x - p.x, y - p.y);}
+    T dist2(const pt& p) const {return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);}
+    T mdist(const pt& p) const {return abs(x - p.x) + abs(y - p.y);}
 
-    void operator+=(const pt &p) { x += p.x, y += p.y; }
+    friend T dot(const pt& p1, const pt& p2) {return p1.x * p2.x + p1.y * p2.y;}
+    friend T cross(const pt& p1, const pt& p2) {return p1.x * p2.y - p1.y * p2.x;}
+    friend D dist(const pt& p1, const pt& p2) {return hypotl(p1.x - p2.x, p1.y - p2.y);}
+    friend T dist2(const pt& p1, const pt& p2) {return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);}
+    friend T mdist(const pt& p1, const pt& p2) {return abs(p1.x - p2.x) + abs(p1.y - p2.y);}
 
-    void operator-=(const pt &p) { x -= p.x, y -= p.y; }
+    void self_rotate_about_origin(D ang) {
+        const D sn = sinl(ang), cs = cosl(ang);
+        D nx = x * cs - sn * y;
+        D ny = x * sn + cs * y;
+        x = nx, y = ny;
+    }
 
-    void operator*=(const T c) { x *= c, y *= c; }
-
-    void operator/=(const T c) { x /= c, y /= c; }
-
-    bool operator==(const pt &p) const {return p.x == x && p.y == y;}
-
-    bool operator!=(const pt &p) const {return p.x != x || p.y != y;}
-
-    ld dst(const pt &p) { return sqrtl((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y)); }
-
-    T sqdst(const pt &p) { return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y); }
-
-    T dot(const pt &p) { return x * p.x + y * p.y; }
-
-    T cross(const pt &p) { return x * p.y - y * p.x; }
-
-    pt<ld> normalize(const ld EPS = 1e-9) {
+    void self_normalize(const D EPS = 1e-9) {
         if (abs(x) < EPS && abs(y) < EPS) assert(0);
-        ld c = sqrtl(x * x + y * y);
-        x /= c;
-        y /= c;
+        D c = hypotl(x, y);
+        x /= c, y /= c;
+    }
+
+    pt<D> get_normalized(const D EPS = 1e-9) const {
+        if (abs(x) < EPS && abs(y) < EPS) assert(0);
+        D c = hypotl(x, y);
+        x /= c, y /= c;
         return pt(x, y);
     }
 
-    bool operator<(const pt &p) const {return x < p.x || (x == p.x && y < p.y);}
-
-    friend istream& operator>>(istream &is, pt &p) {
-        is >> p.x >> p.y;
-        return is;
-    }
-
-    friend ostream& operator<<(ostream &os, const pt &p) {
-        return os << '{' << p.x << ", " << p.y << '}';
-    }
+    friend istream& operator>>(istream& is, pt& p) {return is >> p.x >> p.y;}
+    friend ostream& operator<<(ostream& os, const pt& p) {return os << '{' << p.x << ", " << p.y << '}';}
 };
 
-template<typename T = ld>
+//T - type of A, B, C coefficients
+template<typename T = long double, typename D = long double>
 struct line {
+    static_assert(is_floating_point_v<D>);
     T A, B, C;
 
-    line(T AA, T BB, T CC) {
-        A = AA;
-        B = BB;
-        C = CC;
-        normalize();
-    }
-
-    line(pt<T> a, pt<T> b) {
+    line() = default;
+    line(T A, T B, T C): A(A), B(B), C(C) {self_normalize();}
+    template<typename U>
+    line(const pt<U>& a, const pt<U>& b) {
         A = a.y - b.y;
         B = b.x - a.x;
-        C = a.cross(b);
-        normalize();
+        C = cross(a, b);
+        self_normalize();
     }
 
-    ld dst_to_pt(pt<T> &p) {
-        normalize();
-        return abs(A * p.x + B * p.y + C);
+    template<typename U>
+    D get_dist_to_pt(const pt<U>& p) const {
+        if constexpr(is_integral_v<T>) {
+            return abs(A * p.x + B * p.y + C) / hypotl(A, B);
+        } else {
+            return abs(A * p.x + B * p.y + C);
+        }
     }
 
-    void normalize() {
-        assert(abs(A) + abs(B) > EPS);
-        ld u = sqrtl(A * A + B * B);
-        A /= u, B /= u, C /= u;
-        if (A < -EPS || (abs(A) < EPS && B < -EPS)) A *= -1, B *= -1, C *= -1;
+    void self_normalize() {
+        if constexpr(is_integral_v<T>) {
+            assert(abs(A) + abs(B) > 0);
+            T gc = __gcd(__gcd(abs(A), abs(B)), abs(C));
+            if (A < 0 || (A == 0 && B < 0)) gc *= -1;
+            A /= gc, B /= gc, C /= gc;
+        } else {
+            assert(abs(A) + abs(B) > EPS);
+            D u = hypotl(A, B);
+            if (A < -EPS || (abs(A) < EPS && B < -EPS)) u *= -1;
+            A /= u, B /= u, C /= u;
+        }
     }
 
-    line get_normal_from_point(pt<T> p) const {
+    template<typename U>
+    line get_normal_from_point(const pt<U>& p) const {
         return line(p, p + pt(A, B));
     }
 
-    void make_normal_from_point(pt<T> p) {
-        pt p2 = p + pt(A, B);
+    template<typename U>
+    void make_normal_from_point(const pt<U>& p) {
+        pt p2 = p + pt{A, B};
         (*this) = line(p, p2);
     }
 
-    pt<ld> intersect(const line<T> &l) const {
+    template<typename U>
+    pt<D> get_projection_of_point(const pt<U>& p) const {
+        D dst = get_dist_to_pt(p);
+        pt<D> norm{A, B};
+        norm.self_normalize();
+        norm *= dst;
+        pt<D> o{(D)p.x, (D)p.y}; o += norm;
+        if (get_dist_to_pt(o) < EPS) return o;
+        o -= norm * 2;
+        assert(get_dist_to_pt(o) < EPS);
+        return o;
+    }
+
+    template<typename U>
+    pt<D> intersect(const line<U>& l) const {
         assert(abs(A - l.A) + abs(B - l.B) > EPS);
-        ld x = (l.C * B - C * l.B) / (A * l.B - l.A * B);
-        ld y = (l.A * C - A * l.C) / (A * l.B - l.A * B);
+        D x = (D)1.0 * (l.C * B - C * l.B) / (A * l.B - l.A * B);
+        D y = (D)1.0 * (l.A * C - A * l.C) / (A * l.B - l.A * B);
         return {x, y};
     }
 
-    bool is_parallel_to(line &l) const {
+    template<typename U>
+    bool is_parallel_to(const line<U>& l) const {
         return abs(l.A - A) + abs(l.B - B) < EPS;
     }
 
-    bool is_equal_to(line &l) const {
+    template<typename U>
+    bool is_equal_to(const line<U>& l) const {
         return abs(l.A - A) + abs(l.B - B) + abs(l.C - C) < EPS;
     }
 
     void printkxb() const {
         if (abs(B) < EPS) {
-            cout << "X = " << -C / A << '\n';
+            cout << "X = " << -((D)C / A) << '\n';
         } else {
-            cout << "Y = " << -A / B << "X + " << (-C / B) << '\n';
+            cout << "Y = " << -((D)A / B) << "X + " << -((D)C / B) << '\n';
         }
     }
 
     void printABC() const {
-        cout << A << " " << B << " " << C << '\n';
+        cout << A << ' ' << B << ' ' << C << '\n';
     }
 };
 
-ld dst_pp(pt<ld> p1, pt<ld> p2) {
-    return p1.dst(p2);
-}
-
 int pir(pt<ld> p, pt<ld> p1, pt<ld> p2) {
     line l = line(p1, p2);
-    if (l.dst_to_pt(p) > EPS) return 0;
+    if (l.get_dist_to_pt(p) > EPS) return 0;
     pt n1 = p2 - p1;
     pt n2 = p - p1;
-    if (n1.dot(n2) >= -EPS) return 1;
+    if (dot(n1, n2) >= -EPS) return 1;
     return 0;
 }
 
@@ -147,8 +174,8 @@ ld dst_ps(pt<ld> p, pt<ld> p1, pt<ld> p2) {
     line u = line(p1, p2);
     u.make_normal_from_point(p);
     pt i = l.intersect(u);
-    if (pis(i, p1, p2)) return dst_pp(p, i);
-    return min(dst_pp(p, p1), dst_pp(p, p2));
+    if (pis(i, p1, p2)) return dist(p, i);
+    return min(dist(p, p1), dist(p, p2));
 }
 
 ld dst_pl(pt<ld> p, pt<ld> p1, pt<ld> p2) {
@@ -174,7 +201,7 @@ ld dst_pr(pt<ld> p, pt<ld> p1, pt<ld> p2) {
     i.make_normal_from_point(p);
     pt c = l.intersect(i);
     if (pir(c, p1, p2)) return dst_pl(p, p1, p2);
-    return dst_pp(p, p1);
+    return dist(p, p1);
 }
 
 ld dst_sr(pt<ld> p1, pt<ld> p2, pt<ld> p3, pt<ld> p4) {
@@ -220,20 +247,13 @@ int main() {
     fast;
     cout.precision(12);
     cout << fixed;
-    ll x1, y1, x2, y2, x3, y3, x4, y4;
+    ld x1, y1, x2, y2, x3, y3, x4, y4;
     cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
-    pll m[] = {{x1, y1},
-        {x2, y2},
-        {x3, y3},
-        {x4, y4}
-    };
-    assert(m[0] != m[1]);
-    assert(m[2] != m[3]);
     pt<ld> a = {x1, y1};
     pt<ld> b = {x2, y2};
     pt<ld> c = {x3, y3};
     pt<ld> d = {x4, y4};
-    cout << dst_pp(a, c) << "\n";
+    cout << dist(a, c) << "\n";
     cout << dst_ps(a, c, d) << "\n";
     cout << dst_pr(a, c, d) << "\n";
     cout << dst_pl(a, c, d) << "\n";
