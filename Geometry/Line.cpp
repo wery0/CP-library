@@ -1,5 +1,6 @@
 template<typename T = ld>
 struct line {
+    using ld = long double;
     T A, B, C;
 
     line() = default;
@@ -8,14 +9,14 @@ struct line {
     line(const pt<U>& a, const pt<U>& b) {
         A = a.y - b.y;
         B = b.x - a.x;
-        C = a.cross(b);
+        C = cross(a, b);
         self_normalize();
     }
 
     template<typename U>
-    ld get_dst_to_pt(const pt<U>& p) const {
+    ld get_dist_to_pt(const pt<U>& p) const {
         if constexpr(is_integral_v<T>) {
-            return abs(A * p.x + B * p.y + C) / sqrtl(A * A + B * B);
+            return abs(A * p.x + B * p.y + C) / hypotl(A, B);
         } else {
             return abs(A * p.x + B * p.y + C);
         }
@@ -29,7 +30,7 @@ struct line {
             A /= gc, B /= gc, C /= gc;
         } else {
             assert(abs(A) + abs(B) > EPS);
-            ld u = sqrtl(A * A + B * B);
+            ld u = hypotl(A, B);
             if (A < -EPS || (abs(A) < EPS && B < -EPS)) u *= -1;
             A /= u, B /= u, C /= u;
         }
@@ -48,14 +49,14 @@ struct line {
 
     template<typename U>
     pt<ld> get_projection_of_point(const pt<U>& p) const {
-        ld dst = get_dst_to_pt(p);
+        ld dst = get_dist_to_pt(p);
         pt<ld> norm{A, B};
         norm.self_normalize();
         norm *= dst;
         pt<ld> o{(ld)p.x, (ld)p.y}; o += norm;
-        if (get_dst_to_pt(o) < EPS) return o;
+        if (get_dist_to_pt(o) < EPS) return o;
         o -= norm * 2;
-        assert(get_dst_to_pt(o) < EPS);
+        assert(get_dist_to_pt(o) < EPS);
         return o;
     }
 
