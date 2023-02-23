@@ -1,6 +1,7 @@
-template<typename T = ld>
+//T - type of A, B, C coefficients
+template<typename T = long double, typename D = long double>
 struct line {
-    using ld = long double;
+    static_assert(is_floating_point_v<D>);
     T A, B, C;
 
     line() = default;
@@ -14,7 +15,7 @@ struct line {
     }
 
     template<typename U>
-    ld get_dist_to_pt(const pt<U>& p) const {
+    D get_dist_to_pt(const pt<U>& p) const {
         if constexpr(is_integral_v<T>) {
             return abs(A * p.x + B * p.y + C) / hypotl(A, B);
         } else {
@@ -30,7 +31,7 @@ struct line {
             A /= gc, B /= gc, C /= gc;
         } else {
             assert(abs(A) + abs(B) > EPS);
-            ld u = hypotl(A, B);
+            D u = hypotl(A, B);
             if (A < -EPS || (abs(A) < EPS && B < -EPS)) u *= -1;
             A /= u, B /= u, C /= u;
         }
@@ -48,12 +49,12 @@ struct line {
     }
 
     template<typename U>
-    pt<ld> get_projection_of_point(const pt<U>& p) const {
-        ld dst = get_dist_to_pt(p);
-        pt<ld> norm{A, B};
+    pt<D> get_projection_of_point(const pt<U>& p) const {
+        D dst = get_dist_to_pt(p);
+        pt<D> norm{A, B};
         norm.self_normalize();
         norm *= dst;
-        pt<ld> o{(ld)p.x, (ld)p.y}; o += norm;
+        pt<D> o{(D)p.x, (D)p.y}; o += norm;
         if (get_dist_to_pt(o) < EPS) return o;
         o -= norm * 2;
         assert(get_dist_to_pt(o) < EPS);
@@ -61,10 +62,10 @@ struct line {
     }
 
     template<typename U>
-    pt<ld> intersect(const line<U>& l) const {
+    pt<D> intersect(const line<U>& l) const {
         assert(abs(A - l.A) + abs(B - l.B) > EPS);
-        ld x = (ld)1.0 * (l.C * B - C * l.B) / (A * l.B - l.A * B);
-        ld y = (ld)1.0 * (l.A * C - A * l.C) / (A * l.B - l.A * B);
+        D x = (D)1.0 * (l.C * B - C * l.B) / (A * l.B - l.A * B);
+        D y = (D)1.0 * (l.A * C - A * l.C) / (A * l.B - l.A * B);
         return {x, y};
     }
 
@@ -80,9 +81,9 @@ struct line {
 
     void printkxb() const {
         if (abs(B) < EPS) {
-            cout << "X = " << -((ld)C / A) << '\n';
+            cout << "X = " << -((D)C / A) << '\n';
         } else {
-            cout << "Y = " << -((ld)A / B) << "X + " << -((ld)C / B) << '\n';
+            cout << "Y = " << -((D)A / B) << "X + " << -((D)C / B) << '\n';
         }
     }
 
