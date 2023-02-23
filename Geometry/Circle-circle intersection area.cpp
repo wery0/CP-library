@@ -8,7 +8,7 @@ T circle_circle_intersection(circle<T> c1, circle<T> c2) {
         return r * r * acos(d / r) - d * sqrtl(r * r - d * d);
     };
     if (c1.r > c2.r) swap(c1, c2);
-    T d = dst(c1.p, c2.p);
+    T d = dist(c1.p, c2.p);
     if (d >= c1.r + c2.r) return 0;
     if (c1.r + d <= c2.r) return PI * c1.r * c1.r;
     T A = sqrtl(4 * d * d * c2.r * c2.r - powl(d * d - c1.r * c1.r + c2.r * c2.r, 2)) / d;

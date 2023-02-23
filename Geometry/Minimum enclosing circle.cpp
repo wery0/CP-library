@@ -17,7 +17,7 @@ class minimum_enclosing_circle {
         pt<K> operator+(const pt& p) const {return {x + p.x, y + p.y};}
         pt<K> operator/(const T c) const {return {x / c, y / c};}
 
-        K dst2(const pt& p) const {return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);}
+        K dist2(const pt& p) const {return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);}
     };
 
     struct line {
@@ -62,12 +62,12 @@ class minimum_enclosing_circle {
             if ((c.x - m[q].x) * (c.x - m[q].x) + (c.y - m[q].y) * (c.y - m[q].y) < cr2 + EPS) continue;
             if (q == 0) {
                 c = {(m[0].x + p1.x) / 2.0, (m[0].y + p1.y) / 2.0};
-                cr2 = m[0].dst2(p1) / 4.0;
+                cr2 = m[0].dist2(p1) / 4.0;
                 cr = sqrtl(cr2);
                 continue;
             }
             c = {(m[q].x + p1.x) / 2.0, (m[q].y + p1.y) / 2.0};
-            cr2 = m[q].dst2(p1) / 4.0;
+            cr2 = m[q].dist2(p1) / 4.0;
             cr = sqrtl(cr2);
             solve1(q - 1, m[q], p1);
         }
@@ -99,7 +99,7 @@ public:
             c = {(D)x, (D)y};
         } else if (m.size() == 2) {
             c = {(m[0].x + m[1].x) / 2.0, (m[0].y + m[1].y) / 2.0};
-            cr2 = m[0].dst2(m[1]) / 4.0;
+            cr2 = m[0].dist2(m[1]) / 4.0;
             cr = sqrtl(cr2);
         } else {
             pt<T> u = {x, y};

@@ -7,7 +7,7 @@ class closest_pair_of_points_2d {
         return x * kek + y;
     }
 
-    T sqd(ptt p1, ptt p2) {
+    T dist2(ptt p1, ptt p2) {
         return (p1.F - p2.F) * (p1.F - p2.F) + (p1.S - p2.S) * (p1.S - p2.S);
     }
 
@@ -33,7 +33,7 @@ public:
         assert(m.size() >= 2);
         shuffle(all(m), rnd);
         ptt o1 = m[0], o2 = m[1];
-        T sd = sqd(o1, o2);
+        T sd = dist2(o1, o2);
         rebuild(sqrtl(sd), 2);
         for (int q = 2; q < m.size(); ++q) {
             ull x = m[q].F / sqrtl(sd);
@@ -46,7 +46,7 @@ public:
                     ull hs = hash_pair(nx, ny);
                     if (mp.count(hs)) {
                         for (const ptt& p : mp[hs]) {
-                            if (chmin(sd, sqd(m[q], p))) {
+                            if (chmin(sd, dist2(m[q], p))) {
                                 fl = 1;
                                 o1 = m[q], o2 = p;
                                 if (sd == 0) return {o1, o2};

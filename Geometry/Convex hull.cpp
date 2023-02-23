@@ -9,8 +9,8 @@ vector<pt<T>> convex_hull(vector<pt<T>> arr) {
     });
     vector<pt<T>> ch;
     for (int i = 0; i < arr.size(); ++i) {
-        for (; ch.size() > 1;) {
-            if (cross(ch.back() - end(ch)[-2], arr[i] - ch.back()) > 0) break;
+        while (ch.size() > 1) {
+            if (cross(ch.back() - ch[ch.size() - 2], arr[i] - ch.back()) > 0) break;
             ch.pop_back();
         }
         ch.push_back(arr[i]);
