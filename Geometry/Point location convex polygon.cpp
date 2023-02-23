@@ -1,7 +1,7 @@
 //1 - inside, 0 - border, -1 - outside
 //O(log(n))
 template<typename T>
-int point_location_convex_polygon(vector<pt<T>>& ch, pt<T>& p) {    //ch - convex hull of polygon
+int point_location_convex_polygon(const vector<pt<T>>& ch, const pt<T>& p) {    //ch - convex hull of polygon
     auto pis = [&](pt<T> p1, pt<T> p2, pt<T> p) -> bool{
         return dot(p2 - p1, p - p1) >= 0 && dot(p1 - p2, p - p2) >= 0;
     };
@@ -25,5 +25,5 @@ int point_location_convex_polygon(vector<pt<T>>& ch, pt<T>& p) {    //ch - conve
                pis(ch[0], ch[l], p) ? (l == 1 || l == n - 1 ? 0 : 1) : -1;
     }
     T val = cross(ch[l + 1] - p, p - ch[l]);
-    return sign(val);
+    return val < 0 ? -1 : val > 0 ? 1 : 0;
 }
