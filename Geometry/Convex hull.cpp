@@ -1,6 +1,7 @@
 //Returns smallest subset of arr which generates convex hull, sorted in CCW order.
 template<typename T>
 vector<pt<T>> convex_hull(vector<pt<T>> arr) {
+    if(arr.empty()) return {};
     pt<T> mnp = *min_element(arr.begin(), arr.end());
     for (auto& p : arr) p -= mnp;
     sort(arr.begin(), arr.end(), [&](const auto& p1, const auto& p2) {
