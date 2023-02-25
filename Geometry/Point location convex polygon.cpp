@@ -6,7 +6,7 @@
 */
 //Requirement: ch - points of convex hull of polygon, ordered in CCW order, starting from the lowest of the leftmost points.
 //Complexity: O(log(n))
-//Correctness: Stress tested with point_location_convex_polygon_slow
+//Correctness: Stress tested with linear version of this function.
 template<typename T>
 pair<int, int> point_location_convex_polygon(const vector<pt<T>>& ch, const pt<T>& p) {
     static constexpr pair<int, int> OUTSIDE = {-2, -2};
