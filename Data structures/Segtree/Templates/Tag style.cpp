@@ -28,41 +28,41 @@ class segtree {
 
     tag neutral_tag;   //Init neutral tag
 
-    const uint a, U;
+    const size_t n, U;
     vector<tag> m;
 
     inline int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
-    void push(uint v) {
+    void push(size_t v) {
         push_tag(m[v], m[v << 1], m[v << 1 | 1]);
     }
 
-    void upd(uint v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
-    tag seg_statistic(uint ql, uint qr, uint l, uint r, uint v) {
+    tag seg_statistic(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return neutral_tag;
         if (ql <= l && r <= qr) {
             return m[v];
         }
         push(v);
-        uint md = l + (r - l) >> 1;
+        size_t md = l + (r - l) >> 1;
         const tag lf = seg_statistic(ql, qr, l, md, v << 1);
         const tag rg = seg_statistic(ql, qr, md + 1, r, v << 1 | 1);
         return merge(lf, rg);
     }
 
-    void seg_change(uint ql, uint qr, uint l, uint r, uint v) {
+    void seg_change(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
             //Write change function
             return;
         }
         push(v);
-        uint md = l + (r - l) >> 1;
+        size_t md = l + (r - l) >> 1;
         seg_change(ql, qr, l, md, v << 1);
         seg_change(ql, qr, md + 1, r, v << 1 | 1);
         upd(v);
@@ -71,27 +71,27 @@ class segtree {
 public:
     segtree() = default;
     template<typename I>
-    segtree(I first, I last): a(last - first), U(geq_pow2(a)) {
+    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         m.resize(U * 2);
-        for (uint q = 0; q < a; q++) {
-            tag& t = m[U + q];
-            const T val = *(first + q);
+        for (size_t i = 0; i < n; ++i) {
+            tag& t = m[U + i];
+            const T val = *(first + i);
             //Write init of last layer
         }
-        for (uint q = U; --q;) {
-            const tag &l = m[q << 1], &r = m[q << 1 | 1];
-            merge(l, r, m[q]);
+        for (size_t i = U; --i;) {
+            const tag &l = m[i << 1], &r = m[i << 1 | 1];
+            merge(l, r, m[i]);
         }
     }
     template<typename T_arr>
     segtree(T_arr& n) {
         (*this) = segtree<T>(n.begin(), n.end());
     }
-    segtree(uint a) {
-        vector<T> m(a);
+    segtree(size_t n) {
+        vector<T> m(n);
         (*this) = segtree<T>(m);
     }
 
-    tag seg_statistic(uint ql, uint qr) {return seg_statistic(ql, qr, 0, U - 1, 1);}
-    inline void seg_change(uint ql, uint qr) {seg_change(ql, qr, 0, U - 1, 1);}
+    tag seg_statistic(size_t ql, size_t qr) {return seg_statistic(ql, qr, 0, U - 1, 1);}
+    void seg_change(size_t ql, size_t qr) {seg_change(ql, qr, 0, U - 1, 1);}
 };

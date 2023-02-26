@@ -30,18 +30,18 @@ class segtree_on_points {
 
     tag neutral_tag;   //Init neutral tag
 
-    uint a, U;
+    size_t n, U;
     vector<tag> m;
 
-    void push(uint v) {
+    void push(size_t v) {
         push_tag(m[v], m[v << 1], m[v << 1 | 1]);
     }
 
-    void upd(uint v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
-    tag seg_query(T ql, T qr, uint v) {
+    tag seg_query(T ql, T qr, size_t v) {
         const T l = m[v].bl, r = m[v].br;
         if (qr < l || r < ql) return neutral_tag;
         if (ql <= l && r <= qr) {
@@ -53,7 +53,7 @@ class segtree_on_points {
         return merge(lf, rg);
     }
 
-    void seg_change(T ql, T qr, uint v) {
+    void seg_change(T ql, T qr, size_t v) {
         const T l = m[v].bl, r = m[v].br;
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
@@ -71,37 +71,37 @@ public:
     segtree_on_points() = default;
     segtree_on_points(vector<T> points) {
         if (points.empty()) return;
-        sort(all(points));
-        points.erase(unique(all(points)), points.end());
+        sort(points.begin(), points.end());
+        points.erase(unique(points.begin(), points.end()), points.end());
         vector<pair<T, T>> gr;
-        for (int q = 0; q < points.size(); ++q) {
-            if (q && points[q - 1] + 1 < points[q]) {
-                gr.emplace_back(points[q - 1] + 1, points[q] - 1);
+        for (size_t i = 0; i < points.size(); ++i) {
+            if (i && points[i - 1] + 1 < points[i]) {
+                gr.emplace_back(points[i - 1] + 1, points[i] - 1);
             }
-            gr.emplace_back(points[q], points[q]);
+            gr.emplace_back(points[i], points[i]);
         }
-        a = gr.size();
-        U = geq_pow2(a);
+        n = gr.size();
+        U = n & (n - 1) ? 2 << __lg(n) : n;
         m.resize(U * 2);
-        for (int q = 0; q < a; ++q) {
-            m[U + q].bl = gr[q].first;
-            m[U + q].br = gr[q].second;
+        for (size_t i = 0; i < n; ++i) {
+            m[U + i].bl = gr[i].first;
+            m[U + i].br = gr[i].second;
         }
-        for (int q = a; q < U; ++q) {
-            m[U + q].bl = m[U + q].br = gr[a - 1].second + 1;
+        for (size_t i = n; i < U; ++i) {
+            m[U + i].bl = m[U + i].br = gr[n - 1].second + 1;
         }
-        for (uint q = 0; q < a; ++q) {
-            tag& t = m[U + q];
+        for (size_t i = 0; i < n; ++i) {
+            tag& t = m[U + i];
             //Write init of last layer
         }
-        for (uint q = U; --q;) {
-            const tag &l = m[q << 1], &r = m[q << 1 | 1];
-            merge(l, r, m[q]);
-            m[q].bl = l.bl;
-            m[q].br = r.br;
+        for (size_t i = U; --i;) {
+            const tag &l = m[i << 1], &r = m[i << 1 | 1];
+            merge(l, r, m[i]);
+            m[i].bl = l.bl;
+            m[i].br = r.br;
         }
     }
 
     tag seg_query(T ql, T qr) {return seg_query(ql, qr, 1);}
-    inline void seg_change(T ql, T qr) {seg_change(ql, qr, 1);}
+    void seg_change(T ql, T qr) {seg_change(ql, qr, 1);}
 };
