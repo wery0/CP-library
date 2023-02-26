@@ -51,7 +51,8 @@ public:
     segtree_point_upd() = default;
 
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n), m(U * 2) {
+    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+	m.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
             tag& t = m[U + i];
             const T val = *(first + i);
@@ -77,7 +78,7 @@ public:
     }
 
     //sum{i = l}{r}{arr[i] * (i - l + 1)}
-    T seg_wsum(size_t ql, size_t qr) {
+    T seg_wsum(size_t ql, size_t qr) const {
         ql += U, qr += U;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
@@ -90,7 +91,7 @@ public:
     }
 
     //sum{i = l}{r}{arr[i] * (r - i + 1)}
-    T seg_iwsum(size_t ql, size_t qr) {
+    T seg_iwsum(size_t ql, size_t qr) const {
         ql += U, qr += U;
         tag lt = neutral_tag;
         tag rt = neutral_tag;

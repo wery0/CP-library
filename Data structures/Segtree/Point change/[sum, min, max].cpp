@@ -1,7 +1,7 @@
 template<typename T>
 class segtree_point_upd {
 
-    size_t a, U;
+    size_t n, U;
     vector<T> sm;
     vector<T> mn;
     vector<T> mx;
@@ -16,19 +16,17 @@ public:
     segtree_point_upd() = default;
 
     template<typename I>
-    segtree_point_upd(I first, I last): a(last - first), U(geq_pow2(a)) {
+    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         sm.resize(U * 2);
         mn.resize(U * 2);
         mx.resize(U * 2);
-        for (size_t q = 0; q < a; ++q) {
-            const T val = *(first + q);
-            sm[U + q] = val;
-            mn[U + q] = val;
-            mx[U + q] = val;
+        for (size_t i = 0; i < n; ++i) {
+            const T val = *(first + i);
+            sm[U + i] = val;
+            mn[U + i] = val;
+            mx[U + i] = val;
         }
-        for (size_t q = U; --q;) {
-            upd(q);
-        }
+        for (size_t i = U; --i;) upd(i);
     }
 
     template<typename U>
@@ -41,7 +39,7 @@ public:
         }
     }
 
-    inline T seg_sum(size_t ql, size_t qr) const {
+    T seg_sum(size_t ql, size_t qr) const {
         ql += U, qr += U;
         T ans = 0;
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -51,7 +49,7 @@ public:
         return ans;
     }
 
-    inline T seg_min(size_t ql, size_t qr) const {
+    T seg_min(size_t ql, size_t qr) const {
         ql += U, qr += U;
         T ans = mn[ql];
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -61,7 +59,7 @@ public:
         return ans;
     }
 
-    inline T seg_max(size_t ql, size_t qr) const {
+    T seg_max(size_t ql, size_t qr) const {
         ql += U, qr += U;
         T ans = mx[qr];
         for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
@@ -71,16 +69,13 @@ public:
         return ans;
     }
 
-    inline void point_change(size_t p, T val) {
-        p += U;
-        sm[p] = mn[p] = mx[p] = val;
-        for (p >>= 1; p; p >>= 1) {
-            upd(p);
-        }
+    void point_change(size_t p, T val) {
+        pos += U;
+        sm[pos] = mn[pos] = mx[pos] = val;
+        for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 
     T operator[](size_t pos) const {
         return sm[U + pos];
     }
 };
-//Supports only point updates

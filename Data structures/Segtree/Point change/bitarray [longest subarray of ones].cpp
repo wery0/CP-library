@@ -32,7 +32,7 @@ class segtree_point_upd {
         friend inline void merge_to_right(const tag& l, tag& r) {
             r.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             r.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
-            r.cr += + (r.cr == r.sz ? l.cr : 0);
+            r.cr += r.cr == r.sz ? l.cr : 0;
             r.sz += l.sz;
         }
     };
@@ -50,9 +50,10 @@ public:
     segtree_point_upd() = default;
 
     template<typename T>
-    segtree_point_upd(vector<T>& arr): n(arr.size()), U(n & (n - 1) ? 2 << __lg(n) : n), m(U * 2) {
+    segtree_point_upd(vector<T>& arr): n(arr.size()), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         for (const auto& i : arr) assert(0 <= i && i <= 1);
+	m.resize(U * 2);
         for (size_t q = 0; q < n; ++q) {
             tag& t = m[U + q];
             t.cl = t.cr = arr[q];
@@ -69,7 +70,7 @@ public:
         (*this) = segtree_point_upd(m);
     }
 
-    tag query(size_t ql, size_t qr) {
+    tag query(size_t ql, size_t qr) const {
         ql += U, qr += U;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
