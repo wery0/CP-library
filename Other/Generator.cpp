@@ -49,8 +49,8 @@ namespace Generator {
 
     //Not uniformly random
     /*
-      avg = (r + l) / 2, navg = sum / n
-      Complexity: O(n * log(avg / (avg - abs(avg - navg))))
+      len = r - l, my = sum / n - l
+      Complexity: O(n * log(len / (len - abs(len / 2 - my))))
     */
     template<typename T>
     vector<T> gen_vector_with_fixed_sum(T n, T l, T r, T sum) {
