@@ -47,6 +47,37 @@ namespace Generator {
         return m;
     }
 
+    //Not uniformly random
+    /*
+      avg = (r + l) / 2, navg = sum / n
+      Complexity: O(n * log(avg / (avg - abs(avg - navg))))
+    */
+    template<typename T>
+    vector<T> gen_vector_with_fixed_sum(T n, T l, T r, T sum) {
+        assert(l * n <= sum && sum <= r * n);
+        vector<T> res(n);
+        for (T& c : res) c = gen_val(l, r);
+        T cur = accumulate(res.begin(), res.end(), (T)0);
+        while (cur != sum) {
+            if (cur < sum) {
+                for (T& c : res) {
+                    T eso = r - c;
+                    T tyt = min(gen_val<T>(0, eso), sum - cur);
+                    c += tyt;
+                    cur += tyt;
+                }
+            } else {
+                for (T& c : res) {
+                    T eso = c - l;
+                    T tyt = min(gen_val<T>(0, eso), cur - sum);
+                    c -= tyt;
+                    cur -= tyt;
+                }
+            }
+        }
+        return res;
+    }
+
     template<typename T>
     vector<vector<T>> gen_matrix(int n, int m, T l = nlmin, T r = nlmax) {
         vector<vector<T>> res(n, vector<T>(m));
