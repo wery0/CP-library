@@ -1,4 +1,4 @@
-struct segtree_point_upd {
+class segtree_point_upd {
 
     struct tag {
 
@@ -9,27 +9,27 @@ struct segtree_point_upd {
         tag() = default;
 
 
-        friend inline void merge(const tag &l, const tag &r, tag &res) {
+        friend inline void merge(const tag& l, const tag& r, tag& res) {
             res.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
             res.cr = r.cr + (r.cr == r.sz ? l.cr : 0);
             res.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             res.sz = l.sz + r.sz;
         }
 
-        friend inline tag merge(const tag &l, const tag &r) {
+        friend inline tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;
         }
 
-        friend inline void merge_to_left(tag &l, const tag &r) {
+        friend inline void merge_to_left(tag& l, const tag& r) {
             l.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             l.cl += l.cl == l.sz ? r.cl : 0;
             l.cr = r.cr + (r.cr == r.sz ? l.cr : 0);
             l.sz += r.sz;
         }
 
-        friend inline void merge_to_right(const tag &l, tag &r) {
+        friend inline void merge_to_right(const tag& l, tag& r) {
             r.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             r.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
             r.cr += + (r.cr == r.sz ? l.cr : 0);
@@ -39,38 +39,37 @@ struct segtree_point_upd {
 
     tag neutral_tag;
 
-    uint a, U;
-    vec<tag> m;
+    size_t n, U;
+    vector<tag> m;
 
+    inline void upd(size_t v) {
+        merge(m[v << 1], m[v << 1 | 1], m[v]);
+    }
+
+public:
     segtree_point_upd() = default;
 
     template<typename T>
-    segtree_point_upd(vec<T> &n) {
-        assert(0 <= *min_element(all(n)) && *max_element(all(n)) <= 1);
-        a = n.size();
-        U = geq_pow2(a);
-        m.resize(U * 2);
-        for (uint q = 0; q < a; ++q) {
-            tag &t = m[U + q];
-            t.cl = t.cr = n[q];
+    segtree_point_upd(vector<T>& arr): n(arr.size()), U(n & (n - 1) ? 2 << __lg(n) : n), m(U * 2) {
+        if (!n) return;
+        for (const auto& i : arr) assert(0 <= i && i <= 1);
+        for (size_t q = 0; q < n; ++q) {
+            tag& t = m[U + q];
+            t.cl = t.cr = arr[q];
             t.sz = 1;
         }
-        for (uint q = U; --q;) {
+        for (size_t q = U; --q;) {
             const tag &l = m[q << 1], &r = m[q << 1 | 1];
             merge(l, r, m[q]);
         }
     }
 
-    segtree_point_upd(int a) {
-        vec<bool> m(a);
+    segtree_point_upd(int n) {
+        vector<bool> m(n);
         (*this) = segtree_point_upd(m);
     }
 
-    inline void upd(uint v) {
-        merge(m[v << 1], m[v << 1 | 1], m[v]);
-    }
-
-    inline tag query(uint ql, uint qr) {
+    inline tag query(size_t ql, size_t qr) {
         ql += U, qr += U;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
@@ -81,12 +80,10 @@ struct segtree_point_upd {
         return merge(lt, rt);
     }
 
-    inline void change(uint p, int val) {
+    inline void change(size_t pos, int val) {
         assert(0 <= val && val <= 1);
-        p += U;
-        m[p].cl = m[p].cr = m[p].mxd = val;
-        for (p >>= 1; p; p >>= 1) {
-            upd(p);
-        }
+        pos += U;
+        m[pos].cl = m[pos].cr = m[pos].mxd = val;
+        for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };
