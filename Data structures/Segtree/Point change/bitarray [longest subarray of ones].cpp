@@ -69,7 +69,7 @@ public:
         (*this) = segtree_point_upd(m);
     }
 
-    inline tag query(size_t ql, size_t qr) {
+    tag query(size_t ql, size_t qr) {
         ql += U, qr += U;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
@@ -80,7 +80,7 @@ public:
         return merge(lt, rt);
     }
 
-    inline void change(size_t pos, int val) {
+    void change(size_t pos, int val) {
         assert(0 <= val && val <= 1);
         pos += U;
         m[pos].cl = m[pos].cr = m[pos].mxd = val;
