@@ -9,12 +9,12 @@ vector<pt<T>> convex_hull(vector<pt<T>> arr) {
         return c ? c > 0 : abs(p1.x) + abs(p1.y) < abs(p2.x) + abs(p2.y);
     });
     vector<pt<T>> ch;
-    for (int i = 0; i < arr.size(); ++i) {
+    for (const auto& p : arr) {
         while (ch.size() > 1) {
-            if (cross(ch.back() - ch[ch.size() - 2], arr[i] - ch.back()) > 0) break;
+            if (cross(ch.back() - ch[ch.size() - 2], p - ch.back()) > 0) break;
             ch.pop_back();
         }
-        ch.push_back(arr[i]);
+        ch.push_back(p);
     }
     for (auto& p : ch) p += mnp;
     return ch;
