@@ -133,6 +133,17 @@ namespace Generator {
         return s;
     }
 
+    template<typename T>
+    pair<T, T> gen_point_inside_circle(T cx, T cy, T r) {
+        T x = gen_val(cx - r, cx + r);
+        T y = gen_val(cy - r, cy + r);
+        while ((cx - x) * (cx - x) + (cy - y) * (cy - y) > r * r) {
+            x = gen_val(cx - r, cx + r);
+            y = gen_val(cy - r, cy + r);
+        }
+        return {x, y};
+    }
+
     //Not uniformly random
     vector<pair<int, int>> gen_tree(int n) {
         vector<pair<int, int>> ans(n - 1);
@@ -179,7 +190,7 @@ namespace Generator {
         };
         pair<T, T> mnp = *min_element(arr.begin(), arr.end());
         for (auto& p : arr) p.first -= mnp.first, p.second -= mnp.second;
-        sort(arr.begin(), arr.end(), [&](const auto & p1, const auto & p2) {
+        sort(arr.begin(), arr.end(), [&](const auto& p1, const auto& p2) {
             T c = cross(p1, p2);
             return c ? c > 0 : abs(p1.first) + abs(p1.second) < abs(p2.first) + abs(p2.second);
         });
@@ -218,12 +229,7 @@ namespace Generator {
     vector<pair<T, T>> gen_convex_hull_inside_circle(int n, T cx, T cy, T r) {
         assert(r >= 0);
         vector<pair<T, T>> m(n);
-        for (int i = 0; i < n; ++i) {
-            T x = gen_val(cx - r, cx + r);
-            T y = gen_val(cy - r, cy + r);
-            if ((x - cx) * (x - cx) + (y - cy) * (y - cy) > r * r) --i;
-            else m[i] = {x, y};
-        }
+        for (auto& p : m) p = gen_point_inside_circle(cx, cy, r);
         return __convex_hull(m);
     }
 
