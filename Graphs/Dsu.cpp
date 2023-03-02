@@ -6,12 +6,12 @@ struct dsu {
 
     dsu() = default;
     dsu(int n): n(n), pr(n, -1) {
-        //vrt.resize(n); for (int q = 0; q < n; ++q) vrt[q] = {q};
+        //vrt.resize(n); for (int i = 0; i < n; ++i) vrt[i] = {i};
     }
 
     void clear() {
-        fill(all(pr), -1);
-        //for (int q = 0; q < n; ++q;) vrt[q] = {q}, vrt[q].shrink_to_fit();
+        fill(pr.begin(), pr.end(), -1);
+        //for (int i = 0; i < n; ++i) vrt[i] = {i}, vrt[i].shrink_to_fit();
     }
 
     int get_component_size(int x) {return -pr[find(x)];}

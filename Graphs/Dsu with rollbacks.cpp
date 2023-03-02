@@ -7,7 +7,7 @@ struct dsu_w_rollbacks {
     dsu_w_rollbacks(int n): n(n), pr(n, -1) {}
 
     void clear() {
-        fill(all(pr), -1);
+        fill(pr.begin(), pr.end(), -1);
         store.clear();
     }
 
