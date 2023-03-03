@@ -1,17 +1,17 @@
 //All functions are uniformly random, unless other is stated
 namespace Generator {
 
-#define nlmin numeric_limits<T>::min() / 2
-#define nlmax numeric_limits<T>::max() / 2
+    mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+    mt19937_64 rngll(std::chrono::steady_clock::now().time_since_epoch().count());
 
     template<typename T>
-    T gen_val(T l = nlmin, T r = nlmax) {
+    T gen_val(T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         if constexpr(is_integral_v<T>) {
             uniform_int_distribution<T> gint(l, r);
-            return gint(rndll);
+            return gint(rngll);
         } else if constexpr(is_floating_point_v<T>) {
             uniform_real_distribution<T> greal(l, r);
-            return greal(rndll);
+            return greal(rngll);
         } else {
             assert(0);
         }
@@ -19,19 +19,20 @@ namespace Generator {
     }
 
     template<typename T>
-    vector<T> gen_vector(int n, T l = nlmin, T r = nlmax) {
+    vector<T> gen_vector(int n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         vector<T> m(n);
         for (auto& i : m) i = gen_val<T>(l, r);
         return m;
     }
 
+    //Complexity: O(n) expected
     template<typename T>
-    vector<T> gen_vector_distinct(int n, T l = nlmin, T r = nlmax) {
+    vector<T> gen_vector_distinct(int n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         T d = r - l + 1;
         assert(n <= d);
         if (n * 2 <= d) {
             vector<T> m(n);
-            uset<T> s(n);
+            unordered_set<T> s(n);
             for (auto& i : m) {
                 T c = gen_val<T>(l, r);
                 while (s.count(c)) c = gen_val<T>(l, r);
@@ -42,7 +43,7 @@ namespace Generator {
         }
         vector<T> m(d);
         iota(m.begin(), m.end(), l);
-        shuffle(m.begin(), m.end(), rndll);
+        shuffle(m.begin(), m.end(), rngll);
         m.resize(n);
         return m;
     }
@@ -79,7 +80,7 @@ namespace Generator {
     }
 
     template<typename T>
-    vector<vector<T>> gen_matrix(int n, int m, T l = nlmin, T r = nlmax) {
+    vector<vector<T>> gen_matrix(int n, int m, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         vector<vector<T>> res(n, vector<T>(m));
         for (auto& row : res) {
             for (auto& num : row) {
@@ -125,7 +126,7 @@ namespace Generator {
     string gen_right_parenthesis_sequence(int n) {
         assert(n % 2 == 0);
         string s = string(n / 2, '(') + string(n / 2, ')');
-        shuffle(s.begin(), s.end(), rnd);
+        shuffle(s.begin(), s.end(), rngll);
         for (int q = 0, dep = 0; q < n; ++q) {
             dep += s[q] == '(' ? 1 : -1;
             if (dep < 0 || (dep == 0 && s[q] == '(')) s[q] = '(' + ')' - s[q];
@@ -145,14 +146,14 @@ namespace Generator {
     }
 
     //Not uniformly random
+    //Complexity: O(n)
     vector<pair<int, int>> gen_tree(int n) {
+        assert(n > 0);
         vector<pair<int, int>> ans(n - 1);
-        for (int q = 1; q < n; ++q) {
-            ans[q - 1] = {gen_val(0, q - 1), q};
-        }
+        for (int q = 1; q < n; ++q) ans[q - 1] = {gen_val(0, q - 1), q};
         vector<int> replacement(n);
         iota(replacement.begin(), replacement.end(), 0);
-        shuffle(replacement.begin(), replacement.end(), rnd);
+        shuffle(replacement.begin(), replacement.end(), rngll);
         for (auto& [x, y] : ans) {
             x = replacement[x];
             y = replacement[y];
@@ -161,7 +162,9 @@ namespace Generator {
     }
 
     //Uniformly random among all labeled trees
+    //Complexity: O(n)
     vector<pair<int, int>> gen_tree_prufer(int n) {
+        assert(n > 0);
         if (n == 1) return {};
         vector<int> pcode = gen_vector(n - 2, 0, n - 1);
         vector<int> cnt(n);
@@ -212,11 +215,13 @@ namespace Generator {
         return ch;
     }
 
-    //Expected convex hull size: O(log(n))
+    //Not uniformly random
+    //Expected convex hull size: O(log(samples))
+    //Complexity: O(samples * log(samples))
     template<typename T>
-    vector<pair<T, T>> gen_convex_hull_inside_rectangle(int n, T x1, T y1, T x2, T y2) {
+    vector<pair<T, T>> gen_convex_hull_inside_rectangle_monte_carlo(size_t samples, T x1, T y1, T x2, T y2) {
         assert(x1 <= x2 && y1 <= y2);
-        vector<pair<T, T>> m(n);
+        vector<pair<T, T>> m(samples);
         for (auto& [x, y] : m) {
             x = gen_val(x1, x2);
             y = gen_val(y1, y2);
@@ -224,13 +229,83 @@ namespace Generator {
         return __convex_hull(m);
     }
 
-    //Expected convex hull size: O(cbrt(n))
+    //Not uniformly random
+    //Expected convex hull size: O(cbrt(samples))
+    //Complexity: O(samples * log(samples))
     template<typename T>
-    vector<pair<T, T>> gen_convex_hull_inside_circle(int n, T cx, T cy, T r) {
+    vector<pair<T, T>> gen_convex_hull_inside_circle_monte_carlo(size_t samples, T cx, T cy, T r) {
         assert(r >= 0);
-        vector<pair<T, T>> m(n);
+        vector<pair<T, T>> m(samples);
         for (auto& p : m) p = gen_point_inside_circle(cx, cy, r);
         return __convex_hull(m);
+    }
+
+    //https://cglab.ca/~sander/misc/ConvexGeneration/convex.html
+    /*
+    X = x2 - x1
+    Y = y2 - y1
+    T = min(X, Y, max(X, Y)^{2/3})
+    Expected convex hull size:
+        - O(samples) when samples <= O(T)
+        - o(T) when samples > O(T)
+    */
+    //Complexity: O(samples * log(samples))
+    template<typename T>
+    vector<pair<T, T>> gen_convex_hull_inside_rectangle(size_t samples, T x1, T y1, T x2, T y2) {
+        assert(x1 <= x2 && y1 <= y2);
+        if (samples == 0) return {};
+        if (samples == 1) return {{gen_val(x1, x2), gen_val(y1, y2)}};
+        vector<T> px = gen_vector(samples, x1, x2);
+        vector<T> py = gen_vector(samples, y1, y2);
+        sort(px.begin(), px.end());
+        sort(py.begin(), py.end());
+        vector<T> dx(samples), dy(samples);
+        T lx[2] = {px[0], px[0]};
+        T ly[2] = {py[0], py[0]};
+        for (size_t i = 1; i < samples - 1; ++i) {
+            int cx = gen_val(0, 1);
+            dx[i - 1] = (px[i] - lx[cx]) * (cx ? -1 : 1);
+            lx[cx] = px[i];
+        }
+        for (size_t i = 1; i < samples - 1; ++i) {
+            int cy = gen_val(0, 1);
+            dy[i - 1] = (py[i] - ly[cy]) * (cy ? -1 : 1);
+            ly[cy] = py[i];
+        }
+        dx[samples - 2] = px[samples - 1] - lx[0];
+        dx[samples - 1] = lx[1] - px[samples - 1];
+        dy[samples - 2] = py[samples - 1] - ly[0];
+        dy[samples - 1] = ly[1] - py[samples - 1];
+        shuffle(dy.begin(), dy.end(), rngll);
+        vector<pair<T, T>> ans(samples);
+        for (size_t i = 0; i < samples; ++i) ans[i] = {dx[i], dy[i]};
+        auto part = [](const pair<T, T>& p) -> int {
+            if (p.second < 0) return 0;
+            if (p.second == 0 && p.first >= 0) return 1;
+            return 2;
+        };
+        sort(ans.begin(), ans.end(), [&](const auto& l, const auto& r) {
+            int pl = part(l), pr = part(r);
+            if (pl != pr) return pl < pr;
+            T cross = l.first * r.second - l.second * r.first;
+            if (cross) return cross > 0;
+            return abs(l.first) + abs(l.second) < abs(r.first) + abs(r.second);
+        });
+        for (size_t i = 1; i < samples; ++i) {
+            ans[i].first += ans[i - 1].first;
+            ans[i].second += ans[i - 1].second;
+        }
+        T mnx = numeric_limits<T>::max(), mxx = numeric_limits<T>::min();
+        T mny = numeric_limits<T>::max(), mxy = numeric_limits<T>::min();
+        for (const auto& [x, y] : ans) {
+            mnx = min(mnx, x), mxx = max(mxx, x);
+            mny = min(mny, y), mxy = max(mxy, y);
+        }
+        T ax = x1 - mnx, ay = y1 - mny;
+        ax += gen_val<T>(0, x2 - (mxx + ax));
+        ay += gen_val<T>(0, y2 - (mxy + ay));
+        for (auto& [x, y] : ans) x += ax, y += ay;
+        return __convex_hull(ans);
     }
 
     template<typename T_arr>
