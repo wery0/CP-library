@@ -1,15 +1,14 @@
 template<typename T>
-bool is_convex_polygon(const vector<pt<T>>& m) {
-    const int n = m.size();
-    int sgn = 0;
-    for (int i = 0; i < n; ++i) {
+bool is_convex_polygon(const vector<pt<T>>& m, bool strictly = false) {
+    const size_t n = m.size();
+    for (size_t i = 0, sgn = 0; i < n; ++i) {
         pt<T> v1 = m[(i + 1) % n] - m[i];
         pt<T> v2 = m[(i + 2) % n] - m[(i + 1) % n];
         T val = cross(v1, v2);
-        val = val < 0 ? -1 : val > 0 ? 1 : 0;
-        if (val == 0) continue;
+        val = val < 0 ? 2 : val > 0 ? 1 : 0;
+        if (val == 0 && strictly) return false;
         if (sgn == 0) sgn = val;
-        else if (sgn != val) return 0;
+        else if (val && sgn != val) return false;
     }
-    return 1;
+    return true;
 }
