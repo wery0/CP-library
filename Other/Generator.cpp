@@ -250,6 +250,7 @@ namespace Generator {
         - o(T) when samples > O(T)
     */
     //Complexity: O(samples * log(samples))
+    //Note: max(X, Y) ^ 2 should fit in T
     template<typename T>
     vector<pair<T, T>> gen_convex_hull_inside_rectangle(size_t samples, T x1, T y1, T x2, T y2) {
         assert(x1 <= x2 && y1 <= y2);
