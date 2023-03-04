@@ -14,7 +14,7 @@ struct offline_seg_add {
         }
     }
     template<typename T_arr>
-    offline_seg_add(T_arr& arr, typename enable_if <!is_integral_v<T_arr >>::type* = 0) {
+    offline_seg_add(T_arr& arr, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
         (*this) = offline_seg_add(arr.begin(), arr.end());
     }
 
