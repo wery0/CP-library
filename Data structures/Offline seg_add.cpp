@@ -1,21 +1,25 @@
 template<typename T>
 struct offline_seg_add {
 
-    int n;
+    size_t n;
     vector<T> store;
 
     offline_seg_add() = default;
-    offline_seg_add(int n): n(n), store(n + 1) {}
+    offline_seg_add(size_t n): n(n), store(n + 1) {}
     template<typename I>
     offline_seg_add(I first, I last): n(last - first), store(n + 1) {
-        for (int q = 0; q < n; ++q) {
-            store[q] += *(first + q);
-            store[q + 1] -= *(first + q);
+        for (size_t i = 0; i < n; ++i) {
+            store[i] += *(first + i);
+            store[i + 1] -= *(first + i);
         }
     }
     template<typename T_arr>
-    offline_seg_add(T_arr& m) {
-        (*this) = offline_seg_add(all(m));
+    offline_seg_add(T_arr& arr, typename enable_if <!is_integral_v<T_arr >>::type* = 0) {
+        (*this) = offline_seg_add(arr.begin(), arr.end());
+    }
+
+    void clear() {
+        fill(store.begin(), store.end(), 0);
     }
 
     void seg_add(int l, int r, T val) {
@@ -23,21 +27,9 @@ struct offline_seg_add {
         store[r + 1] -= val;
     }
 
-    void clear() {
-        fill(store.begin(), store.end(), 0);
-    }
-
-    void get_result(vector<T>& m) {
-        assert(n <= m.size());
-        m[0] = store[0];
-        for (int q = 1; q < n; ++q) {
-            m[q] = m[q - 1] + store[q];
-        }
-    }
-
-    vector<T> get_result() {
-        vector<T> m(n);
-        get_result(m);
-        return m;
+    vector<T> get_result() const {
+        vector<T> ans(n);
+        partial_sum(store.begin(), store.begin() + n, ans.begin());
+        return ans;
     }
 };
