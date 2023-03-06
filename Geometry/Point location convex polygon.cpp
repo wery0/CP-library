@@ -1,8 +1,8 @@
 /*
-{-2, -2} - outside
-{-1, -1} - inside
-{i, i} (i >= 0) - border, p == ch[i]
-{i, j} (i, j >= 0, i != j) - border, p on segment {ch[i], ch[j]}
+{-2, -2} - p is outside
+{-1, -1} - p is inside
+{i, i} (i >= 0) - p is on the border, p == ch[i]
+{i, j} (i, j >= 0, i != j) - p is on the border, p lies inside segment {ch[i], ch[j]}
 */
 //Requirement: ch - points of strict convex hull, ordered in CCW order, starting from the lowest of the leftmost points.
 //Complexity: O(log(n))
