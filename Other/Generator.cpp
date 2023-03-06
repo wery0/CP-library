@@ -197,6 +197,7 @@ namespace Generator {
             T c = cross(p1, p2);
             return c ? c > 0 : abs(p1.first) + abs(p1.second) < abs(p2.first) + abs(p2.second);
         });
+        if (arr[0] == arr.back()) return {arr[0]};
         vector<pair<T, T>> ch;
         for (int i = 0; i < arr.size(); ++i) {
             while (ch.size() > 1) {

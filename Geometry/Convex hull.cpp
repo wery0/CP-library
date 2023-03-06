@@ -8,6 +8,7 @@ vector<pt<T>> convex_hull(vector<pt<T>> arr) {
         T c = cross(p1, p2);
         return c ? c > 0 : abs(p1.x) + abs(p1.y) < abs(p2.x) + abs(p2.y);
     });
+    if (arr[0] == arr.back()) return {arr[0]};
     vector<pt<T>> ch;
     for (const auto& p : arr) {
         while (ch.size() > 1) {
