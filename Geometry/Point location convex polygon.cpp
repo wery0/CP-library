@@ -39,7 +39,7 @@ pair<int, int> point_location_convex_polygon(const vector<pt<T>>& ch, const pt<T
             if (l == 1 || l == n - 1) {
                 if (ch[0] == p) return {0, 0};
                 if (ch[l] == p) return make_pair(l, l);
-                return l == 1 ? make_pair(0, l) : make_pair(l, 0);
+                return l == 1 ? make_pair((size_t)0, l) : make_pair(l, (size_t)0);
             }
             return INSIDE;
         }
