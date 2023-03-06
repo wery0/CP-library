@@ -58,3 +58,10 @@ str minutes_to_time(int m, bool h0 = true, bool m0 = true) {int h = m / 60; m %=
 ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}
 bool is_vowel_lowercase(char c) {return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';}
 bool is_consonant_lowercase(char c) {return !is_vowel_lowercase(c);}
+uint leq_pow2(const uint x) {return 1u << __lg(x);}
+ull leq_pow2ll(const ull x) {return 1ull << __lg(x);}
+uint geq_pow2(const uint x) {return x & (x - 1) ? 2u << __lg(x) : x;}
+ull geq_pow2ll(const ull x) {return x & (x - 1) ? 2ull << __lg(x) : x;}
+ll sqd(const pll p1, const pll p2) {return (p1.F - p2.F) * (p1.F - p2.F) + (p1.S - p2.S) * (p1.S - p2.S);}
+ll sqd(const ll x1, const ll y1, const ll x2, const ll y2) {return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);}
+template<typename T> int sign(T x) {return x < 0 ? -1 : x > 0 ? 1 : 0;}
