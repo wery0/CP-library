@@ -8,8 +8,8 @@ struct pt {
     T x = 0, y = 0;
 
     pt() = default;
-    template<typename U>
-    pt(U a, U b): x(a), y(b) {}
+    template<typename T1, typename T2>
+    pt(T1 a, T2 b): x(a), y(b) {}
     template<typename U>
     pt(const pt<U>& p): x(p.x), y(p.y) {}
 
@@ -24,21 +24,37 @@ struct pt {
     void operator*=(const T c) {x *= c, y *= c;}
     void operator/=(const T c) {x /= c, y /= c;}
 
-    bool operator==(const pt& p) const {return p.x == x && p.y == y;}
-    bool operator!=(const pt& p) const {return p.x != x || p.y != y;}
-    bool operator<(const pt& p) const {return x < p.x || (x == p.x && y < p.y);}
+    bool operator==(const pt& p) const {
+        if constexpr(is_integral_v<T>) return p.x == x && p.y == y;
+        return abs(p.x - x) < EPS && abs(p.y - y) < EPS;
+    }
+    bool operator!=(const pt& p) const {return !(*this == p);}
+    bool operator<(const pt& p) const {
+        if constexpr(is_integral_v<T>) return x < p.x || (x == p.x && y < p.y);
+        return x + EPS < p.x || (abs(x - p.x) < EPS && y + EPS < p.y);
+    }
 
-    T dot(const pt& p) const {return x * p.x + y * p.y;}
-    T cross(const pt& p) const {return x * p.y - y * p.x;}
-    D dist(const pt& p) const {return hypotl(x - p.x, y - p.y);}
-    T dist2(const pt& p) const {return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);}
-    T mdist(const pt& p) const {return abs(x - p.x) + abs(y - p.y);}
+    template<typename U>
+    auto dot(const pt<U>& p) const {return x * p.x + y * p.y;}
+    template<typename U>
+    auto cross(const pt<U>& p) const {return x * p.y - y * p.x;}
+    template<typename U>
+    D dist(const pt<U>& p) const {return hypotl(x - p.x, y - p.y);}
+    template<typename U>
+    auto dist2(const pt<U>& p) const {return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);}
+    template<typename U>
+    auto mdist(const pt<U>& p) const {return abs(x - p.x) + abs(y - p.y);}
 
-    friend T dot(const pt& p1, const pt& p2) {return p1.x * p2.x + p1.y * p2.y;}
-    friend T cross(const pt& p1, const pt& p2) {return p1.x * p2.y - p1.y * p2.x;}
-    friend D dist(const pt& p1, const pt& p2) {return hypotl(p1.x - p2.x, p1.y - p2.y);}
-    friend T dist2(const pt& p1, const pt& p2) {return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);}
-    friend T mdist(const pt& p1, const pt& p2) {return abs(p1.x - p2.x) + abs(p1.y - p2.y);}
+    template<typename U>
+    friend auto dot(const pt& p1, const pt<U>& p2) {return p1.x * p2.x + p1.y * p2.y;}
+    template<typename U>
+    friend auto cross(const pt& p1, const pt<U>& p2) {return p1.x * p2.y - p1.y * p2.x;}
+    template<typename U>
+    friend D dist(const pt& p1, const pt<U>& p2) {return hypotl(p1.x - p2.x, p1.y - p2.y);}
+    template<typename U>
+    friend auto dist2(const pt& p1, const pt<U>& p2) {return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);}
+    template<typename U>
+    friend auto mdist(const pt& p1, const pt<U>& p2) {return abs(p1.x - p2.x) + abs(p1.y - p2.y);}
 
     void self_rotate_about_origin(D ang) {
         const D sn = sinl(ang), cs = cosl(ang);
