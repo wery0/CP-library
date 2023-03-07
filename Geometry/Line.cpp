@@ -5,8 +5,8 @@ struct line {
     T A, B, C;
 
     line() = default;
-    template<typename U>
-    line(U A, U B, U C): A(A), B(B), C(C) {self_normalize();}
+    template<typename T1, typename T2, typename T3>
+    line(T1 A, T2 B, T3 C): A(A), B(B), C(C) {self_normalize();}
     template<typename U>
     line(const pt<U>& a, const pt<U>& b): A(a.y - b.y), B(b.x - a.x), C(cross(a, b)) {self_normalize();}
     template<typename U>
