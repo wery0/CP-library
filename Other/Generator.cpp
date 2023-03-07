@@ -3,6 +3,7 @@ namespace Generator {
 
     mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
     mt19937_64 rngll(std::chrono::steady_clock::now().time_since_epoch().count());
+    const long double EPS = 1e-9;
 
     template<typename T>
     T gen_val(T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
@@ -187,30 +188,32 @@ namespace Generator {
 
     template<typename T>
     vector<pair<T, T>> __convex_hull(vector<pair<T, T>> arr) {
+        static const T eps = is_integral_v<T> ? 0 : EPS;
         if (arr.empty()) return {};
         auto cross = [](const pair<T, T>& p1, const pair<T, T>& p2) -> T {
             return p1.first * p2.second - p1.second * p2.first;
         };
         pair<T, T> mnp = *min_element(arr.begin(), arr.end());
         for (auto& p : arr) p.first -= mnp.first, p.second -= mnp.second;
-        sort(arr.begin(), arr.end(), [&](const auto& p1, const auto& p2) {
+        sort(arr.begin(), arr.end(), [&](const pair<T, T>& p1, const pair<T, T>& p2) {
             T c = cross(p1, p2);
-            return c ? c > 0 : abs(p1.first) + abs(p1.second) < abs(p2.first) + abs(p2.second);
+            return abs(c) > eps ? c > 0 : abs(p1.first) + abs(p1.second) < abs(p2.first) + abs(p2.second);
         });
-        if (arr[0] == arr.back()) return {arr[0]};
         vector<pair<T, T>> ch;
-        for (int i = 0; i < arr.size(); ++i) {
+        for (const auto& p : arr) {
             while (ch.size() > 1) {
                 auto p1 = ch.back();
                 p1.first -= ch[ch.size() - 2].first;
                 p1.second -= ch[ch.size() - 2].second;
-                auto p2 = arr[i];
+                auto p2 = p;
                 p2.first -= ch.back().first;
                 p2.second -= ch.back().second;
-                if (cross(p1, p2) > 0) break;
+                if (cross(p1, p2) > eps) break;
                 ch.pop_back();
             }
-            ch.push_back(arr[i]);
+            if (ch.empty() || abs(p.first - ch.back().first) + abs(p.second - ch.back().second) > eps) {
+                ch.push_back(p);
+            }
         }
         for (auto& p : ch) p.first += mnp.first, p.second += mnp.second;
         return ch;
@@ -247,8 +250,9 @@ namespace Generator {
     Y = y2 - y1
     T = min(X, Y, max(X, Y)^{2/3})
     Expected convex hull size:
-        - O(samples) when samples <= O(T)
-        - o(T) when samples > O(T)
+        - ~samples when T is floating point type, depends on EPS
+        - O(samples) when samples <= O(T) and T is integral type
+        - o(T) when samples > O(T) and T is integral type
     */
     //Complexity: O(samples * log(samples))
     //Note: max(X, Y) ^ 2 should fit in T
@@ -286,7 +290,7 @@ namespace Generator {
             if (p.second == 0 && p.first >= 0) return 1;
             return 2;
         };
-        sort(ans.begin(), ans.end(), [&](const auto& l, const auto& r) {
+        sort(ans.begin(), ans.end(), [&](const pair<T, T>& l, const pair<T, T>& r) {
             int pl = part(l), pr = part(r);
             if (pl != pr) return pl < pr;
             T cross = l.first * r.second - l.second * r.first;
