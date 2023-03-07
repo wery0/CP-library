@@ -5,14 +5,12 @@ struct line {
     T A, B, C;
 
     line() = default;
-    line(T A, T B, T C): A(A), B(B), C(C) {self_normalize();}
     template<typename U>
-    line(const pt<U>& a, const pt<U>& b) {
-        A = a.y - b.y;
-        B = b.x - a.x;
-        C = cross(a, b);
-        self_normalize();
-    }
+    line(U A, U B, U C): A(A), B(B), C(C) {self_normalize();}
+    template<typename U>
+    line(const pt<U>& a, const pt<U>& b): A(a.y - b.y), B(b.x - a.x), C(cross(a, b)) {self_normalize();}
+    template<typename U>
+    line(const line<U>& l): A(l.A), B(l.B), C(l.C) {self_normalize();}
 
     template<typename U>
     D get_dist_to_pt(const pt<U>& p) const {
@@ -25,7 +23,7 @@ struct line {
 
     void self_normalize() {
         if constexpr(is_integral_v<T>) {
-            assert(abs(A) + abs(B) > 0);
+            assert(A || B);
             T gc = __gcd(__gcd(abs(A), abs(B)), abs(C));
             if (A < 0 || (A == 0 && B < 0)) gc *= -1;
             A /= gc, B /= gc, C /= gc;
@@ -50,11 +48,10 @@ struct line {
 
     template<typename U>
     pt<D> get_projection_of_point(const pt<U>& p) const {
-        D dst = get_dist_to_pt(p);
         pt<D> norm{A, B};
         norm.self_normalize();
-        norm *= dst;
-        pt<D> o{(D)p.x, (D)p.y}; o += norm;
+        norm *= get_dist_to_pt(p);
+        pt<D> o(p); o += norm;
         if (get_dist_to_pt(o) < EPS) return o;
         o -= norm * 2;
         assert(get_dist_to_pt(o) < EPS);
@@ -63,31 +60,33 @@ struct line {
 
     template<typename U>
     pt<D> intersect(const line<U>& l) const {
-        assert(abs(A - l.A) + abs(B - l.B) > EPS);
-        D x = (D)1.0 * (l.C * B - C * l.B) / (A * l.B - l.A * B);
-        D y = (D)1.0 * (l.A * C - A * l.C) / (A * l.B - l.A * B);
+        assert(!is_equal_to(l));
+        D x = (D)(l.C * B - C * l.B) / (A * l.B - l.A * B);
+        D y = (D)(l.A * C - A * l.C) / (A * l.B - l.A * B);
         return {x, y};
     }
 
     template<typename U>
     bool is_parallel_to(const line<U>& l) const {
+        if constexpr(is_integral_v<T> && is_integral_v<U>) return l.A == A && l.B == B;
         return abs(l.A - A) + abs(l.B - B) < EPS;
     }
 
     template<typename U>
     bool is_equal_to(const line<U>& l) const {
+        if constexpr(is_integral_v<T> && is_integral_v<U>) return l.A == A && l.B == B && l.C == C;
         return abs(l.A - A) + abs(l.B - B) + abs(l.C - C) < EPS;
     }
 
-    void printkxb() const {
+    void print_kxb() const {
         if (abs(B) < EPS) {
-            cout << "X = " << -((D)C / A) << '\n';
+            cout << "x = " << -((D)C / A) << '\n';
         } else {
-            cout << "Y = " << -((D)A / B) << "X + " << -((D)C / B) << '\n';
+            cout << "y = " << -((D)A / B) << "x + " << -((D)C / B) << '\n';
         }
     }
 
-    void printABC() const {
-        cout << A << ' ' << B << ' ' << C << '\n';
+    void print_abc() const {
+        cout << A << "x + " << B << "y + " << C << " = 0\n";
     }
 };
