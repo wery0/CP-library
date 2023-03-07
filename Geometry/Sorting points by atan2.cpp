@@ -7,36 +7,31 @@ Example:
 */
 //O(nlogn)
 template<typename T>
-void sort_points_by_atan2(vector<pair<T, T>>& m) {
-    auto part = [](const pair<T, T>& p) -> int {
-        if (p.second < 0) return 0;
-        if (p.second == 0 && p.first >= 0) return 1;
-        return 2;
+void sort_points_by_atan2(vector<pt<T>>& m) {
+    const T eps = is_integral_v<T> ? 0 : EPS;
+    auto part = [&](const pt<T>& p) -> int {
+        return p.y < -eps ? 0 : abs(p.y) <= eps && p.x >= -eps ? 1 : 2;
     };
-    sort(m.begin(), m.end(), [&](const auto& l, const auto& r) {
-        int pl = part(l);
-        int pr = part(r);
+    sort(m.begin(), m.end(), [&](const pt<T>& l, const pt<T>& r) {
+        int pl = part(l), pr = part(r);
         if (pl != pr) return pl < pr;
-        T cross = l.first * r.second - l.second * r.first;     //Ensure, that it fits in T
-        if (cross) return cross > 0;
-        return abs(l.first) + abs(l.second) < abs(r.first) + abs(r.second);
+        T cross = l.x * r.y - l.y * r.x;     //Ensure, that it fits in T
+        if (abs(cross) > eps) return cross > 0;
+        return abs(l.x) + abs(l.y) < abs(r.x) + abs(r.y);
     });
 }
 
-//Specialization for point structure.
+//Specialization for pair
 template<typename T>
-void sort_points_by_atan2(vector<pt<T>>& m) {
-    auto part = [](const pt<T>& p) -> int {
-        if (p.y < 0) return 0;
-        if (p.y == 0 && p.x >= 0) return 1;
-        return 2;
+void sort_points_by_atan2(vector<pair<T, T>>& m) {
+    auto part = [&](const pair<T, T>& p) -> int {
+        return p.second < -eps ? 0 : abs(p.second) <= eps && p.first >= -eps ? 1 : 2;
     };
-    sort(m.begin(), m.end(), [&](const auto& l, const auto& r) {
-        int pl = part(l);
-        int pr = part(r);
+    sort(m.begin(), m.end(), [&](const pair<T, T>& l, const pair<T, T>& r) {
+        int pl = part(l), pr = part(r);
         if (pl != pr) return pl < pr;
-        T cross = l.x * r.y - l.y * r.x;     //Ensure, that it fits in T
-        if (cross) return cross > 0;
-        return abs(l.x) + abs(l.y) < abs(r.x) + abs(r.y);
+        T cross = l.first * r.second - l.second * r.first;     //Ensure, that it fits in T
+        if (abs(cross) > eps) return cross > 0;
+        return abs(l.first) + abs(l.second) < abs(r.first) + abs(r.second);
     });
 }
