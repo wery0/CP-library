@@ -1,3 +1,5 @@
+const long double EPS = 1e-9;
+
 //T - type for coordinates
 //D - floating point type for noninteger calculations (sqrt for example)
 template<typename T, typename D = long double>
@@ -6,7 +8,10 @@ struct pt {
     T x = 0, y = 0;
 
     pt() = default;
-    pt(T a, T b): x(a), y(b) {}
+    template<typename U>
+    pt(U a, U b): x(a), y(b) {}
+    template<typename U>
+    pt(const pt<U>& p): x(p.x), y(p.y) {}
 
     pt<T> operator+(const pt& p) const {return {x + p.x, y + p.y};}
     pt<T> operator-(const pt& p) const {return {x - p.x, y - p.y};}
@@ -42,17 +47,16 @@ struct pt {
         x = nx, y = ny;
     }
 
-    void self_normalize(const D EPS = 1e-9) {
+    void self_normalize() {
         if (abs(x) < EPS && abs(y) < EPS) assert(0);
         D c = hypotl(x, y);
         x /= c, y /= c;
     }
 
-    pt<D> get_normalized(const D EPS = 1e-9) const {
+    pt<D> get_normalized() const {
         if (abs(x) < EPS && abs(y) < EPS) assert(0);
         D c = hypotl(x, y);
-        x /= c, y /= c;
-        return pt(x, y);
+        return pt(x / c, y / c);
     }
 
     friend istream& operator>>(istream& is, pt& p) {return is >> p.x >> p.y;}
