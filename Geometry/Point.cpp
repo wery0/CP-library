@@ -24,13 +24,16 @@ struct pt {
     void operator*=(const T c) {x *= c, y *= c;}
     void operator/=(const T c) {x /= c, y /= c;}
 
-    bool operator==(const pt& p) const {
-        if constexpr(is_integral_v<T>) return p.x == x && p.y == y;
+    template<typename U>
+    bool operator==(const pt<U>& p) const {
+        if constexpr(is_integral_v<T> && is_integral_v<U>) return p.x == x && p.y == y;
         return abs(p.x - x) < EPS && abs(p.y - y) < EPS;
     }
-    bool operator!=(const pt& p) const {return !(*this == p);}
-    bool operator<(const pt& p) const {
-        if constexpr(is_integral_v<T>) return x < p.x || (x == p.x && y < p.y);
+    template<typename U>
+    bool operator!=(const pt<U>& p) const {return !(*this == p);}
+    template<typename U>
+    bool operator<(const pt<U>& p) const {
+        if constexpr(is_integral_v<T> && is_integral_v<U>) return x < p.x || (x == p.x && y < p.y);
         return x + EPS < p.x || (abs(x - p.x) < EPS && y + EPS < p.y);
     }
 

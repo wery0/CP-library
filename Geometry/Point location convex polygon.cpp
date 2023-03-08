@@ -6,46 +6,51 @@
 */
 //Requirement: ch - points of strict convex hull, ordered in CCW order, starting from the lowest of the leftmost points.
 //Complexity: O(log(n))
-//Correctness: Stress tested with linear version of this function.
-template<typename T>
-pair<int, int> point_location_convex_polygon(const vector<pt<T>>& ch, const pt<T>& p) {
-    static constexpr pair<int, int> OUTSIDE = {-2, -2};
-    static constexpr pair<int, int> INSIDE = {-1, -1};
-    const size_t n = ch.size();
-    auto pis = [&](const pt<T>& p1, const pt<T>& p2, const pt<T>& p) -> bool {
-        return dot(p2 - p1, p - p1) >= 0 && dot(p1 - p2, p - p2) >= 0;
+//Correctness: Stress tested with linear version of this function
+template<typename T, typename U>
+array<ssize_t, 2> point_location_convex_polygon(const vector<pt<T>>& ch, const pt<U>& p) {
+    static const auto eps = is_integral_v<T> && is_integral_v<U> ? (T)0 : is_floating_point_v<T> ? (T)EPS : (U)EPS;
+    static constexpr array<ssize_t, 2> OUTSIDE = {-2, -2};
+    static constexpr array<ssize_t, 2> INSIDE = {-1, -1};
+    const ssize_t n = ch.size();
+    auto pis = [&](const pt<T>& p1, const pt<T>& p2) -> bool {
+        return dot(p2 - p1, p - p1) >= -eps && dot(p1 - p2, p - p2) >= -eps;
     };
     if (n == 0) return OUTSIDE;
-    if (n == 1) return ch[0] == p ? make_pair(0, 0) : OUTSIDE;
+    if (n == 1) {
+        if (ch[0] == p) return {0, 0};
+        return OUTSIDE;
+    }
     if (n == 2) {
-        if (cross(ch[0] - p, ch[1] - p) == 0 && pis(ch[0], ch[1], p)) {
+        if (abs(cross(ch[0] - p, ch[1] - p)) <= eps && pis(ch[0], ch[1])) {
             if (p == ch[0]) return {0, 0};
             if (p == ch[1]) return {1, 1};
             return {0, 1};
         }
         return OUTSIDE;
     }
-    if (p.x < ch[0].x) return OUTSIDE;
-    if (cross(p - ch[0], ch[1] - ch[0]) > 0) return OUTSIDE;
-    if (cross(ch.back() - ch[0], p - ch[0]) > 0) return OUTSIDE;
-    size_t l = 1, r = n;
+    if (p.x + eps < ch[0].x) return OUTSIDE;
+    if (cross(p - ch[0], ch[1] - ch[0]) > eps) return OUTSIDE;
+    if (cross(ch.back() - ch[0], p - ch[0]) > eps) return OUTSIDE;
+    ssize_t l = 1, r = n;
     while (l + 1 < r) {
-        size_t md = (l + r) / 2;
-        (cross(ch[md] - ch[0], p - ch[0]) >= 0 ? l : r) = md;
+        ssize_t md = (l + r) / 2;
+        (cross(ch[md] - ch[0], p - ch[0]) >= -eps ? l : r) = md;
     }
-    if (cross(ch[l] - ch[0], p - ch[0]) == 0) {
+    if (abs(cross(ch[l] - ch[0], p - ch[0])) <= eps) {
         if (p == ch[l]) return {l, l};
-        if (pis(ch[0], ch[l], p)) {
+        if (pis(ch[0], ch[l])) {
             if (l == 1 || l == n - 1) {
                 if (ch[0] == p) return {0, 0};
-                if (ch[l] == p) return make_pair(l, l);
-                return l == 1 ? make_pair((size_t)0, l) : make_pair(l, (size_t)0);
+                if (ch[l] == p) return {l, l};
+                if (l == 1) return {0, l};
+                return {l, 0};
             }
             return INSIDE;
         }
         return OUTSIDE;
     }
-    T val = cross(ch[l + 1] - p, p - ch[l]);
-    if (val) return val < 0 ? OUTSIDE : INSIDE;
+    auto val = cross(ch[l + 1] - p, p - ch[l]);
+    if (abs(val) > eps) return val < 0 ? OUTSIDE : INSIDE;
     return {l, (l + 1) % n};
 }
