@@ -21,7 +21,6 @@ array<ssize_t, 2> get_tangents_to_convex_polygon_from_point(const vector<pt<T>>&
     using H = remove_const<decltype(eps)>::type;
     static constexpr array<ssize_t, 2> NO = {-1, -1};
     auto sign = [](H x) -> int {return x < -eps ? -1 : x > eps ? 1 : 0;};
-    auto eval = [](const line<H>& l, const pt<U>& p) -> H {return l.A * p.x + l.B * p.y + l.C;};
     const ssize_t n = ch.size();
     if (location[0] == -3) location = point_location_convex_polygon(ch, p);
     if (location[0] == -1) return NO;
@@ -46,13 +45,13 @@ array<ssize_t, 2> get_tangents_to_convex_polygon_from_point(const vector<pt<T>>&
     }
     line<H> l(p, ch[0]);
     ssize_t lf = 0, rg = n;
-    int sgn = sign(eval(l, ch[1]));
+    int sgn = sign(l.eval(ch[1]));
     if (sgn == 0) {
         lf = 1;
     } else {
         while (lf + 1 < rg) {
             ssize_t md = (lf + rg) / 2;
-            int tyt = sign(eval(l, ch[md]));
+            int tyt = sign(l.eval(ch[md]));
             if (tyt == -sgn) rg = md;
             else lf = md;
         }
