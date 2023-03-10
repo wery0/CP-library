@@ -13,6 +13,11 @@ struct line {
     line(const line<U>& l): A(l.A), B(l.B), C(l.C) {self_normalize();}
 
     template<typename U>
+    auto eval(const pt<U>& p) const {
+        return A * p.x + B * p.y + C;
+    }
+
+    template<typename U>
     D get_dist_to_pt(const pt<U>& p) const {
         if constexpr(is_integral_v<T>) {
             return abs(A * p.x + B * p.y + C) / hypotl(A, B);
