@@ -14,19 +14,20 @@ vector<pt<D>> intersection_convex_polygon_line(const vector<pt<T>>& ch, const li
     using H = remove_const<decltype(eps)>::type;
     const ssize_t n = ch.size();
     auto eval = [&](ssize_t i) -> H {i -= i >= n ? n : 0; return l.A * ch[i].x + l.B * ch[i].y + l.C;};
-    auto sign = [](H x) -> int {return x < -EPS ? -1 : x > EPS ? 1 : 0;};
-    auto is_point_on_segment = [](const pt<D>& p, const pt<D>& p1, const pt<D>& p2) -> bool {
-        return abs(cross(p - p1, p - p2)) < EPS && dot(p2 - p1, p - p1) > -EPS && dot(p1 - p2, p - p2) > -EPS;
-    };
+    auto sign = [](H x) -> int {return x < -eps ? -1 : x > eps ? 1 : 0;};
     auto segment_line_intersection = [&](const pt<T>& p1, const pt<T>& p2) -> vector<pt<D>> {
         line<T> u(p1, p2);
         if (l.is_parallel_to(u)) {
             if (l.is_equal_to(u)) return {p1, p2, p1};
             return {};
         }
+        int s1 = sign(l.eval(p1));
+        int s2 = sign(l.eval(p2));
+        if(s1 == 0) return {p1};
+        if(s2 == 0) return {p2};
+        if(s1 == s2) return {};
         pt<D> p = l.intersect(u);
-        if (is_point_on_segment(p, p1, p2)) return {p};
-        return {};
+        return {p};
     };
     if (n == 0) return {};
     if (n == 1) {
@@ -38,9 +39,9 @@ vector<pt<D>> intersection_convex_polygon_line(const vector<pt<T>>& ch, const li
     H c1 = -l.A * ch[t1[0]].x - l.B * ch[t1[0]].y;
     H c2 = -l.A * ch[t2[0]].x - l.B * ch[t2[0]].y;
     if (c1 > c2) swap(c1, c2), swap(t1, t2);
-    if (l.C < c1 - EPS || c2 + EPS < l.C) return {};
+    if (l.C < c1 - eps || c2 + eps < l.C) return {};
     for (auto [t, c] : {pair{t1, c1}, pair{t2, c2}}) {
-        if (abs(l.C - c) < EPS) {
+        if (abs(l.C - c) <= eps) {
             if (t[0] == t[1]) return {ch[t[0]]};
             return {ch[t[0]], ch[t[1]], ch[t[0]]};
         }
