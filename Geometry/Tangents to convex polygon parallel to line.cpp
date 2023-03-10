@@ -22,7 +22,7 @@ array<array<ssize_t, 2>, 2> get_tangents_to_convex_polygon_parallel_to_line(cons
         int pr = r.x > eps ? 0 : abs(r.x) <= eps && r.y >= -eps ? 1 : 2;
         return pl != pr ? pl < pr : cross(l, r) > eps;
     };
-    auto get_side = [&](ssize_t i) -> pt<T> {return ch[(i + 1) % n] - ch[i];};
+    auto get_side = [&](ssize_t i) -> pt<T> {return ch[i == n - 1 ? 0 : i + 1] - ch[i];};
     auto binsearch = [&](const pt<U>& v) -> ssize_t {
         ssize_t l = -1, r = n;
         while (l + 1 < r) {
@@ -36,8 +36,8 @@ array<array<ssize_t, 2>, 2> get_tangents_to_convex_polygon_parallel_to_line(cons
     ssize_t p2 = binsearch(v2);
     array<ssize_t, 2> ans1 = {p1, p1};
     array<ssize_t, 2> ans2 = {p2, p2};
-    if (abs(cross(get_side(p1), v1)) <= eps) ans1[1] = (ans1[1] + 1) % n;
-    if (abs(cross(get_side(p2), v2)) <= eps) ans2[1] = (ans2[1] + 1) % n;
+    if (abs(cross(get_side(p1), v1)) <= eps) ans1[1] = ans1[1] == n - 1 ? 0 : ans1[1] + 1;
+    if (abs(cross(get_side(p2), v2)) <= eps) ans2[1] = ans2[1] == n - 1 ? 0 : ans2[1] + 1;
     if (p1 > p2) swap(ans1, ans2);
     return {ans1, ans2};
 }

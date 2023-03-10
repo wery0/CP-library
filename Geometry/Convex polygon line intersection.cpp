@@ -13,7 +13,6 @@ vector<pt<D>> intersection_convex_polygon_line(const vector<pt<T>>& ch, const li
     static const auto eps = is_integral_v<T> && is_integral_v<U> ? (T)0 : is_floating_point_v<T> ? (T)EPS : (U)EPS;
     using H = remove_const<decltype(eps)>::type;
     const ssize_t n = ch.size();
-    auto eval = [&](ssize_t i) -> H {i -= i >= n ? n : 0; return l.A * ch[i].x + l.B * ch[i].y + l.C;};
     auto sign = [](H x) -> int {return x < -eps ? -1 : x > eps ? 1 : 0;};
     auto segment_line_intersection = [&](const pt<T>& p1, const pt<T>& p2) -> vector<pt<D>> {
         line<T> u(p1, p2);
@@ -23,9 +22,9 @@ vector<pt<D>> intersection_convex_polygon_line(const vector<pt<T>>& ch, const li
         }
         int s1 = sign(l.eval(p1));
         int s2 = sign(l.eval(p2));
-        if(s1 == 0) return {p1};
-        if(s2 == 0) return {p2};
-        if(s1 == s2) return {};
+        if (s1 == 0) return {p1};
+        if (s2 == 0) return {p2};
+        if (s1 == s2) return {};
         pt<D> p = l.intersect(u);
         return {p};
     };
@@ -47,13 +46,13 @@ vector<pt<D>> intersection_convex_polygon_line(const vector<pt<T>>& ch, const li
         }
     }
     auto binsearch = [&](ssize_t lf, ssize_t rg) -> pt<D> {
-        int lsign = sign(eval(lf));
+        int lsign = sign(l.eval(ch[lf >= n ? lf - n : lf]));
         while (lf + 1 < rg) {
             ssize_t md = lf + (rg - lf) / 2;
-            int tyt = sign(eval(md));
+            int tyt = sign(l.eval(ch[md >= n ? md - n : md]));
             (tyt == lsign ? lf : rg) = md;
         }
-        auto v = segment_line_intersection(ch[lf % n], ch[rg % n]);
+        auto v = segment_line_intersection(ch[lf >= n ? lf - n : lf], ch[rg >= n ? rg - n : rg]);
         assert(v.size() == 1);
         return v[0];
     };
