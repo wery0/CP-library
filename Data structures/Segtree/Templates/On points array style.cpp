@@ -51,6 +51,7 @@ public:
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
         vector<pair<T, T>> gr;
+        gr.reserve(points.size());
         for (size_t i = 0; i < points.size(); ++i) {
             if (i && points[i - 1] + 1 < points[i]) {
                 gr.emplace_back(points[i - 1] + 1, points[i] - 1);
