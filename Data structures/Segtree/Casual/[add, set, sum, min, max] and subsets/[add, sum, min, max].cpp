@@ -1,9 +1,10 @@
 template<typename T>
 class segtree {
 
-    static constexpr T INF = numeric_limits<T>::max();
+    static const T NO = -1;   //change, if need
+    static const T INF = numeric_limits<T>::max();
 
-    size_t a, U;
+    size_t n, U;
     vector<T> sm, mn, mx;
     vector<T> ps_add;
 
@@ -64,7 +65,7 @@ class segtree {
         return seg_sum(ql, qr, l, md, v << 1) +
                seg_sum(ql, qr, md + 1, r, v << 1 | 1);
     }
-    
+
     void seg_add(size_t ql, size_t qr, size_t l, size_t r, size_t v, T val) {
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
@@ -82,20 +83,18 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): a(last - first), U(geq_pow2(a)) {
+    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
         ps_add.resize(U * 2, 0);
-        for (size_t q = 0; q < a; q++) {
-            const T val = *(first + q);
-            sm[U + q] = val;
-            mn[U + q] = val;
-            mx[U + q] = val;
+        for (size_t i = 0; i < n; ++i) {
+            const T val = *(first + i);
+            sm[U + i] = val;
+            mn[U + i] = val;
+            mx[U + i] = val;
         }
-        for (size_t q = U; --q;) {
-            upd(q);
-        }
+        for (size_t i = U; --i;) upd(i);
     }
 
     template<typename U>
@@ -125,14 +124,12 @@ public:
         return res + sm[v];
     }
 
-    void get_last_layer(vector<T>& res) {
-        for (int q = 1; q < U; q++) push(q);
-        for (int q = 0; q < res.size(); ++q) {
-            res[q] = sm[U + q];
-        }
+    vector<T> get_last_layer() {
+        for (size_t i = 1; i < U; ++i) push(i);
+        return vector<T>(sm.begin() + U, sm.begin() + U + n);
     }
 
-    inline void seg_add(size_t ql, size_t qr, T val) {seg_add(ql, qr, 0, U - 1, 1, val);}
+    void seg_add(size_t ql, size_t qr, T val) {seg_add(ql, qr, 0, U - 1, 1, val);}
     T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
     T seg_min(size_t ql, size_t qr) {return seg_min(ql, qr, 0, U - 1, 1);}
     T seg_max(size_t ql, size_t qr) {return seg_max(ql, qr, 0, U - 1, 1);}

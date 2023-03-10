@@ -1,7 +1,7 @@
 template<typename T>
 class segtree {
 
-    size_t a, U;
+    size_t n, U;
     vector<T> sm;
     vector<T> psA;
     vector<T> psB;
@@ -28,9 +28,7 @@ class segtree {
 
     T seg_sum(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return 0;
-        if (ql <= l && r <= qr) {
-            return sm[v];
-        }
+        if (ql <= l && r <= qr) return sm[v];
         push(v);
         size_t md = (l + r) >> 1;
         const auto lf = seg_sum(ql, qr, l, md, v << 1);
@@ -56,17 +54,15 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): a(last - first), U(geq_pow2(a)) {
+    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         sm.resize(U * 2);
         psA.resize(U * 2);
         psB.resize(U * 2);
-        for (size_t q = 0; q < a; q++) {
-            const T val = *(first + q);
-            sm[U + q] = val * 2;
+        for (size_t i = 0; i < n; ++i) {
+            const T val = *(first + i);
+            sm[U + i] = val * 2;
         }
-        for (size_t q = U; --q;) {
-            upd(q);
-        }
+        for (size_t i = U; --i;) upd(i);
     }
 
     template<typename U>
@@ -81,7 +77,6 @@ public:
 
     T operator[](size_t pos) {
         size_t l = 0, r = U - 1, v = 1;
-        T o = 0;
         while (l != r) {
             push(v);
             size_t md = (l + r) >> 1;
@@ -93,16 +88,16 @@ public:
                 v = v << 1 | 1;
             }
         }
-        return sm[v];
+        return sm[v] / 2;
     }
 
-    void get_last_layer(vector<T>& res) {
-        for (int q = 1; q < U; q++) push(q);
-        for (int q = 0; q < res.size(); ++q) {
-            res[q] = sm[U + q];
-        }
+    vector<T> get_last_layer() {
+        for (size_t i = 1; i < U; ++i) push(i);
+        vector<T> ans(sm.begin() + U, sm.begin() + U + n);
+        for (T& x : ans) x /= 2;
+        return ans;
     }
 
     T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1) / 2;}
-    inline void seg_add_progression(size_t ql, size_t qr, T a0, T b) {seg_add_progression(ql, qr, 0, U - 1, 1, a0, b);}
+    void seg_add_progression(size_t ql, size_t qr, T a0, T b) {seg_add_progression(ql, qr, 0, U - 1, 1, a0, b);}
 };

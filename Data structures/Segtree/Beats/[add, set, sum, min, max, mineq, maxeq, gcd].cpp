@@ -8,7 +8,7 @@ class segtree {
         T ps_add = 0;
         T dgc = 0;
 
-        Node() {}
+        Node() = default;
 
         Node(T x) {
             sm = x;
@@ -17,10 +17,10 @@ class segtree {
         }
     };
 
-    const T inf = numeric_limits<T>::max();
-    const T NO = 4e18 + 228337;     //change, if need
+    static const T inf = numeric_limits<T>::max();
+    static const T NO = 4e18 + 228337;     //change, if need
     vector<Node> m;
-    size_t a, U;
+    size_t n, U;
 
     inline constexpr int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
@@ -28,7 +28,7 @@ class segtree {
 
     T gcd(T x, T y) {
         if (x > y) swap(x, y);
-        for (; x;) {
+        while(x) {
             y %= x;
             if (!y) break;
             x %= y;
@@ -70,7 +70,7 @@ class segtree {
 
     void upd(int v) {
         if (v >= U) return;
-        Node &n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
+        Node& n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
         n.sm = l.sm + r.sm;
         n.mn1 = min(l.mn1, r.mn1);
         n.mx1 = max(l.mx1, r.mx1);
@@ -85,11 +85,8 @@ class segtree {
         T any = lf == NO ? rg == NO ? -1 : rg : lf;
         for (T val : {l.mn1, l.mx1, r.mn1, r.mx1}) {
             if (!chk(val, n.mn1, n.mx1)) continue;
-            if (any != -1) {
-                n.dgc = gcd(n.dgc, abs(val - any));
-            } else {
-                any = val;
-            }
+            if (any != -1) n.dgc = gcd(n.dgc, abs(val - any));
+            else any = val;
         }
     }
 
@@ -98,11 +95,8 @@ class segtree {
         int fl = n.mn1 == n.mx1, fl2 = n.mn1 == n.mx2;
         n.sm -= n.cmx1 * (n.mx1 - x);
         n.mx1 = x;
-        if (fl) {
-            n.mn1 = x;
-        } else if (fl2) {
-            n.mn2 = x;
-        }
+        if (fl) n.mn1 = x;
+        else if (fl2) n.mn2 = x;
     }
 
     void push_maxeq(Node& n, T x) {
@@ -110,11 +104,8 @@ class segtree {
         int fl = n.mn1 == n.mx1, fl2 = n.mn1 == n.mx2;
         n.sm += n.cmn1 * (x - n.mn1);
         n.mn1 = x;
-        if (fl) {
-            n.mx1 = x;
-        } else if (fl2) {
-            n.mx2 = x;
-        }
+        if (fl) n.mx1 = x;
+        else if (fl2) n.mx2 = x;
     }
 
     void push_add(int v, T x) {
@@ -129,7 +120,7 @@ class segtree {
 
     void push(int v) {
         if (v >= U) return;
-        Node &n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
+        Node& n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
         T mn = n.mn1, mx = n.mx1;
         if (n.ps_add) {
             push_add(v << 1, n.ps_add);
@@ -229,14 +220,44 @@ class segtree {
 public:
     segtree() = default;
 
-    segtree(vector<T>& n): a(n.size()), U(geq_pow2(a)) {
+    template<typename I>
+    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         m.resize(U * 2);
-        for (size_t q = 0; q < a; q++) {
-            m[U + q] = Node(n[q]);
+        for (size_t i = 0; i < n; ++i) m[U + i] = Node(*(first + i));
+        for (size_t i = U; --i;) upd(i);
+    }
+
+    template<typename U>
+    segtree(U n) {
+        if constexpr(is_integral<U>::value) {
+            vector<T> m(n);
+            (*this) = segtree<T>(m.begin(), m.end());
+        } else {
+            (*this) = segtree<T>(n.begin(), n.end());
         }
-        for (size_t q = U; --q;) {
-            upd(q);
+    }
+
+    T operator[](size_t pos) {
+        size_t l = 0, r = U - 1, v = 1;
+        while (l != r) {
+            push(v);
+            size_t md = (l + r) >> 1;
+            if (pos <= md) {
+                r = md;
+                v = v << 1;
+            } else {
+                l = md + 1;
+                v = v << 1 | 1;
+            }
         }
+        return m[U + pos].sm;
+    }
+
+    vector<T> get_last_layer() {
+        for (size_t i = 1; i < U; ++i) push(i);
+        vector<T> ans(n);
+        for (size_t i = 0; i < n; ++i) ans[i] = m[U + i].sm;
+        return ans;
     }
 
     T seg_gcd(int ql, int qr) {return seg_gcd(ql, qr, 0, U - 1, 1);}

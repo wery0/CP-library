@@ -1,11 +1,10 @@
 template<typename T>
 class segtree_on_points {
 
-    size_t a, U;
+    size_t n, U;
     vector<pair<T, T>> seg_gr;
     vector<T> sm;
-    vector<T> psA;
-    vector<T> psB;
+    vector<T> psA, psB;
 
     inline constexpr T gsz(int v) {
         return seg_gr[v].second - seg_gr[v].first + 1;
@@ -28,11 +27,9 @@ class segtree_on_points {
     }
 
     T seg_sum(T ql, T qr, size_t v) {
-        const T l = seg_gr[v].first, r = seg_gr[v].second;
+        const auto [l, r] = seg_gr[v];
         if (qr < l || r < ql) return 0;
-        if (ql <= l && r <= qr) {
-            return sm[v];
-        }
+        if (ql <= l && r <= qr) return sm[v];
         push(v);
         const auto lf = seg_sum(ql, qr, v << 1);
         const auto rg = seg_sum(ql, qr, v << 1 | 1);
@@ -40,7 +37,7 @@ class segtree_on_points {
     }
 
     void seg_add_progression(T ql, T qr, size_t v, T a0, T b) {
-        const T l = seg_gr[v].first, r = seg_gr[v].second;
+        const auto [l, r] = seg_gr[v];
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
             apply_add(v, b, 2 * a0 - b);
@@ -62,29 +59,30 @@ public:
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
         vector<pair<T, T>> gr;
-        for (int q = 0; q < points.size(); ++q) {
-            if (q && points[q - 1] + 1 < points[q]) {
-                gr.emplace_back(points[q - 1] + 1, points[q] - 1);
+        gr.reserve(points.size());
+        for (size_t i = 0; i < points.size(); ++i) {
+            if (i && points[i - 1] + 1 < points[i]) {
+                gr.emplace_back(points[i - 1] + 1, points[i] - 1);
             }
-            gr.emplace_back(points[q], points[q]);
+            gr.emplace_back(points[i], points[i]);
         }
-        a = gr.size();
-        U = geq_pow2(a);
+        n = gr.size();
+        U = n & (n - 1) ? 2 << __lg(n) : n;
         seg_gr.resize(U * 2);
-        for (int q = 0; q < a; ++q) seg_gr[U + q] = gr[q];
-        for (int q = a; q < U; ++q) seg_gr[U + q].first = seg_gr[U + q].second = gr[a - 1].second + 1;
+        for (size_t i = 0; i < n; ++i) seg_gr[U + i] = gr[i];
+        for (size_t i = n; i < U; ++i) {
+            seg_gr[U + i].first = seg_gr[U + i].second = gr[n - 1].second + 1;
+        }
         sm.resize(U * 2);
         psA.resize(U * 2);
         psB.resize(U * 2);
-        for (size_t q = 0; q < a; ++q) {
-            sm[U + q] = 0;
-        }
-        for (size_t q = U; --q;) {
-            seg_gr[q] = {seg_gr[q << 1].first, seg_gr[q << 1 | 1].second};
-            upd(q);
+        for (size_t i = 0; i < n; ++i) sm[U + i] = 0;
+        for (size_t i = U; --i;) {
+            seg_gr[i] = {seg_gr[i << 1].first, seg_gr[i << 1 | 1].second};
+            upd(i);
         }
     }
 
     T seg_sum(T ql, T qr) {return seg_sum(ql, qr, 1) / 2;}
-    inline void seg_add_progression(T ql, T qr, T a0, T b) {seg_add_progression(ql, qr, 1, a0, b);}
+    void seg_add_progression(T ql, T qr, T a0, T b) {seg_add_progression(ql, qr, 1, a0, b);}
 };

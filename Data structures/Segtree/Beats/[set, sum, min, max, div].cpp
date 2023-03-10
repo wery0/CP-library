@@ -1,10 +1,10 @@
 template<typename T>
 class segtree {
 
-    static constexpr T NO = -1;   //change, if need
-    static constexpr T INF = numeric_limits<T>::max();
+    static const T NO = -1;   //change, if need
+    static const T INF = numeric_limits<T>::max();
 
-    size_t a, U;
+    size_t n, U;
     vector<T> sm, mn, mx;
     vector<T> ps_set;
 
@@ -92,23 +92,22 @@ class segtree {
         upd(v);
     }
 
+public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): a(last - first), U(geq_pow2(a)) {
+    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
         ps_set.resize(U * 2, NO);
-        for (size_t q = 0; q < a; q++) {
-            const T val = *(first + q);
-            sm[U + q] = val;
-            mn[U + q] = val;
-            mx[U + q] = val;
+        for (size_t i = 0; i < n; ++i) {
+            const T val = *(first + i);
+            sm[U + i] = val;
+            mn[U + i] = val;
+            mx[U + i] = val;
         }
-        for (size_t q = U; --q;) {
-            upd(q);
-        }
+        for (size_t i = U; --i;) upd(i);
     }
 
     template<typename U>
@@ -123,7 +122,6 @@ class segtree {
 
     T operator[](size_t pos) {
         size_t l = 0, r = U - 1, v = 1;
-        size_t res = 0;
         while (l != r) {
             push(v);
             size_t md = (l + r) >> 1;
@@ -138,11 +136,9 @@ class segtree {
         return sm[v];
     }
 
-    void get_last_layer(vector<T>& res) {
-        for (int q = 1; q < U; q++) push(q);
-        for (int q = 0; q < res.size(); ++q) {
-            res[q] = sm[U + q];
-        }
+    vector<T> get_last_layer() {
+        for (size_t i = 1; i < U; ++i) push(i);
+        return vector<T>(sm.begin() + U, sm.begin() + U + n);
     }
 
     T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
