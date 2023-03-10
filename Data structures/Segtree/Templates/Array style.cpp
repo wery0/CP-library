@@ -1,7 +1,7 @@
 template<typename T>
 class segtree {
 
-    const size_t n, U;
+    size_t n, U;
     //Create needed vectors
 
     inline int gsz(int v) {
@@ -89,10 +89,8 @@ public:
     //     return sm[v];
     // }
 
-    // void get_last_layer(vector<T>& res) {
+    // vector<T> get_last_layer() {
     //     for (size_t i = 1; i < U; ++i) push(i);
-    //     for (size_t i = 0; i < res.size(); ++i) {
-    //         res[i] = sm[U + i];
-    //     }
+    //     return vector<T>(sm.begin() + U, sm.begin() + U + n);
     // }
 };

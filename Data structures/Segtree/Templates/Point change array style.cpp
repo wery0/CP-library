@@ -1,7 +1,7 @@
 template<typename T>
 class segtree_point_upd {
 
-    const size_t n, U;
+    size_t n, U;
     //Create needed vectors
 
     inline void upd(size_t v) {

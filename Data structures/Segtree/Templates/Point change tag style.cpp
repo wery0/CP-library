@@ -34,7 +34,7 @@ class segtree_point_upd {
 
     tag neutral_tag;    //Init neutral tag
 
-    const size_t n, U;
+    size_t n, U;
     vector<tag> m;
 
     inline void upd(size_t v) {
