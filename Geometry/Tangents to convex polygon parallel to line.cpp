@@ -18,7 +18,7 @@ array<array<ssize_t, 2>, 2> get_tangents_to_convex_polygon_parallel_to_line(cons
     if (n == 0) return {array<ssize_t, 2>{-1, -1}, array<ssize_t, 2>{-1, -1}};
     if (n == 1) return {array<ssize_t, 2>{0, 0}, array<ssize_t, 2>{0, 0}};
     auto cmp = [&](const pt<T>& l, const pt<U>& r) -> bool {
-        int pl = l.x > 0 ? 0 : l.x == 0 && l.y >= 0 ? 1 : 2;
+        int pl = l.x > eps ? 0 : abs(l.x) <= eps && l.y >= -eps ? 1 : 2;
         int pr = r.x > eps ? 0 : abs(r.x) <= eps && r.y >= -eps ? 1 : 2;
         return pl != pr ? pl < pr : cross(l, r) > eps;
     };
