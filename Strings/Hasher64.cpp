@@ -52,9 +52,22 @@ public:
         return big_prod_mod(o, pows[n - l], MOD);
     }
 
-    bool is_substrings_equal(int l1, int r1, int l2, int r2) {
-        if (r1 - l1 != r2 - l2) return 0;
-        return calc_hash(l1, r1) == calc_hash(l2, r2);
+    //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
+    //O(log(k))
+    uint64_t calc_hash_repeated(int l, int r, uint64_t k) {
+        uint64_t ans = 0, anspw = 1;
+        uint64_t hs = calc_hash(l, r), hspw = pows[r - l + 1];
+        for (; k; k >>= 1) {
+            if (k & 1) {
+                ans += big_prod_mod(hs, anspw, MOD);
+                ans -= ans < MOD ? 0 : MOD;
+                anspw = big_prod_mod(anspw, hspw, MOD);
+            }
+            hs += big_prod_mod(hs, hspw, MOD);
+            hs -= hs < MOD ? 0 : MOD;
+            hspw = big_prod_mod(hspw, hspw, MOD);
+        }
+        return ans;
     }
 
     uint64_t calc_hash_of_substrings_concatenation(vector<pair<int, int>> borders) {
