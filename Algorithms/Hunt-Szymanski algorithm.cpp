@@ -15,7 +15,7 @@ int hunt_szymanski_LCS_length(I f1, I l1, I f2, I l2) {
     vector<int> dp(N + 2, N + 1);
     dp[0] = 0;
     for (auto i2 = f2; i2 != l2; ++i2) {
-        const char c = *i2;
+        const auto c = *i2;
         for (int pos : gde[c - FIRST_CHAR]) {
             auto it = lower_bound(dp.begin(), dp.end(), pos);
             *it = min(*it, pos);
