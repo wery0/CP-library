@@ -1,8 +1,8 @@
 template<typename T>
 class segtree_on_points {
 
-    static const T NO = -1;                               //Change, if need
-    static const T INF = numeric_limits<T>::max();
+    static constexpr T NO = -1;                               //Change, if need
+    static constexpr T INF = numeric_limits<T>::max();
 
     size_t n, U;
     vector<pair<T, T>> seg_gr;

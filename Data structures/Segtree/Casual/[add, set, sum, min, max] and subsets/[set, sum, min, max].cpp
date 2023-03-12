@@ -1,7 +1,7 @@
 template<typename T>
 class segtree {
 
-    static const T NO = -1;   //change, if need
+    static constexpr T NO = -1;   //change, if need
     static const T INF = numeric_limits<T>::max();
 
     size_t n, U;
@@ -35,9 +35,7 @@ class segtree {
 
     T seg_max(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return -INF;
-        if (ql <= l && r <= qr) {
-            return mx[v];
-        }
+        if (ql <= l && r <= qr) return mx[v];
         push(v);
         size_t md = (l + r) >> 1;
         return max(seg_max(ql, qr, l, md, v << 1),
@@ -46,9 +44,7 @@ class segtree {
 
     T seg_min(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return INF;
-        if (ql <= l && r <= qr) {
-            return mn[v];
-        }
+        if (ql <= l && r <= qr) return mn[v];
         push(v);
         size_t md = (l + r) >> 1;
         return min(seg_min(ql, qr, l, md, v << 1),
@@ -57,9 +53,7 @@ class segtree {
 
     T seg_sum(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return 0;
-        if (ql <= l && r <= qr) {
-            return sm[v];
-        }
+        if (ql <= l && r <= qr) return sm[v];
         push(v);
         size_t md = (l + r) >> 1;
         return seg_sum(ql, qr, l, md, v << 1) +

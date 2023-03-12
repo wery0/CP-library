@@ -1,7 +1,7 @@
 template<typename T, ll N>      //Works with coordinates [0; N]
 class implicit_segtree {
-    static const T NO = -1;     //Change, if set value can be -1
-    static const T INF = numeric_limits<T>::max();
+    static constexpr T NO = -1;     //Change, if set value can be -1
+    static constexpr T INF = numeric_limits<T>::max();
     struct Node {
         Node* l = 0;
         Node* r = 0;

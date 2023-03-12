@@ -1,7 +1,7 @@
 template<typename T>
 class segtree_point_upd {
 
-    static const T inf = numeric_limits<T>::max();
+    static constexpr T inf = numeric_limits<T>::max();
 
     struct tag {
 
