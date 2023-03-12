@@ -49,7 +49,7 @@ class segtree {
             return m[v];
         }
         push(v);
-        size_t md = l + (r - l) >> 1;
+        size_t md = (l + r) >> 1;
         const tag lf = seg_statistic(ql, qr, l, md, v << 1);
         const tag rg = seg_statistic(ql, qr, md + 1, r, v << 1 | 1);
         return merge(lf, rg);
@@ -62,7 +62,7 @@ class segtree {
             return;
         }
         push(v);
-        size_t md = l + (r - l) >> 1;
+        size_t md = (l + r) >> 1;
         seg_change(ql, qr, l, md, v << 1);
         seg_change(ql, qr, md + 1, r, v << 1 | 1);
         upd(v);

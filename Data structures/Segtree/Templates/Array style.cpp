@@ -25,7 +25,7 @@ class segtree {
 
         }
         push(v);
-        size_t md = l + (r - l) >> 1;
+        size_t md = (l + r) >> 1;
         const auto lf = seg_statistic(ql, qr, l, md, v << 1);
         const auto rg = seg_statistic(ql, qr, md + 1, r, v << 1 | 1);
         return ?;
@@ -39,7 +39,7 @@ class segtree {
             return;
         }
         push(v);
-        size_t md = l + (r - l) >> 1;
+        size_t md = (l + r) >> 1;
         seg_change(ql, qr, l, md, v << 1, val);
         seg_change(ql, qr, md + 1, r, v << 1 | 1, val);
         upd(v);
