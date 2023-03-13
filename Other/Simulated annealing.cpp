@@ -1,10 +1,10 @@
 auto simulated_annealing = [&](bool maximize_score = true) {
-    auto calc_score = [](const auto & state) {
+    auto calc_score = [](const auto& state) {
 
     };
     maximize_score ^= 1;
     uniform_real_distribution<double> gen(0, 1);
-    mt19937 rnd(777);
+    mt19937 rnd(std::chrono::steady_clock::now().time_since_epoch().count());
     const int sign = maximize_score ? -1 : 1;
 
     const double TL = 1.0;
