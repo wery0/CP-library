@@ -1,18 +1,19 @@
+//Implementation of SPFA algorithm
 template<typename T_flow, typename T_cost>
 struct min_cost_max_flow {
     struct edge {
         int fr, to;
-        T_flow f;
-        T_cost c, w;
+        T_flow f, c;
+        T_cost w;
     };
 
-    int a, ss, tt;
+    int n, ss, tt;
     vector<vector<int>> l;
     vector<edge> e;
 
-    min_cost_max_flow(int a): a(a), ss(a - 2), tt(a - 1), l(a) {
-    }
+    min_cost_max_flow(int n, int ss, int tt): n(n), ss(ss), tt(tt), l(n) {}
 
+    //Edge is directed
     void add_edge(int fr, int to, T_flow c, T_cost w) {
         l[fr].push_back(e.size());
         e.emplace_back(fr, to, 0, c, w);
@@ -20,27 +21,26 @@ struct min_cost_max_flow {
         e.emplace_back(to, fr, 0, 0, -w);
     }
 
-    vector<T_cost> dst;
-    vector<int> pr, inq;
     pair<T_flow, T_cost> calc() {
         const T_cost inf = numeric_limits<T_cost>::max();
         T_flow flow = 0;
         T_cost cost = 0;
-        dst.resize(a);
-        pr.resize(a);
-        inq.resize(a);
-        for (;;) {
-            fill(all(dst), inf);
-            fill(all(pr), -1);
-            fill(all(inq), 0);
+        vector<T_cost> dst(n);
+        vector<T_flow> mn(n);
+        vector<int> pr(n), inq(n);
+        while (true) {
+            fill(dst.begin(), dst.end(), inf);
+            fill(pr.begin(), pr.end(), -1);
+            fill(inq.begin(), inq.end(), 0);
+            fill(mn.begin(), mn.end(), numeric_limits<T_flow>::max());
             dst[ss] = 0;
             inq[ss] = 1;
             deque<int> dq = {ss};
-            for (; dq.size();) {
-                // constexpr int MAGIC = 1;
-                // for (int q = 0; q < MAGIC && q + 1 < dq.size(); ++q) {
-                //     if (dst[dq.back()] < dst[dq[q]]) {
-                //         swap(dq.back(), dq[q]);
+            while (!dq.empty()) {
+                // constexpr size_t MAGIC = 2;
+                // for (size_t i = 0; i < MAGIC && i + 1 < dq.size(); ++i) {
+                //     if (dst[dq.back()] < dst[dq[i]]) {
+                //         swap(dq.back(), dq[i]);
                 //         break;
                 //     }
                 // }
@@ -53,6 +53,7 @@ struct min_cost_max_flow {
                     if (tyt < dst[to]) {
                         dst[to] = tyt;
                         pr[to] = i;
+                        mn[to] = min(mn[e[i].fr], e[i].c - e[i].f);
                         if (!inq[to]) {
                             inq[to] = 1;
                             dq.push_back(to);
@@ -61,13 +62,13 @@ struct min_cost_max_flow {
                 }
             }
             if (dst[tt] == inf) break;
-            ++flow;
-            cost += dst[tt];
-            int v = tt;
-            for (; v != ss;) {
-                int i = pr[v];
-                e[i].f++;
-                --e[i ^ 1].f;
+            T_flow tyt = mn[tt];
+            flow += tyt;
+            cost += dst[tt] * tyt;
+            for (int v = tt; v != ss; ) {
+                const int i = pr[v];
+                e[i].f += tyt;
+                e[i ^ 1].f -= tyt;
                 v = e[i].fr;
             }
         }
