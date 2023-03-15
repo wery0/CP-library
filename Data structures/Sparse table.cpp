@@ -1,35 +1,29 @@
 template<typename T>
 class sparse_table {
-    int K, G;
+    size_t n, K;
     vector<vector<T>> m;
 
-    template<typename I>
-    void init_table(I fir, I last) {
-        G = last - fir;
-        K = __lg(G) + 1;
-        m.resize(K);
-        for (int q = 0; q < K; q++) m[q].resize(max(0, G - (1 << q) + 1));
-        for (int q = 0; q < G; q++) m[0][q] = *(fir + q);
-        for (int q = 1; q < K; q++) {
-            for (int w = 0; w + (1 << q) <= G; w++) {
-                m[q][w] = merge(m[q - 1][w], m[q - 1][w + (1 << (q - 1))]);
-            }
-        }
-    }
-
     //Change, if need
-    inline T merge(T x, T y) {
+    inline T merge(T x, T y) const {
         return min(x, y);
     }
 
 public:
-    template<typename T_arr>
-    sparse_table(T_arr& n) {init_table(all(n));}
     template<typename I>
-    sparse_table(I fir, I last) {init_table(fir, last);}
+    sparse_table(I first, I last) : n(last - first), K(__lg(n) + 1), m(K) {
+        for (size_t i = 0; i < K; ++i) m[i].resize(max((size_t)0, n - (1 << i) + 1));
+        copy(first, last, m[0].begin());
+        for (size_t i = 1; i < K; ++i) {
+            for (size_t j = 0; j + (1 << i) <= n; ++j) {
+                m[i][j] = merge(m[i - 1][j], m[i - 1][j + (1 << (i - 1))]);
+            }
+        }
+    }
+    template<typename T_arr>
+    sparse_table(T_arr& arr) {*this = sparse_table(arr.begin(), arr.end());}
 
-    T query(int l, int r) {
-        int u = __lg(r - l + 1);
+    T query(size_t l, size_t r) const {
+        const int u = __lg(r - l + 1);
         return merge(m[u][l], m[u][r - (1 << u) + 1]);
     }
 };
