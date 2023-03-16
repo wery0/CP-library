@@ -314,6 +314,28 @@ namespace Generator {
         return __convex_hull(ans);
     }
 
+    vector<array<size_t, 2>> gen_graph(size_t n, size_t m) {
+        assert(n || m == 0);
+        vector<array<size_t, 2>> ans(m);
+        for (auto& [x, y] : ans) {
+            x = gen_val<size_t>(0, n - 1);
+            y = gen_val<size_t>(0, n - 1);
+        }
+        return ans;
+    }
+
+    template<typename T>
+    vector<array<T, 3>> gen_graph_weighted(size_t n, size_t m, T wl, T wr) {
+        assert(n || m == 0);
+        vector<array<T, 3>> ans(m);
+        for (auto& [x, y, w] : ans) {
+            x = gen_val<size_t>(0, n - 1);
+            y = gen_val<size_t>(0, n - 1);
+            w = gen_val(wl, wr);
+        }
+        return ans;
+    }
+
     template<typename T_arr>
     auto gen_element_from(T_arr& m) {
         assert(!m.empty());
