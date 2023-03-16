@@ -1,4 +1,5 @@
 //Returns minimum cost of matching and the matching itself
+//Complexity: O(V^3) with good constant
 template <typename Cost = long long, typename CostSum = Cost>
 pair<CostSum, vector<int>> fast_dense_hungarian(const vector<vector<Cost>>& cost) {
     const int V = cost.size();

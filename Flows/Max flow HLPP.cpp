@@ -1,4 +1,4 @@
-template <int V, typename T>
+template<typename T>
 class HLPP {
     const T INF = numeric_limits<T>::max();
     struct edge {
@@ -9,10 +9,11 @@ class HLPP {
         edge(int x, int y, T c): to(x), rev(y), f(c) {}
     };
 
-    vector<edge> adj[V];
-    vector<int> lst[V], gap[V];
-    T ex[V];
-    int mxh, h[V], cnt[V], work;
+    int V, s, t, mxh, work;
+    vector<vector<edge>> adj;
+    vector<vector<int>> lst, gap;
+    vector<T> ex;
+    vector<int> h, cnt;
 
     void updh(int v, int nh) {
         work++;
@@ -26,9 +27,9 @@ class HLPP {
 
     void globalRelabel() {
         work = 0;
-        fill(h, h + V, V);
-        fill(cnt, cnt + V, 0);
-        for (int i = 0; i < mxh; i++) lst[i].clear(), gap[i].clear();
+        fill(h.begin(), h.end(), V);
+        fill(cnt.begin(), cnt.end(), 0);
+        for (int i = 0; i < min(mxh, V); i++) lst[i].clear(), gap[i].clear();
         h[t] = 0;
         queue<int> q({t});
         while (!q.empty()) {
@@ -57,12 +58,15 @@ class HLPP {
                 if (h[v] == h[e.to] + 1) {
                     push(v, e);
                     if (ex[v] <= 0) return;
-                } else chmin(nh, h[e.to] + 1);
+                } else {
+                    nh = min(nh, h[e.to] + 1);
+                }
             }
         }
-        if (cnt[h[v]] > 1) updh(v, nh);
-        else {
-            for (int i = h[v]; i <= mxh; i++) {
+        if (cnt[h[v]] > 1) {
+            updh(v, nh);
+        } else {
+            for (int i = h[v]; i <= mxh; ++i) {
                 for (auto j : gap[i]) updh(j, V);
                 gap[i].clear();
             }
@@ -70,9 +74,10 @@ class HLPP {
     }
 
 public:
-    int s = V - 2, t = V - 1;
+    HLPP(int n, int s, int t): V(n), s(s), t(t), adj(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {}
 
     void add_edge(int x, int to, T f, int is_dir) {
+        assert(0 <= min(x, to) && max(x, to) < V);
         adj[x].emplace_back(to, adj[to].size(), f);
         adj[to].emplace_back(x, adj[x].size() - 1, is_dir ? 0 : f);
     }
@@ -84,13 +89,14 @@ public:
             gap[i].clear();
         }
         mxh = work = 0;
-        fill(h, h + V, 0);
-        fill(cnt, cnt + V, 0);
-        fill(ex, ex + V, 0);
+        fill(h.begin(), h.end(), 0);
+        fill(cnt.begin(), cnt.end(), 0);
+        fill(ex.begin(), ex.end(), 0);
     }
 
-    T calc(int heur_n = V) {
-        fill(ex, ex + V, 0);
+    T calc(int heur_n = -1) {
+        if (heur_n == -1) heur_n = V;
+        fill(ex.begin(), ex.end(), 0);
         ex[s] = INF;
         globalRelabel();
         for (auto& e : adj[s]) push(s, e);
@@ -99,9 +105,7 @@ public:
                 int v = lst[mxh].back();
                 lst[mxh].pop_back();
                 discharge(v);
-                if (work > 4 * heur_n) {
-                    globalRelabel();
-                }
+                if (work > 4 * heur_n) globalRelabel();
             }
         }
         return ex[t];
