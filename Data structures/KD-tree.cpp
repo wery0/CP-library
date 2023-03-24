@@ -12,8 +12,15 @@ template<typename T, const int D, const AXIS_MODE MODE = LONGEST, const bool is_
 class KD_tree {
     static_assert(MODE == 0 || MODE == 1);
     static_assert(is_signed_v<T>);
-    using point = array<T, D>;
     struct hyperrect {array<T, D> lf, rg;};
+
+    using point = array<T, D>;
+    //Use this instead when you want to store some info with points
+    // struct point {
+    //     array<T, D> p;
+    //     T& operator[](size_t i) {return p[i];}
+    //     const T& operator[](size_t i) const {return p[i];}
+    // };
 
     //Change, if need.
     const T EPS = is_integral_v<T> ? 0 : 1e-9;
@@ -24,7 +31,7 @@ class KD_tree {
     vector<size_t> vaxis;
     vector<hyperrect> bounding_box;
 
-    bool is_hyperrect_inside_hypersphere(const hyperrect& hr, const point& c, T r) const {
+    bool is_hr_inside_hypersphere(const hyperrect& hr, const point& c, T r) const {
         array<T, D> p = hr.lf;
         for (size_t mask = 0; ;) {
             if (metric(p, c) > r + EPS) return false;
@@ -46,6 +53,27 @@ class KD_tree {
         if (cdx > rw + r * 2 + EPS || cdy > rh + r * 2 + EPS) return false;
         if (cdx <= rw + EPS || cdy <= rh + EPS) return true;
         return (cdx - rw) * (cdx - rw) + (cdy - rh) * (cdy - rh) <= 4 * r * r + EPS;
+    }
+
+    bool is_point_inside_hr(const hyperrect& hr, const point& p) const {
+        for (size_t i = 0; i < D; ++i) {
+            if (p[i] + EPS < hr.lf[i] || p[i] > hr.rg[i] + EPS) return false;
+        }
+        return true;
+    }
+
+    bool is_hr_inside_hr(const hyperrect& h, const hyperrect& hr) const {
+        for (size_t i = 0; i < D; ++i) {
+            if (h.lf[i] + EPS < hr.lf[i] || h.rg[i] > hr.rg[i] + EPS) return false;
+        }
+        return true;
+    }
+
+    bool is_hr_intersect_hr(const hyperrect& hr1, const hyperrect& hr2) const {
+        for (size_t i = 0; i < D; ++i) {
+            if (max(hr1.lf[i], hr2.lf[i]) > min(hr1.rg[i], hr2.rg[i]) + EPS) return false;
+        }
+        return true;
     }
 
     void rec(const point& p, auto f, auto get_interesting_radius, auto ans, int k = 1) const {
@@ -76,13 +104,9 @@ public:
     KD_tree() = default;
 
     template<typename I>
-    KD_tree(I first, I last): n(last - first) {
+    KD_tree(I first, I last): n(last - first), m(n), mid_axis(n * 2 - 1), bounding_box(n * 2 - 1), vaxis(n * 2 - 1) {
         if (!n) return;
-        m.resize(n);
         for (size_t i = 0; i < n; ++i) m[i] = *(first + i);
-        mid_axis.resize(n * 2 - 1);
-        bounding_box.resize(n * 2 - 1);
-        vaxis.resize(n * 2 - 1);
         auto build = [&](auto&& build, size_t l, size_t r, size_t v, size_t axis1 = 0) {
             if (l == r) {
                 bounding_box[v] = {m[l], m[l]};
@@ -159,24 +183,41 @@ public:
     size_t count_points_inside_hypersphere(const point& c, T radius) const {
         T rr = is_squared_metric ? radius * radius : radius;
         size_t ans = 0;
-        //Manually edit these constants to achieve better time
-        const size_t MAGIC1 = 32;
-        const size_t MAGIC2 = 32;
+        //Manually edit this constant to achieve better time
+        const size_t MAGIC = 32;
         auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
-            if (r - l < MAGIC1) {
+            if (r - l < MAGIC) {
                 for (size_t i = l; i <= r; ++i) ans += metric(c, m[i]) <= rr + EPS;
                 return;
             }
-            if (r - l > MAGIC2) {
-                if (is_hyperrect_inside_hypersphere(bounding_box[v], c, rr)) {ans += r - l + 1; return;}
-                if (!is_rect_intersect_circle(c[0], c[1], radius, bounding_box[v])) return;
-            }
+            if (is_hr_inside_hypersphere(bounding_box[v], c, rr)) {ans += r - l + 1; return;}
+            if (!is_rect_intersect_circle(c[0], c[1], radius, bounding_box[v])) return;
             size_t md = (l + r) >> 1;
             auto go_left = [&]() {go(go, l, md, v + 1);};
             auto go_right = [&]() {go(go, md + 1, r, v + 2 * (md - l + 1));};
             T df = c[vaxis[v]] - mid_axis[v];
             (df < 0 ? go_left() : go_right());
             if (radius >= abs(df) - EPS) (df < 0 ? go_right() : go_left());
+        };
+        go(go, 0, n - 1, 0);
+        return ans;
+    }
+
+    size_t count_points_inside_hyperrectangle(const hyperrect& hr) {
+        for (size_t i = 0; i < D; ++i) assert(hr.lf[i] <= hr.rg[i] && "Bad hyperrect");
+        size_t ans = 0;
+        //Manually edit this constant to achieve better time
+        const size_t MAGIC = 32;
+        auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
+            if (r - l < MAGIC) {
+                for (size_t i = l; i <= r; ++i) ans += is_point_inside_hr(hr, m[i]);
+                return;
+            }
+            if (is_hr_inside_hr(bounding_box[v], hr)) {ans += r - l + 1; return;}
+            if (!is_hr_intersect_hr(bounding_box[v], hr)) return;
+            size_t md = (l + r) >> 1;
+            if (hr.lf[vaxis[v]] <= mid_axis[v] + EPS) go(go, l, md, v + 1);
+            if (mid_axis[v] <= hr.rg[vaxis[v]] + EPS) go(go, md + 1, r, v + 2 * (md - l + 1));
         };
         go(go, 0, n - 1, 0);
         return ans;
