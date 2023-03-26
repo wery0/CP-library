@@ -286,6 +286,9 @@ public:
         return ans;
     }
 
+    V pref_sumval(ll p) {Node* n = root; V sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmv(n->l) + n->val; if (gsz(n->l) < p) sm += gsmv(n->l) + n->val, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
+    V seg_sumval(ll l, ll r) {return pref_sumval(r) - (l ? pref_sumval(l - 1) : 0);}
+
     int get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
     int get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
     vector<K> get_keys_from_seg(int l, int len) {vector<K> res; get_keys_on_subsegment(root, l, len, res); return res;}
