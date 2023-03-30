@@ -46,7 +46,7 @@ public:
     const vector<T>& operator[](size_t i) const {assert(0 <= i && i < a); return m[i];}
 
     size_t size() const {return a;}
-    void fill(T val) {for (auto& row : m) fill(row.begin(), row.end(), val);}
+    void fill(T val) {for (auto& row : m) std::fill(row.begin(), row.end(), val);}
 
     bool is_sum_compatible(const Matrix& rhs) const {return a == rhs.a && b == rhs.b;}
     bool is_mul_compatible(const Matrix& rhs) const {return b == rhs.a;}
