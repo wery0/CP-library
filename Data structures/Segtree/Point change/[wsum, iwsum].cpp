@@ -43,7 +43,7 @@ class segtree_point_upd {
     size_t n, U;
     vector<tag> m;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
@@ -52,6 +52,7 @@ public:
 
     template<typename I>
     segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
 	m.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
             tag& t = m[U + i];

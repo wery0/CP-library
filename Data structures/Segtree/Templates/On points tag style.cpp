@@ -7,21 +7,21 @@ class segtree_on_points {
 
         tag() = default;
 
-        friend inline void push_tag(tag& t, tag& l, tag& r) {
+        friend void push_tag(tag& t, tag& l, tag& r) {
             //Write push if need, or remove it
         }
 
-        friend inline bool is_neutral(const tag& t) {
+        friend bool is_neutral(const tag& t) {
             //Write neutral if need, or remove it
             return false;
         }
 
-        friend inline void merge(const tag& l, const tag& r, tag& res) {
+        friend void merge(const tag& l, const tag& r, tag& res) {
             if (is_neutral(l)) {res = r; return;} if (is_neutral(r)) {res = l; return;}
             //Write merge
         }
 
-        friend inline tag merge(const tag& l, const tag& r) {
+        friend tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;

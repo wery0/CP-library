@@ -5,7 +5,7 @@ class segtree_point_upd {
     vector<T> A;
     vector<T> B;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         A[v] = A[v << 1] * A[v << 1 | 1];
         B[v] = B[v << 1 | 1] + A[v << 1 | 1] * B[v << 1];
     }
@@ -14,6 +14,7 @@ public:
     segtree_point_upd() = default;
 
     segtree_point_upd(vector<pair<int, int>>& arr): n(arr.size()), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         A.resize(U * 2, 1);
         B.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
@@ -35,7 +36,7 @@ public:
         return lA * x + lB;
     }
 
-    void change(size_t pos, T c, T d) {
+    void point_change(size_t pos, T c, T d) {
         pos += U;
         A[pos] = c, B[pos] = d;
         for (pos >>= 1; pos; pos >>= 1) upd(pos);

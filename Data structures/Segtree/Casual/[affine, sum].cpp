@@ -6,17 +6,17 @@ class segtree {
     vector<T> psa;
     vector<T> psb;
 
-    inline constexpr int gsz(int v) {
+    int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
-    inline void apply(int v, T a, T b) {
+    void apply(int v, T a, T b) {
         psa[v] *= a;
         psb[v] = psb[v] * a + b;
         sm[v] = sm[v] * a +  gsz(v) * b;
     }
 
-    inline void push(size_t v) {
+    void push(size_t v) {
         if (psa[v] == 1 && psb[v] == 0) return;
         apply(v << 1, psa[v], psb[v]);
         apply(v << 1 | 1, psa[v], psb[v]);
@@ -24,7 +24,7 @@ class segtree {
         psb[v] = 0;
     }
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         sm[v] = sm[v << 1] + sm[v << 1 | 1];
     }
 
@@ -56,6 +56,7 @@ public:
 
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         sm.resize(U * 2);
         psa.resize(U * 2, 1);
         psb.resize(U * 2);

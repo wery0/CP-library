@@ -12,14 +12,14 @@ class implicit_segtree {
 
     Node* root = new Node();
 
-    inline T gsm(Node* n) {return n ? n->sm : 0;}
+    T gsm(Node* n) {return n ? n->sm : 0;}
 
-    inline void setval(Node* n, ll val, ll sz) {
+    void setval(Node* n, ll val, ll sz) {
         n->ps_set = val;
         n->sm = sz * val;
     }
 
-    inline void push(Node* n, ll sz) {
+    void push(Node* n, ll sz) {
         if (!n->l) n->l = new Node();
         if (!n->r) n->r = new Node();
         setval(n->l, n->ps_set, (sz + 1) >> 1);
@@ -27,7 +27,7 @@ class implicit_segtree {
         n->ps_set = NO;
     }
 
-    inline void upd(Node* n) {
+    void upd(Node* n) {
         n->sm = gsm(n->l) + gsm(n->r);
     }
 

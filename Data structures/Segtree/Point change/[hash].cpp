@@ -5,7 +5,7 @@ class segtree_point_upd {
     vector<uint64_t> pows;
     vector<uint64_t> hs;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         hs[v] = hs[v << 1] + hs[v << 1 | 1];
         hs[v] -= hs[v] < MOD ? 0 : MOD;
     }
@@ -22,6 +22,7 @@ public:
     segtree_point_upd() = default;
     template<typename I>
     segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         pows.resize(n + 1, 1);
         for (size_t i = 1; i < n + 1; ++i) pows[i] = big_prod_mod(pows[i - 1], P);
         hs.resize(U * 2);
@@ -31,13 +32,14 @@ public:
         }
         for (size_t i = U; --i;) upd(i);
     }
-    template<typename T_arr>
-    segtree_point_upd(T_arr& n) {
-        (*this) = segtree_point_upd<T, MOD, P>(n.begin(), n.end());
-    }
-    segtree_point_upd(size_t n) {
-        vector<T> m(n);
-        (*this) = segtree_point_upd<T, MOD, P>(m);
+    template<typename U>
+    segtree_point_upd(U n) {
+        if constexpr(is_integral<U>::value) {
+            vector<T> m(n);
+            (*this) = segtree_point_upd<T, MOD, P>(m.begin(), m.end());
+        } else {
+            (*this) = segtree_point_upd<T, MOD, P>(n.begin(), n.end());
+        }
     }
 
     uint64_t seg_hash(size_t ql, size_t qr) const {

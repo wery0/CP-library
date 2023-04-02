@@ -5,7 +5,7 @@ class segtree {
     vector<int> sm;
     vector<int> ps_xor;
 
-    inline constexpr int gsz(int v) {
+    int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
@@ -61,6 +61,7 @@ public:
 
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         sm.resize(U * 2);
         ps_xor.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {

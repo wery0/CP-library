@@ -9,27 +9,27 @@ class segtree_point_upd {
         tag() = default;
 
 
-        friend inline void merge(const tag& l, const tag& r, tag& res) {
+        friend void merge(const tag& l, const tag& r, tag& res) {
             res.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
             res.cr = r.cr + (r.cr == r.sz ? l.cr : 0);
             res.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             res.sz = l.sz + r.sz;
         }
 
-        friend inline tag merge(const tag& l, const tag& r) {
+        friend tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;
         }
 
-        friend inline void merge_to_left(tag& l, const tag& r) {
+        friend void merge_to_left(tag& l, const tag& r) {
             l.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             l.cl += l.cl == l.sz ? r.cl : 0;
             l.cr = r.cr + (r.cr == r.sz ? l.cr : 0);
             l.sz += r.sz;
         }
 
-        friend inline void merge_to_right(const tag& l, tag& r) {
+        friend void merge_to_right(const tag& l, tag& r) {
             r.mxd = max({l.mxd, r.mxd, l.cr + r.cl});
             r.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
             r.cr += r.cr == r.sz ? l.cr : 0;
@@ -42,7 +42,7 @@ class segtree_point_upd {
     size_t n, U;
     vector<tag> m;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 

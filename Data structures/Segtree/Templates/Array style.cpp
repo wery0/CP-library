@@ -4,7 +4,7 @@ class segtree {
     size_t n, U;
     //Create needed vectors
 
-    inline int gsz(int v) {
+    int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
@@ -49,6 +49,7 @@ public:
     segtree() = default;
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         //Resize needed vectors with U * 2
 
         for (size_t i = 0; i < n; ++i) {
@@ -60,13 +61,14 @@ public:
             //Write additional info, if need
         }
     }
-    template<typename T_arr>
-    segtree(T_arr& n) {
-        (*this) = segtree<T>(n.begin(), n.end());
-    }
-    segtree(size_t n) {
-        vector<T> m(n);
-        (*this) = segtree<T>(m);
+    template<typename U>
+    segtree(U n) {
+        if constexpr(is_integral<U>::value) {
+            vector<T> m(n);
+            (*this) = segtree<T>(m.begin(), m.end());
+        } else {
+            (*this) = segtree<T>(n.begin(), n.end());
+        }
     }
 
     T seg_statistic(size_t ql, size_t qr) {return seg_statistic(ql, qr, 0, U - 1, 1);}

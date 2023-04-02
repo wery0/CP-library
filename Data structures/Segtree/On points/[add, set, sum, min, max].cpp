@@ -9,7 +9,7 @@ class segtree_on_points {
     vector<T> sm, mn, mx;
     vector<T> ps_add, ps_set;
 
-    inline constexpr T gsz(int v) {
+    T gsz(int v) {
         return seg_gr[v].second - seg_gr[v].first + 1;
     }
 

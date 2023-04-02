@@ -6,7 +6,7 @@ class segtree_point_upd {
     vector<T> mn;
     vector<T> mx;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         sm[v] = sm[v << 1] + sm[v << 1 | 1];
         mn[v] = min(mn[v << 1], mn[v << 1 | 1]);
         mx[v] = max(mx[v << 1], mx[v << 1 | 1]);
@@ -17,6 +17,7 @@ public:
 
     template<typename I>
     segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         sm.resize(U * 2);
         mn.resize(U * 2);
         mx.resize(U * 2);
@@ -69,7 +70,7 @@ public:
         return ans;
     }
 
-    void point_change(size_t p, T val) {
+    void point_change(size_t pos, T val) {
         pos += U;
         sm[pos] = mn[pos] = mx[pos] = val;
         for (pos >>= 1; pos; pos >>= 1) upd(pos);

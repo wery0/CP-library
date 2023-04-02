@@ -8,7 +8,7 @@ class segtree {
     vector<uint64_t> pows, smpows;
     vector<T> ps_set;
 
-    inline int gsz(int v) {
+    int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
@@ -70,6 +70,7 @@ public:
     segtree() = default;
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         pows.resize(n + 1, 1);
         smpows.resize(n + 1, 1);
         for (size_t i = 1; i < n + 1; ++i) {

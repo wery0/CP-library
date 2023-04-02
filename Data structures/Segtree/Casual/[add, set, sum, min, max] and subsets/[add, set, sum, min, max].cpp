@@ -8,7 +8,7 @@ class segtree {
     vector<T> sm, mn, mx;
     vector<T> ps_set, ps_add;
 
-    inline constexpr int gsz(int v) {
+    int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
@@ -103,6 +103,7 @@ public:
 
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);

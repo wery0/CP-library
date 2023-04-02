@@ -5,7 +5,7 @@ class segtree_on_points {
     vector<pair<T, T>> seg_gr;
     //Create needed vectors
 
-    inline T gsz(int v) {
+    T gsz(int v) {
         return seg_gr[v].second - seg_gr[v].first + 1;
     }
 

@@ -5,28 +5,28 @@ class segtree_point_upd {
 
         tag() = default;
 
-        friend inline bool is_neutral(const tag& t) {
+        friend bool is_neutral(const tag& t) {
             //Write neutral if need, or remove it
             return false;
         }
 
-        friend inline void merge(const tag& l, const tag& r, tag& res) {
+        friend void merge(const tag& l, const tag& r, tag& res) {
             if (is_neutral(l)) {res = r; return;} if (is_neutral(r)) {res = l; return;}
             //Write merge
         }
 
-        friend inline tag merge(const tag& l, const tag& r) {
+        friend tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;
         }
 
-//        friend inline void merge_to_left(tag& l, const tag& r) {
+//        friend void merge_to_left(tag& l, const tag& r) {
 //            if (is_neutral(l)) {l = r; return;}if (is_neutral(r)) return;
 //
 //        }
 //
-//        friend inline void merge_to_right(const tag& l, tag& r) {
+//        friend void merge_to_right(const tag& l, tag& r) {
 //            if (is_neutral(l)) return;if (is_neutral(r)) {r = l; return;}
 //
 //        }
@@ -37,7 +37,7 @@ class segtree_point_upd {
     size_t n, U;
     vector<tag> m;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
@@ -45,6 +45,7 @@ public:
     segtree_point_upd() = default;
     template<typename I>
     segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
         m.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
             tag& t = m[U + i];
@@ -56,13 +57,14 @@ public:
             merge(l, r, m[i]);
         }
     }
-    template<typename T_arr>
-    segtree_point_upd(T_arr& n) {
-        (*this) = segtree_point_upd<T>(n.begin(), n.end());
-    }
-    segtree_point_upd(size_t n) {
-        vector<T> m(n);
-        (*this) = segtree_point_upd<T>(m);
+    template<typename U>
+    segtree_point_upd(U n) {
+        if constexpr(is_integral<U>::value) {
+            vector<T> m(n);
+            (*this) = segtree_point_upd<T>(m.begin(), m.end());
+        } else {
+            (*this) = segtree_point_upd<T>(n.begin(), n.end());
+        }
     }
 
     inline tag seg_statistic(size_t ql, size_t qr) const {

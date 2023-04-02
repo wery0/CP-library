@@ -12,7 +12,7 @@ class segtree_point_upd {
 
         tag() = default;
 
-        friend inline void merge(const tag& l, const tag& r, tag& res) {
+        friend void merge(const tag& l, const tag& r, tag& res) {
             res.sm = l.sm + r.sm;
             res.mx = max(l.mx, r.mx);
             res.mx_pref = max(l.mx_pref, l.sm + r.mx_pref);
@@ -20,13 +20,13 @@ class segtree_point_upd {
             res.mx_seg = max({l.mx_seg, r.mx_seg, l.mx_suf + r.mx_pref});
         }
 
-        friend inline tag merge(const tag& l, const tag& r) {
+        friend tag merge(const tag& l, const tag& r) {
             tag res;
             merge(l, r, res);
             return res;
         }
 
-        friend inline void merge_to_left(tag& l, const tag& r) {
+        friend void merge_to_left(tag& l, const tag& r) {
             l.mx_seg = max(l.mx_seg, max(r.mx_seg, l.mx_suf + r.mx_pref));
             l.mx_pref = max(l.mx_pref, l.sm + r.mx_pref);
             l.mx_suf = max(r.mx_suf, r.sm + l.mx_suf);
@@ -34,7 +34,7 @@ class segtree_point_upd {
             l.mx = max(l.mx, r.mx);
         }
 
-        friend inline void merge_to_right(const tag& l, tag& r) {
+        friend void merge_to_right(const tag& l, tag& r) {
             r.mx_seg = max(r.mx_seg, max(l.mx_seg, l.mx_suf + r.mx_pref));
             r.mx_suf = max(r.mx_suf, r.sm + l.mx_suf);
             r.mx_pref = max(l.mx_pref, l.sm + r.mx_pref);
@@ -48,7 +48,7 @@ class segtree_point_upd {
     size_t n, U;
     vector<tag> m;
 
-    inline void upd(size_t v) {
+    void upd(size_t v) {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
@@ -57,6 +57,7 @@ public:
 
     template<typename I>
     segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+        if (!n) return;
 	m.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
             tag& t = m[U + i];
