@@ -61,13 +61,7 @@ class tree {
         pr[v] = p;
         sz[v] = 1;
         dep[v] = p == -1 ? 0 : dep[p] + 1;
-        if (p == -1) {
-            jump[v] = v;
-        } else if (dep[pr[v]] + dep[jump[jump[pr[v]]]] == dep[jump[pr[v]]] * 2) {
-            jump[v] = jump[jump[pr[v]]];
-        } else {
-            jump[v] = pr[v];
-        }
+        jump[v] = p == -1 ? v : dep[pr[v]] + dep[jump[jump[pr[v]]]] == dep[jump[pr[v]]] * 2 ? jump[jump[pr[v]]] : pr[v];
         for (const auto& e : g[v]) {
             if (e.to == p) continue;
             //wdep[e.to] = wdep[v] + e.data;
@@ -110,6 +104,7 @@ public:
     int size() const {return V;}
 
     bool is_descendant(int p, int v) {assert(is_prepared); return tin[p] <= tin[v] && tout[v] <= tout[p];}
+    bool is_vertex_on_path(int v, int x, int y, int lc = -1) {if (lc == -1) lc = calc_lca(x, y); return is_descendant(lc, v) && (is_descendant(v, x) || is_descendant(v, y));}
     //ll calc_distance_weighted(int x, int y, int lc = -1) {if (lc == -1) lc = calc_lca(x, y); return wdep[x] + wdep[y] - wdep[lc] * 2;}
     int calc_distance_unweighted(int x, int y, int lc = -1) {if (lc == -1) lc = calc_lca(x, y); return dep[x] + dep[y] - dep[lc] * 2;}
     int calc_lca(int x, int y) {assert(is_prepared); if (dep[x] > dep[y]) swap(x, y); y = calc_kth_ancestor(y, dep[y] - dep[x]); if (x == y) return x; for (; pr[x] != pr[y];) {int u1 = jump[x], u2 = jump[y]; if (u1 == u2) x = pr[x], y = pr[y]; else x = u1, y = u2;} return pr[x];}
@@ -125,6 +120,7 @@ public:
     template<typename D> D calc_sum_of_distances_between_all_pairs_of_vertexes_weighted() {D o = 0; auto dfs = [&](auto&& dfs, int v, int pr) -> void {for (const auto& e : (*this)[v]) {if (e.to == pr) continue; dfs(dfs, e.to, v); o += (D)e.data * sz[e.to] * (V - sz[e.to]);}}; dfs(dfs, root, -1); return o;}
     vector<int> calc_rooted_isomorphic_subtrees_without_data_guaranteed() {vector<int> ans(V); map<vector<int>, int> mp; int cnt = 1; vector<pair<int, int>> stq = {{root, 0}}; while (stq.size()) {pair<int, int> p = stq.back(); const int pr = stq.size() == 1 ? -1 : stq[stq.size() - 2].first; int v = p.first; if (p.second < (*this)[v].size()) {++stq.back().second; if ((*this)[v][p.second].to != pr) stq.emplace_back((*this)[v][p.second].to, 0);} else {vector<int> tyt; tyt.reserve((*this)[v].size()); for (const auto& e : (*this)[v]) {if (e.to != pr) tyt.push_back(ans[e.to]);} sort(tyt.begin(), tyt.end()); int& i = mp[tyt]; if (!i) i = cnt++; ans[v] = i - 1; stq.pop_back();}} return ans;}
     vector<int> calc_prufer_code() {assert(is_prepared && V > 1); vector<int> cnt(V), pr(V); auto dfs = [&](auto&& dfs, int v, int p) -> void {pr[v] = p; for (const auto& e : g[v]) {if (e.to != p) dfs(dfs, e.to, v);}}; dfs(dfs, V - 1, -1); for (int q = 0; q < V; ++q) cnt[q] = g[q].size(); vector<int> ans(V - 2); for (int q = 0, leaf = find(cnt.begin(), cnt.end(), 1) - cnt.begin(), ptr = leaf + 1; q < V - 2; ++q) {int p = pr[leaf]; ans[q] = p; --cnt[leaf]; if (--cnt[p] == 1 && p < ptr) {leaf = p;} else {for (; cnt[ptr] != 1;) ++ptr; leaf = ptr++;}} return ans;}
+    pair<int, int> calc_path_intersection(int x1, int y1, int x2, int y2, int lc1 = -1, int lc2 = -1) {static constexpr pair<int, int> NO = { -1, -1}; if (lc1 == -1) lc1 = calc_lca(x1, y1); if (lc2 == -1) lc2 = calc_lca(x2, y2); if (!is_descendant(lc1, x2) && !is_descendant(lc1, y2)) return NO; if (!is_descendant(lc1, lc2)) swap(x1, x2), swap(y1, y2), swap(lc1, lc2); if (lc1 != lc2 && !is_vertex_on_path(lc2, x1, y1, lc1)) return NO; int v1 = calc_lca(x1, x2), v2 = calc_lca(x1, y2); if (v1 == lc1) v1 = calc_lca(y1, x2); if (v2 == lc1) v2 = calc_lca(y1, y2); if (tin[v1] > tin[v2]) swap(v1, v2); return {v1, v2};}
 };
 //Usage: tree<edge<T>> t(V), where T is the type of info you want to store on edges, T could be void.
 //Before using tree, add all edges and then call t.prepare_and_root(root_number).
