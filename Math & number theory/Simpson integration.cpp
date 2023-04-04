@@ -1,9 +1,9 @@
 //long double f(long double x) {return sin(x) * x;}
-//const long double EPS = 1e-9; 
 namespace Simpson {
 
     using T = long double;
-
+    //const T EPS = 1e-9;
+    
     T approx(T l, T r, T fl, T fmd, T fr) {
         return (fl + 4 * fmd + fr) * (r - l);
     }
