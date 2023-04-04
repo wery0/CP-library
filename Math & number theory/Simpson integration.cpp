@@ -4,7 +4,7 @@ namespace Simpson {
 
     using T = long double;
 
-    inline T approx(T l, T r, T fl, T fmd, T fr) {
+    T approx(T l, T r, T fl, T fmd, T fr) {
         return (fl + 4 * fmd + fr) * (r - l);
     }
 
