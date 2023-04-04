@@ -19,10 +19,10 @@ struct pt {
     pt<T> operator/(const T c) const {return {x / c, y / c};}
     pt<T> operator-() const {return {-x, -y};}
 
-    void operator+=(const pt& p) {x += p.x, y += p.y;}
-    void operator-=(const pt& p) {x -= p.x, y -= p.y;}
-    void operator*=(const T c) {x *= c, y *= c;}
-    void operator/=(const T c) {x /= c, y /= c;}
+    pt<T>& operator+=(const pt& p) {x += p.x, y += p.y; return *this;}
+    pt<T>& operator-=(const pt& p) {x -= p.x, y -= p.y; return *this;}
+    pt<T>& operator*=(const T c) {x *= c, y *= c; return *this;}
+    pt<T>& operator/=(const T c) {x /= c, y /= c; return *this;}
 
     template<typename U>
     bool operator==(const pt<U>& p) const {
