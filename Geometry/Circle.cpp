@@ -69,10 +69,11 @@ public:
     friend istream& operator>>(istream& is, circle& c) {return is >> c.p >> c.r;}
 };
 
-template<typename T>
-T calc_len_of_arc(const pt<T>& c, const pt<T>& p1, const pt<T>& p2) {
+template<typename T, typename D = long double>
+D calc_len_of_arc(const pt<T>& c, const pt<T>& p1, const pt<T>& p2) {
     T rr = dist2(c, p1);
     T dd = dist2(p1, p2);
-    T ang = acosl(1 - dd / (2 * rr) + EPS);
+    D arg = (D)1 - (D)dd / (2 * rr);
+    D ang = acosl(abs(abs(arg) - 1) < EPS ? arg < 0 ? -1 : 1 : arg);
     return sqrtl(rr) * ang;
 }
