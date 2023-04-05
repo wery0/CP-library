@@ -42,13 +42,12 @@ struct line {
 
     template<typename U>
     line get_normal_from_point(const pt<U>& p) const {
-        return line(p, p + pt(A, B));
+        return line(p, p + pt<T>(A, B));
     }
 
     template<typename U>
     void make_normal_from_point(const pt<U>& p) {
-        pt p2 = p + pt{A, B};
-        (*this) = line(p, p2);
+        *this = line(p, p + pt<T>(A, B));
     }
 
     template<typename U>
