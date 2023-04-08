@@ -1,3 +1,4 @@
+template<typename T>
 T triangle_circle_intersection(pt<T> c, T r, pt<T> a, pt<T> b) {
     T sd1 = dist2(c, a), sd2 = dist2(c, b);
     if (sd1 > sd2) swap(a, b), swap(sd1, sd2);
