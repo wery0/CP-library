@@ -9,7 +9,7 @@
 2807516534892679321
 3835424442118071511
 */
-template<const uint64_t MOD, const uint64_t P>
+template<const uint64_t MOD = 3835424442118071511, const uint64_t P = 2807516534892679321>
 struct hasher64 {
     size_t n;
     vector<uint64_t> pref_hash;
@@ -32,11 +32,10 @@ public:
         if(!n) return;
         using T = typename iterator_traits<Iterator>::value_type;
         pref_hash[0] = hash<T>{}(*first); ++first;
-        for (int q = 1; q < n; ++q, ++first) {
-            pows[q] = big_prod_mod(pows[q - 1], P, MOD);
-            pref_hash[q] = pref_hash[q - 1];
-            pref_hash[q] += big_prod_mod(hash<T>{}(*first), pows[q], MOD);
-            pref_hash[q] -= pref_hash[q] < MOD ? 0 : MOD;
+        for (size_t i = 1; i < n; ++i, ++first) {
+            pows[i] = big_prod_mod(pows[i - 1], P, MOD);
+            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash<T>{}(*first), pows[i], MOD);
+            pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
         pows[n] = big_prod_mod(pows[n - 1], P, MOD);
     }
