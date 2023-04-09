@@ -17,10 +17,10 @@ struct hasher64 {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    uint64_t big_prod_mod(const uint64_t x, const uint64_t y, const uint64_t mod) {
-        uint64_t c = (long double)x * y / mod;
-        int64_t ans = int64_t(x * y - c * mod) % int64_t(mod);
-        return ans < 0 ? ans + mod : ans;
+    uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
+        uint64_t c = (long double)x * y / MOD;
+        int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
+        return ans < 0 ? ans + MOD : ans;
     }
 
     template<typename T>
@@ -36,11 +36,11 @@ public:
         using T = typename iterator_traits<Iterator>::value_type;
         pref_hash[0] = hash_elem(*first); ++first;
         for (size_t i = 1; i < n; ++i, ++first) {
-            pows[i] = big_prod_mod(pows[i - 1], P, MOD);
-            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash_elem(*first), pows[i], MOD);
+            pows[i] = big_prod_mod(pows[i - 1], P);
+            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash_elem(*first), pows[i]);
             pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
-        pows[n] = big_prod_mod(pows[n - 1], P, MOD);
+        pows[n] = big_prod_mod(pows[n - 1], P);
     }
 
     uint64_t calc_hash(int l, int r) {
@@ -51,7 +51,7 @@ public:
             o += o < pref_hash[l - 1] ? MOD : 0;
             o -= pref_hash[l - 1];
         }
-        return big_prod_mod(o, pows[n - l], MOD);
+        return big_prod_mod(o, pows[n - l]);
     }
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
@@ -61,13 +61,13 @@ public:
         uint64_t hs = calc_hash(l, r), hspw = pows[r - l + 1];
         for (; k; k >>= 1) {
             if (k & 1) {
-                ans += big_prod_mod(hs, anspw, MOD);
+                ans += big_prod_mod(hs, anspw);
                 ans -= ans < MOD ? 0 : MOD;
-                anspw = big_prod_mod(anspw, hspw, MOD);
+                anspw = big_prod_mod(anspw, hspw);
             }
-            hs += big_prod_mod(hs, hspw, MOD);
+            hs += big_prod_mod(hs, hspw);
             hs -= hs < MOD ? 0 : MOD;
-            hspw = big_prod_mod(hspw, hspw, MOD);
+            hspw = big_prod_mod(hspw, hspw);
         }
         return ans;
     }
@@ -76,9 +76,9 @@ public:
         uint64_t res = 0;
         for (uint64_t cpw = 1; auto [l, r] : borders) {
             if (l > r) continue;
-            res += big_prod_mod(calc_hash(l, r), cpw, MOD);
+            res += big_prod_mod(calc_hash(l, r), cpw);
             res -= res < MOD ? 0 : MOD;
-            cpw = big_prod_mod(cpw, pows[r - l + 1], MOD);
+            cpw = big_prod_mod(cpw, pows[r - l + 1]);
         }
         return res;
     }
