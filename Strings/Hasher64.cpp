@@ -23,18 +23,21 @@ struct hasher64 {
         return ans < 0 ? ans + mod : ans;
     }
 
+    template<typename T>
+    auto hash_elem(T x) {return hash<T>{}(x);}
+
 public:
     hasher64() = default;
 
     template<typename Iterator>
     hasher64(Iterator first, Iterator last): n(last - first), pref_hash(n), pows(n + 1) {
         pows[0] = 1;
-        if(!n) return;
+        if (!n) return;
         using T = typename iterator_traits<Iterator>::value_type;
-        pref_hash[0] = hash<T>{}(*first); ++first;
+        pref_hash[0] = hash_elem(*first); ++first;
         for (size_t i = 1; i < n; ++i, ++first) {
             pows[i] = big_prod_mod(pows[i - 1], P, MOD);
-            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash<T>{}(*first), pows[i], MOD);
+            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash_elem(*first), pows[i], MOD);
             pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
         pows[n] = big_prod_mod(pows[n - 1], P, MOD);
@@ -45,7 +48,7 @@ public:
         assert(0 <= l && r < n);
         uint64_t o = pref_hash[r];
         if (l) {
-            o += o < pref_hash[l - 1] ? MOD : 0; 
+            o += o < pref_hash[l - 1] ? MOD : 0;
             o -= pref_hash[l - 1];
         }
         return big_prod_mod(o, pows[n - l], MOD);
