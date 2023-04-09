@@ -45,14 +45,14 @@ class treap {
     ll gsz(Node* n) const {return n ? n->sz : 0;}
 
     //Write, if need
-    inline void apply_push(Node* n) {
+    void apply_push(Node* n) {
         if (!n) return;
     }
-    inline void push(Node* n) {
+    void push(Node* n) {
         if (!n) return;
     }
 
-    inline void upd(Node* n) {
+    void upd(Node* n) {
         if (!n) return;
         n->mnk = min({gmnk(n->l), n->key, gmnk(n->r)});
         n->mxk = max({gmxk(n->l), n->key, gmxk(n->r)});
@@ -82,13 +82,13 @@ class treap {
         push(n);
         if (key <= gsz(n->l)) {
             pair<Node*, Node*> p = split_size(n->l, key);
-            n->l = p.S; upd(n);
-            p.S = n;
+            n->l = p.second; upd(n);
+            p.second = n;
             return p;
         }
         pair<Node*, Node*> p = split_size(n->r, key - gsz(n->l) - 1);
-        n->r = p.F; upd(n);
-        p.F = n;
+        n->r = p.first; upd(n);
+        p.first = n;
         return p;
     }
 
@@ -97,13 +97,13 @@ class treap {
         push(n);
         if (key < n->key) {
             pair<Node*, Node*> p = split_key(n->l, key);
-            n->l = p.S; upd(n);
-            p.S = n;
+            n->l = p.second; upd(n);
+            p.second = n;
             return p;
         }
         pair<Node*, Node*> p = split_key(n->r, key);
-        n->r = p.F; upd(n);
-        p.F = n;
+        n->r = p.first; upd(n);
+        p.first = n;
         return p;
     }
 
@@ -143,7 +143,7 @@ class treap {
         if (gsz(n->l) == pos) {
             last_erased_key = n->key;
             last_erased_val = n->val;
-            Node *l = n->l, *r = n->r;
+            Node* l = n->l, *r = n->r;
             delete n;
             return merge(l, r);
         }
@@ -156,9 +156,9 @@ class treap {
     Node* insert_node(Node* n, Node* nw) {
         push(n);
         if (!n || nw->y > n->y) {
-            pair<Node*, Node*> p = split_key(n, nw->key);
-            nw->l = p.F;
-            nw->r = p.S;
+            auto [lf, rg] = split_key(n, nw->key);
+            nw->l = lf;
+            nw->r = rg;
             upd(nw);
             return nw;
         }
@@ -172,7 +172,7 @@ class treap {
         if (!n) return 0;
         push(n);
         if (n->key == key) {
-            Node *l = n->l, *r = n->r;
+            Node* l = n->l, *r = n->r;
             delete n;
             return merge(l, r);
         }
@@ -194,7 +194,7 @@ class treap {
         assert(n);
         K mnk = gmnk(n);
         int ans = 0;
-        for (; n;) {
+        while (n) {
             push(n);
             if (gmnk(n->l) == mnk) n = n->l;
             else if (n->key == mnk) return ans + gsz(n->l);
@@ -208,7 +208,7 @@ class treap {
         assert(n);
         K mnk = gmnk(n);
         int ans = 0;
-        for (; n;) {
+        while (n) {
             push(n);
             if (gmnk(n->r) == mnk) ans += gsz(n->l) + 1, n = n->r;
             else if (n->key == mnk) return ans + gsz(n->l);
@@ -220,15 +220,15 @@ class treap {
 
     pair<K, V> kth_elem(Node* n, ll k) {
         assert(0 <= k && k < gsz(n));
-        for (;;) {
+        while(n) {
             push(n);
             const int szl = gsz(n->l);
             if (k == szl) return {n->key, n->val};
             if (k < szl) n = n->l;
-            else {k -= szl + 1; n = n->r;}
+            else k -= szl + 1, n = n->r;
         }
         assert(0);
-        return { -1, -1};
+        return {-1, -1};
     }
 
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
@@ -252,14 +252,14 @@ public:
     bool empty() const {return root == 0;}
 
     template<typename I>
-    void insert_array_at_pos(int pos, I first, I last) {pair<Node*, Node*> p = split_size(root, pos); root = merge(merge(p.F, build(first, last)), p.S);}
-    void insert_key_at_pos(int pos, K key, V val = UNDEF) {pair<Node*, Node*> p = split_size(root, pos); root = merge(merge(p.F, new Node(key, val)), p.S);}
+    void insert_array_at_pos(int pos, I first, I last) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(first, last)), rg);}
+    void insert_key_at_pos(int pos, K key, V val = UNDEF) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key, val)), rg);}
     void insert_key(K key, V val = UNDEF) {root = insert_node(root, new Node(key, val));}
     void update_val_at_pos(int pos, V new_val) {update_val_at_pos(root, pos, new_val);}
 
     void erase_pos(ll pos) {root = erase_pos(root, pos);}
     void erase_one_key(K key) {root = erase_one_key(root, key);}
-    void erase_seg(int l, int len) {pair<Node*, Node*> p1 = split_size(root, l); pair<Node*, Node*> p2 = split_size(p1.S, len); root = merge(p1.F, p2.S);}
+    void erase_seg(int l, int len) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, len); root = merge(lf, rg);}
 
     K extract_pos_get_key(ll pos) {erase_pos(pos); return last_erased_key;}
     V extract_pos_get_val(ll pos) {erase_pos(pos); return last_erased_val;}
@@ -267,7 +267,7 @@ public:
 
     pair<K, V> operator[](ll pos) {return kth_elem(root, pos);}
     V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
-    ll get_leftest_pos_of_key(K key) {Node* n = root; ll pos = 0, o = size; while (n) {push(n); if (key == n->x) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->x) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size()); return o;}
+    ll get_leftest_pos_of_key(K key) {Node* n = root; ll pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
 
     ll count_keys_leq(K key) {Node* n = root; ll o = 0; while (n) {push(n); if (n->key <= key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
     ll count_keys_less(K key) {Node* n = root; ll o = 0; while (n) {push(n); if (n->key < key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
