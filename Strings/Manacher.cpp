@@ -1,25 +1,21 @@
-template<typename T_arr>
-ll manacher(const T_arr& t) {
-    int a = t.size();
-    vector<int> odd(a);   //odd("aaaaa")  = {1, 2, 3, 2, 1}
-    vector<int> even(a);  //even("aaaaa") = {0, 1, 2, 2, 1}
-    for (int q = 0, l = 0, r = 0; q < a; ++q) {
-        int& d = odd[q];
-        d = q > r ? 1 : max(0, min(r - q, odd[r - q + l]));
-        while (q - d >= 0 && q + d < a && t[q - d] == t[q + d]) {
-            ++d;
-        }
-        l = chmax(r, q + d - 1) ? q - d + 1 : l;
+template<typename Arr, typename T = int64_t>
+T manacher(const Arr& t) {
+    size_t n = t.size();
+    vector<int> odd(n);   //odd("aaaaa")  = {1, 2, 3, 2, 1}
+    vector<int> even(n);  //even("aaaaa") = {0, 1, 2, 2, 1}
+    for (int i = 0, l = 0, r = 0; i < n; ++i) {
+        int& d = odd[i];
+        d = i > r ? 1 : max(0, min(r - i, odd[r - i + l]));
+        while (i - d >= 0 && i + d < n && t[i - d] == t[i + d]) ++d;
+        if (i + d - 1 > r) r = i + d - 1, l = i - d + 1;
     }
-    for (int q = 1, l = 0, r = 0; q < a; ++q) {
-        int& d = even[q];
-        d = q > r ? 0 : max(0, min(r - q, even[r - q + l + 1]));
-        while (q - d - 1 >= 0 && q + d < a && t[q - d - 1] == t[q + d]) {
-            ++d;
-        }
-        l = chmax(r, q + d) ? q - d - 1 : l;
+    for (int i = 1, l = 0, r = 0; i < n; ++i) {
+        int& d = even[i];
+        d = i > r ? 0 : max(0, min(r - i, even[r - i + l + 1]));
+        while (i - d - 1 >= 0 && i + d < n && t[i - d - 1] == t[i + d]) ++d;
+        if (i + d > r) r = i + d, l = i - d - 1;
     }
-    return accumulate(all(odd), 0ll) + accumulate(all(even), 0ll);
+    return accumulate(odd.begin(), odd.end(), (T)0) + accumulate(even.begin(), even.end(), (T)0);
 }
 
 // bool is_palindrome(int l, int r) {
