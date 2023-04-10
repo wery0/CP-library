@@ -1,39 +1,39 @@
 //O(nlog(n))
 vector<int> calc_suffix_array(string& t) {
     t += (char)(0);           //This symbol must not appear in the string
-    int n = t.size();
-    vector<int> cnt(n), cl(n), pcl(n);
-    int kek[256] = {0};
+    const int n = t.size();
+    vector<int> cnt(n), cl(n), pcl(n), kek(256);
     for (char c : t) kek[c] = 1;
-    for (int q = 0, i = 0; q < 256; q++) if (kek[q]) kek[q] = i++;
-    for (int q = 0; q < n; ++q) cl[q] = kek[t[q]], ++cnt[cl[q]];
-    vector<pair<pair<int, int>, int>> ncl(n);
+    for (int i = 0, j = 0; i < 256; ++i) if (kek[i]) kek[i] = j++;
+    for (int i = 0; i < n; ++i) cl[i] = kek[t[i]], ++cnt[cl[i]];
+    vector<array<int, 3>> ncl(n);
     for (int d = 1; d < n; d *= 2) {
-        for (int q = 1; q < n; q++) cnt[q] += cnt[q - 1];
-        for (int q = 0; q < n; q++) pcl[--cnt[cl[(q + d) % n]]] = q;
-        for (int q : pcl) ncl[cnt[cl[q]]++] = {{cl[q], cl[(q + d) % n]}, q};
-        for (int q = 0; q < n; q++) cl[ncl[q].second] = q ? cl[ncl[q - 1].second] + (ncl[q - 1].first != ncl[q].first) : 0;
-        fill(all(cnt), 0);
-        for (int i : cl) cnt[i]++;
+        partial_sum(cnt.begin(), cnt.end(), cnt.begin());
+        for (int i = 0; i < n; ++i) pcl[--cnt[cl[(i + d) % n]]] = i;
+        for (int i : pcl) ncl[cnt[cl[i]]++] = {cl[i], cl[(i + d) % n], i};
+        for (int i = 0; i < n; ++i) cl[ncl[i][2]] = i ? cl[ncl[i - 1][2]] + (ncl[i - 1][0] != ncl[i][0] || ncl[i - 1][1] != ncl[i][1]) : 0;
+        memset(&cnt[0], 0, sizeof(cnt[0]) * n);
+        for (int i : cl) ++cnt[i];
     }
+    t.pop_back();
     vector<int> suf(n - 1);
-    for (int q = 0; q < n; ++q) if (cl[q]) suf[cl[q] - 1] = q;
+    for (int i = 0; i < n; ++i) if (cl[i]) suf[cl[i] - 1] = i;
     return suf;
 }
 
 //O(n)
-vector<int> calc_lcp(string& t, vector<int>& suf) {
-    int n = suf.size();
+vector<int> calc_lcp(const string& t, const vector<int>& suf) {
+    const int n = suf.size();
     vector<int> pos_in_sufmas(n), lcp(n - 1);
-    for (int q = 0; q < n; ++q) pos_in_sufmas[suf[q]] = q;
-    for (int q = 0; q < n - 1; ++q) {
-        int i = pos_in_sufmas[q];
-        if (!i) continue;
-        if (q) {
-            int prps = pos_in_sufmas[q - 1] - 1;
-            lcp[i - 1] = max(0, prps >= 0 ? lcp[prps] - 1 : 0);
+    for (int i = 0; i < n; ++i) pos_in_sufmas[suf[i]] = i;
+    for (int i = 0; i < n - 1; ++i) {
+        int p = pos_in_sufmas[i];
+        if (!p) continue;
+        if (i) {
+            int prps = pos_in_sufmas[i - 1] - 1;
+            lcp[p - 1] = max(0, prps >= 0 ? lcp[prps] - 1 : 0);
         }
-        for (int d = lcp[i - 1]; q + d < n && suf[i - 1] + d < n && t[q + d] == t[suf[i - 1] + d]; ++d) ++lcp[i - 1];
+        for (int d = lcp[p - 1]; i + d < n && suf[p - 1] + d < n && t[i + d] == t[suf[p - 1] + d]; ++d) ++lcp[p - 1];
     }
     return lcp;
 }
