@@ -1,43 +1,38 @@
 template<typename K>
 struct hash_set_chain {
 
-    int N;
-    vec<vec<K>> table;
+    size_t N;
+    vector<vector<K>> table;
 
+    static constexpr uint64_t kek = 11995408973635179863ull;
     constexpr inline int hsh(const K& key) const {
-        if constexpr(is_integral<K>::value) {
-            return key % N;
+        if constexpr(is_integral<K>) {
+            //return key % N;
+            return ((key * kek) >> 32) % N;
         } else {
-            return hash<K> {}(key) % N;
+            return hash<K>{}(key) % N;
         }
     }
 
     hash_set_chain() = default;
 
-    hash_set_chain(int n) {
-        N = n;
-        table.resize(N);
-        //for (int q = 0; q < N; ++q) table.reserve(5);
+    hash_set_chain(size_t N): N(N), table(N) {
+        //for (vector<K>& v : table) v.reserve(5);
     }
 
-    inline bool contains(const K& key) const {
-        for (const auto &k : table[hsh(key)]) {
-            if (k == key) return true;
-        }
-        return false;
-    }
-
-    inline void insert(const K& key) {
+    bool contains(const K& key) const {
         int pos = hsh(key);
-        for (const auto &k : table[pos]) {
-            if (k == key) {
-                return;
-            }
-        }
-        table[pos].pb(key);
+        return any_of(table[pos].begin(), table[pos].end(), [&](const K& k) {return k == key;});
     }
 
-    inline void insert_unchecked(const K& key) {
-        table[hsh(key)].pb(key);
+    void insert(const K& key) {
+        int pos = hsh(key);
+        if (!any_of(table[pos].begin(), table[pos].end(), [&](const K& k) {return k == key;})) {
+            table[pos].push_back(key);
+        }
+    }
+
+    void insert_unchecked(const K& key) {
+        table[hsh(key)].push_back(key);
     }
 };

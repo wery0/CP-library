@@ -1,60 +1,56 @@
 template<typename K, typename V>
 struct hash_map_open_addressing {
 
-    int N;
-    vec<pair<K, V>> store;
-    vec<bool> is_occupied;
+    size_t N;
+    vector<pair<K, V>> store;
+    vector<bool> is_occupied;
 
-    hash_map_open_addressing() = default;
+    hash_map_open_addressing(size_t N = 1): N(N), store(N), is_occupied(N) {assert(N > 0);}
 
-    hash_map_open_addressing(int n) {
-	assert(n > 0);
-        N = n;
-        store.resize(n);
-        is_occupied.resize(n);
-    }
-
-    constexpr inline void next_pos(int &pos) const {
+    constexpr inline void next_pos(int& pos) const {
         pos = pos < N - 1 ? pos + 1 : 0;
     }
 
-    const ull kek = uid<ull>(0, ULLONG_MAX)(rndll);
+    static constexpr uint64_t kek = 11995408973635179863ull;
     constexpr inline int hsh(const K& key) const {
-        if constexpr(std::is_integral<K>::value) {
+        if constexpr(is_integral_v<K>) {
             //return key % N;
             return ((key * kek) >> 32) % N;
         } else {
-            return hash<K> {}(key) % N;
+            return hash<K>{}(key) % N;
         }
     }
 
-    inline void clear() {
-        fill(all(is_occupied), false);
+    void clear() {
+        fill(is_occupied.begin(), is_occupied.end(), false);
     }
 
-    inline V operator[](const K& key) const {
+    V operator[](const K& key) const {
         int pos = hsh(key);
-        for (; is_occupied[pos]; next_pos(pos)) {
-            if (store[pos].F == key) return store[pos].S;
+        while (is_occupied[pos]) {
+            if (store[pos].first == key) return store[pos].second;
+            next_pos(pos);
         }
-        return 0;
+        return V();
     }
 
-    inline bool contains(const K& key) const {
+    bool contains(const K& key) const {
         int pos = hsh(key);
-        for (; is_occupied[pos]; next_pos(pos)) {
-            if (store[pos].F == key) return true;
+        while (is_occupied[pos]) {
+            if (store[pos].first == key) return true;
+            next_pos(pos);
         }
         return false;
     }
 
-    inline void add(const K& key, const V& val) {
+    void add(const K& key, const V& val) {
         int pos = hsh(key);
-        for (; is_occupied[pos]; next_pos(pos)) {
-            if (store[pos].F == key) {
-                store[pos].S = val;
+        while (is_occupied[pos]) {
+            if (store[pos].first == key) {
+                store[pos].second = val;
                 return;
             }
+            next_pos(pos);
         }
         store[pos] = {key, val};
         is_occupied[pos] = true;
