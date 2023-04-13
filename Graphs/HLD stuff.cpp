@@ -15,8 +15,8 @@ void ifs1(int v, int p = -1) {
         ifs1(to, v);
         sz[v] += sz[to];
     }
-    if (p != -1) l[v].erase(find(all(l[v]), p));
-    for (int &h : l[v]) if (sz[h] > sz[l[v][0]]) swap(h, l[v][0]);
+    if (p != -1) l[v].erase(find(l[v].begin(), l[v].end(), p));
+    for (int& h : l[v]) if (sz[h] > sz[l[v][0]]) swap(h, l[v][0]);
 }
 
 int fpth[G];
@@ -25,9 +25,9 @@ void ifs2(int v, int fir = -1) {
     static int T = 0;
     tin[v] = T++;
     fpth[v] = fir;
-    for (int q = 0; q < l[v].size(); q++) {
-        const int to = l[v][q];
-        ifs2(to, (q ? to : fir));
+    for (int i = 0; i < l[v].size(); ++i) {
+        const int to = l[v][i];
+        ifs2(to, (i ? to : fir));
     }
     tout[v] = T;
 }
@@ -39,9 +39,9 @@ auto path_query(int x, int y) {
         return seg_query(tin[fr], tin[to]);
     };
     array<int, 2> arr = {x, y};
-    for (int &v : arr) {
+    for (int& v : arr) {
         int u = x + y - v;
-        for (; !is_descendant(fpth[v], u);) {
+        while (!is_descendant(fpth[v], u)) {
             query(fpth[v], v);
             v = pr[fpth[v]];
         }
@@ -59,21 +59,19 @@ auto path_query_inorder(int x, int y) {
         }
         return seg_query(tin[fr], tin[to]);
     };
-    vec<pii> store;
-    for (; !is_descendant(fpth[x], y);) {
-        store.pb({x, fpth[x]});
+    vector<pair<int, int>> store;
+    while (!is_descendant(fpth[x], y)) {
+        store.emplace_back(x, fpth[x]);
         x = pr[fpth[x]];
     }
     int sz = store.size();
-    for (; fpth[x] != fpth[y];) {
-        store.pb({fpth[y], y});
+    while (fpth[x] != fpth[y]) {
+        store.emplace_back(fpth[y], y);
         y = pr[fpth[y]];
     }
     reverse(store.begin() + sz, store.end());
     store.insert(store.begin() + sz, {x, y});
-    for (pii p : store) {
-        query(p.F, p.S);
-    }
+    for (auto [x, y] : store) query(x, y);
     return ?;
 }
 
