@@ -293,6 +293,9 @@ public:
     int get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
     vector<K> get_keys_from_seg(int l, int len) {vector<K> res; get_keys_on_subsegment(root, l, len, res); return res;}
 
+    void cyclic_shift_left(int shift) {if (shift < 0) cyclic_shift_right(-shift); else {if (shift >= size()) shift %= size(); auto [lf, rg] = split_size(root, shift); root = merge(rg, lf);}}
+    void cyclic_shift_right(int shift) {if (shift < 0) cyclic_shift_left(-shift); else {if (shift >= size()) shift %= size(); auto [lf, rg] = split_size(root, size() - shift); root = merge(rg, lf);}}
+    
     void print_keys(string end_string = "") {print_keys(root); cout << end_string;}
     void print_vals(string end_string = "") {print_vals(root); cout << end_string;}
 };
