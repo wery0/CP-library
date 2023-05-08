@@ -9,7 +9,7 @@ struct hash_map_open_addressing {
         pos = pos < N - 1 ? pos + 1 : 0;
     }
 
-    static constexpr ull kek = 11995408973635179863ull;
+    static constexpr uint64_t kek = 11995408973635179863ull;
     constexpr inline int hsh(const K& key) const {
         if constexpr(is_integral_v<K>) {
             //return key & (N - 1);
