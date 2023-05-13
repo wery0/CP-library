@@ -62,7 +62,7 @@ public:
     int count_weakly_connected_components(int min_component_size = 1) {assert(is_prepared); vector<int> pr(V), sz(V, 1); iota(pr.begin(), pr.end(), 0); auto find = [&](auto&& find, int v) -> int {return pr[v] = v == pr[v] ? v : find(find, pr[v]);}; for (int v = 0; v < V; ++v) {for (const auto& e : store) {int pv = find(find, v), ph = find(find, e.to); if (pv != ph) {if (sz[pv] > sz[ph]) swap(pv, ph); sz[ph] += sz[pv]; pr[pv] = ph;}}} int ans = 0; for (int q = 0; q < V; ++q) ans += pr[q] == q && sz[q] >= min_component_size; return ans;}
 
     bool is_tree() {return E == V - 1 && is_vertex_connected();}
-    bool is_vertex_connected() {return count_connected_components() == 1;}
+    bool is_vertex_connected() {return V == 0 || count_connected_components() == 1;}
     bool is_edge_connected() {return count_connected_components(2) <= 1;}
     bool is_bipartite() {assert(is_prepared); vector<int> col(V, -1); bool fl = 1; auto dfs = [&](auto&& dfs, int v, int c) -> void {col[v] = c; for (const auto& h : (*this)[v]) {if (col[h.to] == -1) dfs(dfs, h.to, c ^ 1); else fl &= col[h.to] != c;}}; for (int q = 0; q < V; ++q) if (col[q] == -1) dfs(dfs, q, 0); return fl;}
     bool is_simple() {return !has_self_edges() && !has_multiple_edges();}
