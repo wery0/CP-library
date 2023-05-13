@@ -1,9 +1,60 @@
 //All functions are uniformly random, unless other is stated
 namespace Generator {
 
+    const long double EPS = 1e-9;
+
+    namespace impl {
+        template<typename T>
+        vector<array<T, 2>> convex_hull(vector<array<T, 2>> arr) {
+            static const T eps = is_integral_v<T> ? 0 : EPS;
+            if (arr.empty()) return {};
+            auto cross = [](const array<T, 2>& p1, const array<T, 2>& p2) -> T {
+                return p1[0] * p2[1] - p1[1] * p2[0];
+            };
+            array<T, 2> mnp = *min_element(arr.begin(), arr.end());
+            for (auto& p : arr) p[0] -= mnp[0], p[1] -= mnp[1];
+            sort(arr.begin(), arr.end(), [&](const array<T, 2>& p1, const array<T, 2>& p2) {
+                T c = cross(p1, p2);
+                return abs(c) > eps ? c > 0 : abs(p1[0]) + abs(p1[1]) < abs(p2[0]) + abs(p2[1]);
+            });
+            vector<array<T, 2>> ch;
+            for (const auto& p : arr) {
+                while (ch.size() > 1) {
+                    auto p1 = ch.back();
+                    p1[0] -= ch[ch.size() - 2][0];
+                    p1[1] -= ch[ch.size() - 2][1];
+                    auto p2 = p;
+                    p2[0] -= ch.back()[0];
+                    p2[1] -= ch.back()[1];
+                    if (cross(p1, p2) > eps) break;
+                    ch.pop_back();
+                }
+                if (ch.empty() || abs(p[0] - ch.back()[0]) + abs(p[1] - ch.back()[1]) > eps) {
+                    ch.push_back(p);
+                }
+            }
+            for (auto& p : ch) p[0] += mnp[0], p[1] += mnp[1];
+            return ch;
+        }
+
+        array<size_t, 2> num_to_edge(uint64_t n, uint64_t c, bool is_directed) {
+            if (is_directed) {
+                size_t x = c / (n - 1), y = c % (n - 1);
+                return {x, y + (y >= x)};
+            }
+            uint64_t D = 4 * n * n - 4 * n + 1 - 8 * c;
+            size_t x = floor((2 * n - 3 - sqrtl(D)) / 2) + 1;
+            size_t y = x + 1 + (c - (2 * n - x - 1) * x / 2);
+            return {x, y};
+        }
+
+        uint64_t edge_to_num(uint64_t n, uint64_t x, uint64_t y, bool is_directed) {
+            return is_directed ? x * (n - 1) + y - (y > x) : (n * 2 - 1 - x) * x / 2 + (y - x - 1);
+        }
+    }
+
     mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
     mt19937_64 rngll(std::chrono::steady_clock::now().time_since_epoch().count());
-    const long double EPS = 1e-9;
 
     template<typename T>
     T gen_val(T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
@@ -20,7 +71,7 @@ namespace Generator {
     }
 
     template<typename T>
-    vector<T> gen_vector(int n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+    vector<T> gen_vector(size_t n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         vector<T> m(n);
         for (auto& i : m) i = gen_val<T>(l, r);
         return m;
@@ -28,7 +79,8 @@ namespace Generator {
 
     //Complexity: O(n) expected
     template<typename T>
-    vector<T> gen_vector_distinct(int n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+    vector<T> gen_vector_distinct(size_t n, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+        static_assert(is_integral_v<T>);
         T d = r - l + 1;
         assert(n <= d);
         if (n * 2 <= d) {
@@ -55,7 +107,7 @@ namespace Generator {
       Complexity: O(n * log(len / (len - abs(len / 2 - my))))
     */
     template<typename T>
-    vector<T> gen_vector_with_fixed_sum(T n, T l, T r, T sum) {
+    vector<T> gen_vector_with_fixed_sum(size_t n, T l, T r, T sum) {
         assert(l * n <= sum && sum <= r * n);
         vector<T> res(n);
         for (T& c : res) c = gen_val(l, r);
@@ -81,7 +133,7 @@ namespace Generator {
     }
 
     template<typename T>
-    vector<vector<T>> gen_matrix(int n, int m, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
+    vector<vector<T>> gen_matrix(size_t n, size_t m, T l = numeric_limits<T>::min(), T r = numeric_limits<T>::max()) {
         vector<vector<T>> res(n, vector<T>(m));
         for (auto& row : res) {
             for (auto& num : row) {
@@ -91,25 +143,25 @@ namespace Generator {
         return res;
     }
 
-    string gen_alpha_string(int n, int first_letters = 26) {
+    string gen_alpha_string(size_t n, int first_letters = 26) {
         string s(n, 'A');
         for (auto& i : s) i += (gen_val<int>(0, 1) ? 32 : 0) + gen_val<int>(0, first_letters - 1);
         return s;
     }
 
-    string gen_lowercase_string(int n, int first_letters = 26) {
+    string gen_lowercase_string(size_t n, int first_letters = 26) {
         string s(n, 'a');
         for (auto& i : s) i += gen_val<int>(0, first_letters - 1);
         return s;
     }
 
-    string gen_uppercase_string(int n, int first_letters = 26) {
+    string gen_uppercase_string(size_t n, int first_letters = 26) {
         string s(n, 'A');
         for (auto& i : s) i += gen_val<int>(0, first_letters - 1);
         return s;
     }
 
-    string gen_palindrome_lowercase_string(int n, int first_letters = 26) {
+    string gen_palindrome_lowercase_string(size_t n, int first_letters = 26) {
         string s = gen_lowercase_string(n / 2, first_letters);
         if (n & 1) s.push_back('a' + gen_val(0, first_letters - 1));
         string t = s;
@@ -117,14 +169,14 @@ namespace Generator {
         return s + t;
     }
 
-    string gen_parenthesis_sequence(int n) {
+    string gen_parenthesis_sequence(size_t n) {
         string s = string(n, '(');
         for (auto& c : s) c = gen_val<int>(0, 1) ? ')' : c;
         return s;
     }
 
     //Not uniformly random, P("((()))") < P("()()()")
-    string gen_right_parenthesis_sequence(int n) {
+    string gen_right_parenthesis_sequence(size_t n) {
         assert(n % 2 == 0);
         string s = string(n / 2, '(') + string(n / 2, ')');
         shuffle(s.begin(), s.end(), rngll);
@@ -136,7 +188,7 @@ namespace Generator {
     }
 
     template<typename T>
-    pair<T, T> gen_point_inside_circle(T cx, T cy, T r) {
+    array<T, 2> gen_point_inside_circle(T cx, T cy, T r) {
         T x = gen_val(cx - r, cx + r);
         T y = gen_val(cy - r, cy + r);
         while ((cx - x) * (cx - x) + (cy - y) * (cy - y) > r * r) {
@@ -148,32 +200,33 @@ namespace Generator {
 
     //Not uniformly random
     //Complexity: O(n)
-    vector<pair<int, int>> gen_tree(int n) {
+    vector<array<size_t, 2>> gen_tree(size_t n) {
         assert(n > 0);
-        vector<pair<int, int>> ans(n - 1);
-        for (int q = 1; q < n; ++q) ans[q - 1] = {gen_val(0, q - 1), q};
-        vector<int> replacement(n);
+        vector<array<size_t, 2>> ans(n - 1);
+        for (size_t q = 1; q < n; ++q) ans[q - 1] = {gen_val<size_t>(0, q - 1), q};
+        vector<size_t> replacement(n);
         iota(replacement.begin(), replacement.end(), 0);
         shuffle(replacement.begin(), replacement.end(), rngll);
         for (auto& [x, y] : ans) {
             x = replacement[x];
             y = replacement[y];
+            if (x > y) swap(x, y);
         }
         return ans;
     }
 
     //Uniformly random among all labeled trees
     //Complexity: O(n)
-    vector<pair<int, int>> gen_tree_prufer(int n) {
+    vector<array<size_t, 2>> gen_tree_prufer(size_t n) {
         assert(n > 0);
         if (n == 1) return {};
-        vector<int> pcode = gen_vector(n - 2, 0, n - 1);
-        vector<int> cnt(n);
+        vector<size_t> pcode = gen_vector<size_t>(n - 2, 0, n - 1);
+        vector<size_t> cnt(n);
         for (int v : pcode) ++cnt[v];
-        vector<pair<int, int>> ans(n - 1);
-        int leaf = find(cnt.begin(), cnt.end(), 0) - cnt.begin();
+        vector<array<size_t, 2>> ans(n - 1);
+        size_t leaf = find(cnt.begin(), cnt.end(), 0) - cnt.begin();
         for (int q = 0, ptr = leaf + 1; q < n - 2; ++q) {
-            int p = pcode[q];
+            size_t p = pcode[q];
             ans[q] = {p, leaf};
             if (--cnt[p] == 0 && p < ptr) {
                 leaf = p;
@@ -183,65 +236,33 @@ namespace Generator {
             }
         }
         ans.back() = {leaf, n - 1};
+        for (auto& [x, y] : ans) if (x > y) swap(x, y);
         return ans;
-    }
-
-    template<typename T>
-    vector<pair<T, T>> __convex_hull(vector<pair<T, T>> arr) {
-        static const T eps = is_integral_v<T> ? 0 : EPS;
-        if (arr.empty()) return {};
-        auto cross = [](const pair<T, T>& p1, const pair<T, T>& p2) -> T {
-            return p1.first * p2.second - p1.second * p2.first;
-        };
-        pair<T, T> mnp = *min_element(arr.begin(), arr.end());
-        for (auto& p : arr) p.first -= mnp.first, p.second -= mnp.second;
-        sort(arr.begin(), arr.end(), [&](const pair<T, T>& p1, const pair<T, T>& p2) {
-            T c = cross(p1, p2);
-            return abs(c) > eps ? c > 0 : abs(p1.first) + abs(p1.second) < abs(p2.first) + abs(p2.second);
-        });
-        vector<pair<T, T>> ch;
-        for (const auto& p : arr) {
-            while (ch.size() > 1) {
-                auto p1 = ch.back();
-                p1.first -= ch[ch.size() - 2].first;
-                p1.second -= ch[ch.size() - 2].second;
-                auto p2 = p;
-                p2.first -= ch.back().first;
-                p2.second -= ch.back().second;
-                if (cross(p1, p2) > eps) break;
-                ch.pop_back();
-            }
-            if (ch.empty() || abs(p.first - ch.back().first) + abs(p.second - ch.back().second) > eps) {
-                ch.push_back(p);
-            }
-        }
-        for (auto& p : ch) p.first += mnp.first, p.second += mnp.second;
-        return ch;
     }
 
     //Not uniformly random
     //Expected convex hull size: O(log(samples))
     //Complexity: O(samples * log(samples))
     template<typename T>
-    vector<pair<T, T>> gen_convex_hull_inside_rectangle_monte_carlo(size_t samples, T x1, T y1, T x2, T y2) {
+    vector<array<T, 2>> gen_convex_hull_inside_rectangle_monte_carlo(size_t samples, T x1, T y1, T x2, T y2) {
         assert(x1 <= x2 && y1 <= y2);
-        vector<pair<T, T>> m(samples);
+        vector<array<T, 2>> m(samples);
         for (auto& [x, y] : m) {
             x = gen_val(x1, x2);
             y = gen_val(y1, y2);
         }
-        return __convex_hull(m);
+        return impl::convex_hull(m);
     }
 
     //Not uniformly random
     //Expected convex hull size: O(cbrt(samples))
     //Complexity: O(samples * log(samples))
     template<typename T>
-    vector<pair<T, T>> gen_convex_hull_inside_circle_monte_carlo(size_t samples, T cx, T cy, T r) {
+    vector<array<T, 2>> gen_convex_hull_inside_circle_monte_carlo(size_t samples, T cx, T cy, T r) {
         assert(r >= 0);
-        vector<pair<T, T>> m(samples);
+        vector<array<T, 2>> m(samples);
         for (auto& p : m) p = gen_point_inside_circle(cx, cy, r);
-        return __convex_hull(m);
+        return impl::convex_hull(m);
     }
 
     //https://cglab.ca/~sander/misc/ConvexGeneration/convex.html
@@ -254,10 +275,11 @@ namespace Generator {
         - O(samples) when samples <= O(T) and T is integral type
         - o(T) when samples > O(T) and T is integral type
     */
+    //Ensure that max(X * X, Y * Y, X * Y) fits in T
     //Complexity: O(samples * log(samples))
     //Note: max(X, Y) ^ 2 should fit in T
     template<typename T>
-    vector<pair<T, T>> gen_convex_hull_inside_rectangle(size_t samples, T x1, T y1, T x2, T y2) {
+    vector<array<T, 2>> gen_convex_hull_inside_rectangle(size_t samples, T x1, T y1, T x2, T y2) {
         assert(x1 <= x2 && y1 <= y2);
         if (samples == 0) return {};
         if (samples == 1) return {{gen_val(x1, x2), gen_val(y1, y2)}};
@@ -283,23 +305,23 @@ namespace Generator {
         dy[samples - 2] = py[samples - 1] - ly[0];
         dy[samples - 1] = ly[1] - py[samples - 1];
         shuffle(dy.begin(), dy.end(), rngll);
-        vector<pair<T, T>> ans(samples);
+        vector<array<T, 2>> ans(samples);
         for (size_t i = 0; i < samples; ++i) ans[i] = {dx[i], dy[i]};
-        auto part = [](const pair<T, T>& p) -> int {
-            if (p.second < 0) return 0;
-            if (p.second == 0 && p.first >= 0) return 1;
+        auto part = [](const array<T, 2>& p) -> int {
+            if (p[1] < 0) return 0;
+            if (p[1] == 0 && p[0] >= 0) return 1;
             return 2;
         };
-        sort(ans.begin(), ans.end(), [&](const pair<T, T>& l, const pair<T, T>& r) {
+        sort(ans.begin(), ans.end(), [&](const array<T, 2>& l, const array<T, 2>& r) {
             int pl = part(l), pr = part(r);
             if (pl != pr) return pl < pr;
-            T cross = l.first * r.second - l.second * r.first;
+            T cross = l[0] * r[1] - l[1] * r[0];
             if (cross) return cross > 0;
-            return abs(l.first) + abs(l.second) < abs(r.first) + abs(r.second);
+            return abs(l[0]) + abs(l[1]) < abs(r[0]) + abs(r[1]);
         });
         for (size_t i = 1; i < samples; ++i) {
-            ans[i].first += ans[i - 1].first;
-            ans[i].second += ans[i - 1].second;
+            ans[i][0] += ans[i - 1][0];
+            ans[i][1] += ans[i - 1][1];
         }
         T mnx = numeric_limits<T>::max(), mxx = numeric_limits<T>::min();
         T mny = numeric_limits<T>::max(), mxy = numeric_limits<T>::min();
@@ -311,27 +333,74 @@ namespace Generator {
         ax += gen_val<T>(0, x2 - (mxx + ax));
         ay += gen_val<T>(0, y2 - (mxy + ay));
         for (auto& [x, y] : ans) x += ax, y += ay;
-        return __convex_hull(ans);
+        return impl::convex_hull(ans);
     }
 
-    vector<array<size_t, 2>> gen_graph(size_t n, size_t m) {
+    //Complexity: O(m)
+    vector<array<size_t, 2>> gen_graph(size_t n, size_t m, bool is_directed) {
         assert(n || m == 0);
         vector<array<size_t, 2>> ans(m);
         for (auto& [x, y] : ans) {
             x = gen_val<size_t>(0, n - 1);
             y = gen_val<size_t>(0, n - 1);
+            if (!is_directed && x > y) swap(x, y);
         }
         return ans;
     }
 
-    template<typename T>
-    vector<array<T, 3>> gen_graph_weighted(size_t n, size_t m, T wl, T wr) {
-        assert(n || m == 0);
-        vector<array<T, 3>> ans(m);
-        for (auto& [x, y, w] : ans) {
-            x = gen_val<size_t>(0, n - 1);
-            y = gen_val<size_t>(0, n - 1);
-            w = gen_val(wl, wr);
+    //Complexity: O(m)
+    vector<array<size_t, 2>> gen_graph_simple(size_t n, size_t m, bool is_directed) {
+        const uint64_t MAX_E = 1ull * n * (n - 1) / (2 - is_directed);
+        assert(m <= MAX_E);
+        vector<array<size_t, 2>> ans(m);
+        for (size_t i = 0; auto& c : gen_vector_distinct<uint64_t>(m, 0, MAX_E - 1)) {
+            ans[i++] = impl::num_to_edge(n, c, is_directed);
+        }
+        return ans;
+    }
+
+    //Generates UNDIRECTED connected graph
+    //Complexity: O(m)
+    vector<array<size_t, 2>> gen_graph_simple_connected(size_t n, size_t m) {
+        const uint64_t MAX_E = 1ull * n * (n - 1) / 2;
+        assert(n <= m + 1 && m <= MAX_E);
+        if (n < 2) return {};
+        unordered_set<uint64_t> s(m);
+        for (auto [x, y] : gen_tree_prufer(n)) {
+            s.insert(impl::edge_to_num(n, x, y, 0));
+        }
+        for (auto c : gen_vector_distinct<uint64_t>(min((uint64_t)m + n - 1, MAX_E), 0, MAX_E - 1)) {
+            if (s.size() == m) break;
+            s.insert(c);
+        }
+        vector<array<size_t, 2>> ans(m);
+        for (size_t i = 0; auto& c : s) {
+            ans[i++] = impl::num_to_edge(n, c, 0);
+        }
+        return ans;
+    }
+
+    //Complexity: O(m)
+    vector<array<size_t, 2>> gen_graph_simple_with_hamiltonian_path(size_t n, size_t m, bool is_directed) {
+        const uint64_t MAX_E = 1ull * n * (n - 1) / (2 - is_directed);
+        assert(n <= m + 1 && m <= MAX_E);
+        if (n < 2) return {};
+        unordered_set<uint64_t> s(m);
+        vector<size_t> perm(n);
+        iota(perm.begin(), perm.end(), 0);
+        shuffle(perm.begin(), perm.end(), rngll);
+        for (size_t i = 1; i < n; ++i) {
+            auto x = perm[i - 1], y = perm[i];
+            if (!is_directed && x > y) swap(x, y);
+            s.insert(impl::edge_to_num(n, x, y, is_directed));
+        }
+        for (auto c : gen_vector_distinct<uint64_t>(min((uint64_t)m + n - 1, MAX_E), 0, MAX_E - 1)) {
+            if (s.size() == m) break;
+            s.insert(c);
+        }
+        vector<array<size_t, 2>> ans(m);
+        for (size_t i = 0; auto& c : s) {
+            ans[i++] = impl::num_to_edge(n, c, is_directed);
         }
         return ans;
     }
