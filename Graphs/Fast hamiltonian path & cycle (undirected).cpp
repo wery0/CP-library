@@ -1,19 +1,16 @@
 namespace hamil {
     namespace LCT {
+
         vector<vector<int>> ch;
         vector<int> fa, rev;
+
         void init(int n) {
-            ch.resize(n + 1);
-            fa.resize(n + 1);
-            rev.resize(n + 1);
-            for (int i = 0; i <= n; i++)
-                ch[i].resize(2),
-                ch[i][0] = ch[i][1] = fa[i] = rev[i] = 0;
+            ch = vector<vector<int>>(n + 1, vector<int>(2));
+            fa = vector<int>(n + 1);
+            rev = vector<int>(n + 1);
         }
 
-        bool isr(int a) {
-            return !(ch[fa[a]][0] == a || ch[fa[a]][1] == a);
-        }
+        bool isr(int a) {return !(ch[fa[a]][0] == a || ch[fa[a]][1] == a);}
 
         void pushdown(int a) {
             if (rev[a]) {
@@ -99,12 +96,13 @@ namespace hamil {
     unordered_set<int> caneg;
     void cut(int a, int b) {
         LCT::cut(a, b);
-        for (int s = 0; s < 2; s++) {
-            for (int i = 0; i < used[a].size(); i++)
+        for (int s = 0; s < 2; ++s) {
+            for (int i = 0; i < used[a].size(); ++i) {
                 if (used[a][i] == b) {
                     used[a].erase(used[a].begin() + i);
                     break;
                 }
+            }
             if (used[a].size() == 1) caneg.insert(a);
             swap(a, b);
         }
@@ -112,34 +110,35 @@ namespace hamil {
 
     void link(int a, int b) {
         LCT::link(a, b);
-        for (int s = 0; s < 2; s++) {
+        for (int s = 0; s < 2; ++s) {
             used[a].push_back(b);
             if (used[a].size() == 2) caneg.erase(a);
             swap(a, b);
         }
     }
 
+    // mx_ch : max number of adding/replacing. Default is (n + 100) * (n + 50)
+    // n : number of vertices
+    // eg: vector<pair<int, int>> storing all the edges
+    // Returns a vector<int> consists of all indices of vertices on the path. Returns empty list if failed to find one.
+    // This version finds some random hamiltonian path.
+    // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
+    // If you need cycle - enumerate the edge, remove it, and read previous line.
     vector<int> work(int n, vector<pair<int, int>> eg, ll mx_ch = -1) {
-        // mx_ch : max number of adding/replacing. Default is (n + 100) * (n + 50)
-        // n : number of vertices
-        // eg: vector<pair<int, int>> storing all the edges
-        // Returns a vector<int> consists of all indices of vertices on the path. Returns empty list if failed to find one.
-        // This version finds some random hamiltonian path.
-        // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
-        // If you need cycle - enumerate the edge, remove it, and check previous line.
+        if (n == 1) return {0};
+        if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50);    //default
+        static mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
         LCT::init(n);
-        if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50); //default
         used.resize(n + 1);
         caneg.clear();
-        for (int i = 1; i <= n; i++) used[i].clear();
+        for (int i = 1; i <= n; ++i) used[i].clear();
         vector<vector<int>> edges(n + 1);
         for (auto& [x, y] : eg) {
             ++x, ++y;
             edges[x].push_back(y);
             edges[y].push_back(x);
         }
-        for (int i = 1; i <= n; i++) caneg.insert(i);
-        mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+        for (int i = 1; i <= n; ++i) caneg.insert(i);
         int tot = 0;
         while (mx_ch >= 0) {
             vector<pair<int, int>> eg;
@@ -148,22 +147,22 @@ namespace hamil {
                     eg.emplace_back(v, s);
                 }
             }
-            shuffle(eg.begin(), eg.end(), rnd);
+            shuffle(eg.begin(), eg.end(), rng);
             if (eg.size() == 0) break;
             for (auto [x, y] : eg) {
                 mx_ch--;
                 if (used[x].size() < used[y].size()) swap(x, y);
-                if (used[y].size() >= 2 || (rnd() & 1) || LCT::fdr(x) == LCT::fdr(y)) continue;
+                if (used[y].size() >= 2 || (rng() & 1) || LCT::fdr(x) == LCT::fdr(y)) continue;
                 if (used[x].size() < 2 && used[y].size() < 2) ++tot;
                 if (used[x].size() == 2) {
-                    int p = used[x][rnd() & 1];
+                    int p = used[x][rng() & 1];
                     cut(x, p);
                 }
                 link(x, y);
             }
             if (tot == n - 1) {
                 vector<int> cur;
-                for (int i = 1; i <= n; i++)
+                for (int i = 1; i <= n; ++i) {
                     if (used[i].size() <= 1) {
                         int pl = i, ls = 0;
                         while (pl) {
@@ -181,10 +180,10 @@ namespace hamil {
                         }
                         break;
                     }
+                }
                 return cur;
             }
         }
-        //Failed to find a path
         return {};
     }
 }
