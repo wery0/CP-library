@@ -1,27 +1,23 @@
-//Constraints: k, m_i >= 0
-//Decreases sum(m) on min(k, sum(m)), minimizing max remaining element
+//Constraints: k >= 0
+//Decreases sum(m) on k, minimizing max remaining element
 //Returns sorted array after decreasing
+//Sum of elements must fit into T
 template<typename T>
 vector<T> remove_k(vector<T> m, T k) {
-    const int n = m.size();
+    if (m.empty() || k < 0) return m;
+    const size_t n = m.size();
     sort(m.begin(), m.end());
-    ll sm = accumulate(m.begin(), m.end(), 0ll);
-    ll rem = max(0ll, sm - k);
-    ll pr = 0;
-    for (int i = 0; i < n; ++i) {
-        if (m[i] == pr) continue;
-        ll len_suf = n - i;
-        ll tyt = len_suf * (m[i] - pr);
-        if (tyt <= rem) {
-            rem -= tyt;
-            pr = m[i];
-            continue;
+    for (size_t i = n - 1; ; --i) {
+        if (i && m[i] == m[i - 1]) continue;
+        T df = i ? m[i] - m[i - 1] : 0, cnt = n - i;
+        if (i && df * cnt <= k) {
+            k -= df * cnt;
+        } else {
+            T can = k / cnt, c = m[i];
+            fill(m.begin() + i + k % cnt, m.end(), c - can);
+            fill(m.begin() + i, m.begin() + i + k % cnt, c - can - 1);
+            break;
         }
-        ll can = pr + rem / len_suf;
-        ll eso = rem % len_suf;
-        fill(m.begin() + i, m.end() - eso, can);
-        fill(m.end() - eso, m.end(), can + 1);
-        break;
     }
     return m;
 }
