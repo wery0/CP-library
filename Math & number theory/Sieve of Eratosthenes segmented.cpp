@@ -2,6 +2,7 @@
 //O(sqrt(R)loglog(sqrt(R)) + (R-L)loglog(R))
 template<typename T>
 vector<T> segmented_sieve_of_eratosthenes(T L, T R) {
+    L = max(L, (T)2);
     if (L > R) return {};
     if (R <= 62) {
         uint64_t mask = 2891462833508853932ull & (((1ull << (R - L + 1)) - 1)) << L;
