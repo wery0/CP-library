@@ -1,6 +1,6 @@
 //Finds the sum of weitghts of points in rectangle.
 //T - type of coordinates and weights of points.
-//C - type of answer.
+//C - type of answer (sum of all point weights should fit in C)
 template<typename T, typename C>
 class static_offline_rectangle_sum {
 
@@ -33,11 +33,11 @@ public:
     vector<C> process_queries() {
         const size_t N = points.size();
         const size_t Q = queries.size();
-        sort(queries.begin(), queries.end(), [&](const auto & l, const auto & r) {return l.x < r.x;});
-        sort(points.begin(), points.end(), [&](const auto & l, const auto & r) {return l.x < r.x;});
+        sort(queries.begin(), queries.end(), [](const item& l, const item& r) {return l.x < r.x;});
+        sort(points.begin(), points.end(), [](const pt& l, const pt& r) {return l.x < r.x;});
         vector<T> ystore(N);
         vector<C> ans(Q / 2);
-        for (int q = 0; q < N; ++q) ystore[q] = points[q].y;
+        for (size_t i = 0; i < N; ++i) ystore[i] = points[i].y;
         sort(ystore.begin(), ystore.end());
         ystore.erase(unique(ystore.begin(), ystore.end()), ystore.end());
         const size_t sz = ystore.size();
