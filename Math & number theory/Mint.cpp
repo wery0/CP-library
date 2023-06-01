@@ -2,9 +2,9 @@ template<typename INT, typename LL, const INT MOD>
 struct Mint {
     INT val = 0;
 
-    Mint() = default;
+    constexpr Mint() = default;
     template<typename T>
-    Mint(T c) {
+    constexpr Mint(T c) {
         static_assert(is_integral<T>::value);
         if (c < 0) c += ((-c - 1) / MOD + 1) * MOD;
         else if (c >= MOD) c %= MOD;
