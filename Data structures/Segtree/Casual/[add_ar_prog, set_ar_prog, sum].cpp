@@ -66,7 +66,7 @@ class segtree {
         push(v);
         ssize_t md = (l + r) >> 1;
         seg_add_progression(ql, qr, l, md, v << 1, a0, b);
-        size_t llen = max((ssize_t)0, md - (ssize_t)max(ql, l) + 1);
+        ssize_t llen = max((ssize_t)0, md - (ssize_t)max(ql, l) + 1);
         seg_add_progression(ql, qr, md + 1, r, v << 1 | 1, a0 + llen * b, b);
         upd(v);
     }
@@ -80,7 +80,7 @@ class segtree {
         push(v);
         ssize_t md = (l + r) >> 1;
         seg_set_progression(ql, qr, l, md, v << 1, a0, b);
-        size_t llen = max((ssize_t)0, md - (ssize_t)max(ql, l) + 1);
+        ssize_t llen = max((ssize_t)0, md - (ssize_t)max(ql, l) + 1);
         seg_set_progression(ql, qr, md + 1, r, v << 1 | 1, a0 + llen * b, b);
         upd(v);
     }
