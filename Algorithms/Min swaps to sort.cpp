@@ -1,17 +1,18 @@
 //WARNING: elements of array must be distinct, otherwise it is NP-Complete!
 template<typename T>
-int min_swaps_to_sort(vector<T> m) {
-    int a = m.size(), cyc_cnt = 0;
-    vector<T> n = m;
-    vector<int> nm(a);
-    vector<bool> us(a);
-    sort(all(n));
-    for (int q = 1; q < a; ++q) if (n[q] == n[q - 1]) assert(0);
-    for (int q = 0; q < a; ++q) nm[q] = lower_bound(all(n), m[q]) - n.begin();
-    for (int q = 0; q < a; ++q) {
-        if (us[q]) continue;
-        for (int w = q; !us[w]; w = nm[w]) us[w] = 1;
+size_t min_swaps_to_sort(vector<T> m) {
+    const size_t n = m.size();
+    size_t cyc_cnt = 0;
+    vector<T> u = m;
+    vector<size_t> nm(n);
+    vector<bool> us(n);
+    sort(u.begin(), u.end());
+    for (size_t i = 1; i < n; ++i) if (u[i] == u[i - 1]) assert(0);
+    for (size_t i = 0; i < n; ++i) nm[i] = lower_bound(u.begin(), u.end(), m[i]) - u.begin();
+    for (size_t i = 0; i < n; ++i) {
+        if (us[i]) continue;
+        for (size_t w = i; !us[w]; w = nm[w]) us[w] = 1;
         ++cyc_cnt;
     }
-    return a - cyc_cnt;
+    return n - cyc_cnt;
 }
