@@ -13,12 +13,12 @@ class segtree {
     void apply_add(int v, T a, T b) {
         psA[v] += a;
         psB[v] += b;
-        sm[v] += gsz(v) * (a * gsz(v) + b);
+        sm[v] += gsz(v) * (a + b * gsz(v));
     }
 
     void push(size_t v) {
         apply_add(v << 1, psA[v], psB[v]);
-        apply_add(v << 1 | 1, psA[v], psA[v] * gsz(v << 1) * 2 + psB[v]);
+        apply_add(v << 1 | 1, psA[v] + psB[v] * gsz(v << 1) * 2, psB[v]);
         psA[v] = psB[v] = 0;
     }
 
@@ -39,7 +39,7 @@ class segtree {
     void seg_add_progression(size_t ql, size_t qr, size_t l, size_t r, size_t v, T a0, T b) {
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
-            apply_add(v, b, 2 * a0 - b);
+            apply_add(v, 2 * a0 - b, b);
             return;
         }
         push(v);

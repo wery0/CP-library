@@ -17,7 +17,7 @@ class segtree {
         psA[v] = psB[v] = 0;
         psetA[v] = a, psetB[v] = b;
         need_set[v] = 1;
-        sm[v] = gsz(v) * (a * gsz(v) + b);
+        sm[v] = gsz(v) * (a + b * gsz(v));
     }
 
     void apply_add(int v, T a, T b) {
@@ -26,19 +26,19 @@ class segtree {
         } else {
             psA[v] += a;
             psB[v] += b;
-            sm[v] += gsz(v) * (a * gsz(v) + b);
+            sm[v] += gsz(v) * (a + b * gsz(v));
         }
     }
 
     void push(size_t v) {
         if (need_set[v]) {
             apply_set(v << 1, psetA[v], psetB[v]);
-            apply_set(v << 1 | 1, psetA[v], psetB[v] + psetA[v] * gsz(v << 1) * 2);
+            apply_set(v << 1 | 1, psetA[v] + psetB[v] * gsz(v << 1) * 2, psetB[v]);
             psetA[v] = psetB[v] = 0;
             need_set[v] = 0;
         } else if (psA[v] || psB[v]) {
             apply_add(v << 1, psA[v], psB[v]);
-            apply_add(v << 1 | 1, psA[v], psB[v] + psA[v] * gsz(v << 1) * 2);
+            apply_add(v << 1 | 1, psA[v] + psB[v] * gsz(v << 1) * 2, psB[v]);
             psA[v] = psB[v] = 0;
         }
     }
@@ -60,7 +60,7 @@ class segtree {
     void seg_add_progression(size_t ql, size_t qr, size_t l, size_t r, size_t v, T a0, T b) {
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
-            apply_add(v, b, 2 * a0 - b);
+            apply_add(v, 2 * a0 - b, b);
             return;
         }
         push(v);
@@ -74,7 +74,7 @@ class segtree {
     void seg_set_progression(size_t ql, size_t qr, size_t l, size_t r, size_t v, T a0, T b) {
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
-            apply_set(v, b, 2 * a0 - b);
+            apply_set(v, 2 * a0 - b, b);
             return;
         }
         push(v);
