@@ -44,6 +44,8 @@ struct Mint {
     bool operator<(const Mint& o) const {return val < o.val;}
     bool operator>(const Mint& o) const {return val > o.val;}
 
+    operator bool() const {return val != 0;}
+
     friend istream& operator>>(istream& in, Mint& m) {return in >> m.val;}
     friend ostream& operator<<(ostream& out, const Mint& m) {return out << m.val;}
     friend ostream& operator<<(ostream& out, const Mint&& m) {return out << m.val;}
