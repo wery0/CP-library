@@ -54,7 +54,7 @@ namespace compressor {
     void inline_compress(H& h, T&... t) {
         vector<K> store;
         extract_data(store, h, t...);
-        sort(store.begin(), store.end())
+        sort(store.begin(), store.end());
         store.erase(unique(store.begin(), store.end()), store.end());
         do_compress<K, first_val>(store, h, t...);
     }
