@@ -11,7 +11,8 @@ class sparse_table {
 public:
     sparse_table() = default;
     template<typename I>
-    sparse_table(I first, I last): n(last - first), K(__lg(n) + 1), m(K) {
+    sparse_table(I first, I last): n(last - first), K(n ? __lg(n) + 1 : 0), m(K) {
+        if (!n) return;
         for (size_t i = 0; i < K; ++i) m[i].resize(max((size_t)0, n - (1 << i) + 1));
         copy(first, last, m[0].begin());
         for (size_t i = 1; i < K; ++i) {

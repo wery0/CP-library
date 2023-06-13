@@ -11,7 +11,7 @@ class disjoint_sparse_table {
 public:
     disjoint_sparse_table() = default;
     template<typename I>
-    disjoint_sparse_table(I first, I last): n(last - first), K(__lg(n) + 1 + (!!(n & (n - 1)))), m(K - 1, vector<T>(n)) {
+    disjoint_sparse_table(I first, I last): n(last - first), K(n ? __lg(n) + 1 + (!!(n & (n - 1))) : 0), m(K - 1, vector<T>(n)) {
         for (ssize_t i = 1; i < K; ++i) {
             for (ssize_t l = 0, md = (1 << i) / 2, r = 1 << i; md < n; l += 1 << i, md += 1 << i, r += 1 << i) {
                 m[i - 1][md - 1] = *(first + md - 1);
