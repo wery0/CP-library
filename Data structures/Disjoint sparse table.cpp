@@ -9,6 +9,7 @@ class disjoint_sparse_table {
     }
 
 public:
+    disjoint_sparse_table() = default;
     template<typename I>
     disjoint_sparse_table(I first, I last): n(last - first), K(__lg(n) + 1 + (!!(n & (n - 1)))), m(K - 1, vector<T>(n)) {
         for (ssize_t i = 1; i < K; ++i) {
@@ -21,7 +22,7 @@ public:
         }
     }
     template<typename T_arr>
-    disjoint_sparse_table(T_arr& arr) {*this = disjoint_sparse_table(arr.begin(), arr.end());}
+    disjoint_sparse_table(const T_arr& arr) {*this = disjoint_sparse_table(arr.begin(), arr.end());}
 
     T query(size_t l, size_t r) const {
         const int u = l == r ? 0 : __lg(l ^ r);
