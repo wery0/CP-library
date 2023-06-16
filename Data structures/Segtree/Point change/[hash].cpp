@@ -1,7 +1,7 @@
 template<typename T, const uint64_t MOD, const uint64_t P>
 class segtree_point_upd {
 
-    size_t n, U;
+    size_t n;
     vector<uint64_t> pows;
     vector<uint64_t> hs;
 
@@ -20,21 +20,23 @@ class segtree_point_upd {
 
 public:
     segtree_point_upd() = default;
+
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree_point_upd(I first, I last): n(last - first) {
         if (!n) return;
         pows.resize(n + 1, 1);
         for (size_t i = 1; i < n + 1; ++i) pows[i] = big_prod_mod(pows[i - 1], P);
-        hs.resize(U * 2);
+        hs.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
-            hs[U + i] = big_prod_mod(val, pows[i]);
+            hs[n + i] = big_prod_mod(val, pows[i]);
         }
-        for (size_t i = U; --i;) upd(i);
+        for (size_t i = n; --i;) upd(i);
     }
+
     template<typename U>
     segtree_point_upd(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree_point_upd<T, MOD, P>(m.begin(), m.end());
         } else {
@@ -42,20 +44,20 @@ public:
         }
     }
 
-    uint64_t seg_hash(size_t ql, size_t qr) const {
-        const size_t stql = ql;
-        ql += U, qr += U;
+    uint64_t seg_hash(size_t l, size_t r) const {
+        const size_t stl = l;
+        l += n, r += n;
         uint64_t ans = 0;
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) ans += hs[ql], ans -= ans < MOD ? 0 : MOD;
-            if (~qr & 1) ans += hs[qr], ans -= ans < MOD ? 0 : MOD;
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) ans += hs[l], ans -= ans < MOD ? 0 : MOD;
+            if (~r & 1) ans += hs[r], ans -= ans < MOD ? 0 : MOD;
         }
-        return big_prod_mod(ans, pows[n - stql]);
+        return big_prod_mod(ans, pows[n - stl]);
     }
 
     void point_change(size_t pos, T val) {
-        pos += U;
-        hs[pos] = big_prod_mod(val, pows[pos - U]);
+        pos += n;
+        hs[pos] = big_prod_mod(val, pows[pos - n]);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };

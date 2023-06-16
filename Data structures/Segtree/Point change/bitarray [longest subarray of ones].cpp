@@ -39,7 +39,7 @@ class segtree_point_upd {
 
     tag neutral_tag;
 
-    size_t n, U;
+    size_t n;
     vector<tag> m;
 
     void upd(size_t v) {
@@ -50,40 +50,40 @@ public:
     segtree_point_upd() = default;
 
     template<typename T>
-    segtree_point_upd(vector<T>& arr): n(arr.size()), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree_point_upd(vector<T>& arr): n(arr.size()) {
         if (!n) return;
         for (const auto& i : arr) assert(0 <= i && i <= 1);
-	m.resize(U * 2);
-        for (size_t q = 0; q < n; ++q) {
-            tag& t = m[U + q];
-            t.cl = t.cr = arr[q];
+        m.resize(n * 2);
+        for (size_t i = 0; i < n; ++i) {
+            tag& t = m[n + i];
+            t.cl = t.cr = arr[i];
             t.sz = 1;
         }
-        for (size_t q = U; --q;) {
-            const tag &l = m[q << 1], &r = m[q << 1 | 1];
-            merge(l, r, m[q]);
+        for (size_t i = n; --i;) {
+            const tag& l = m[i << 1], &r = m[i << 1 | 1];
+            merge(l, r, m[i]);
         }
     }
 
-    segtree_point_upd(int n) {
+    segtree_point_upd(size_t n) {
         vector<bool> m(n);
         (*this) = segtree_point_upd(m);
     }
 
-    tag query(size_t ql, size_t qr) const {
-        ql += U, qr += U;
+    tag query(size_t l, size_t r) const {
+        l += n, r += n;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) merge_to_left(lt, m[ql]);
-            if (~qr & 1) merge_to_right(m[qr], rt);
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) merge_to_left(lt, m[l]);
+            if (~r & 1) merge_to_right(m[r], rt);
         }
         return merge(lt, rt);
     }
 
-    void change(size_t pos, int val) {
+    void point_change(size_t pos, int val) {
         assert(0 <= val && val <= 1);
-        pos += U;
+        pos += n;
         m[pos].cl = m[pos].cr = m[pos].mxd = val;
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }

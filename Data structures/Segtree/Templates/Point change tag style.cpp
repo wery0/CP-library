@@ -34,7 +34,7 @@ class segtree_point_upd {
 
     tag neutral_tag;    //Init neutral tag
 
-    size_t n, U;
+    size_t n;
     vector<tag> m;
 
     void upd(size_t v) {
@@ -44,22 +44,22 @@ class segtree_point_upd {
 public:
     segtree_point_upd() = default;
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree_point_upd(I first, I last): n(last - first) {
         if (!n) return;
-        m.resize(U * 2);
+        m.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
-            tag& t = m[U + i];
+            tag& t = m[n + i];
             const T val = *(first + i);
             //Write init of last layer
         }
-        for (size_t i = U; --i;) {
-            const tag &l = m[i << 1], &r = m[i << 1 | 1];
+        for (size_t i = n; --i;) {
+            const tag& l = m[i << 1], &r = m[i << 1 | 1];
             merge(l, r, m[i]);
         }
     }
     template<typename U>
     segtree_point_upd(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree_point_upd<T>(m.begin(), m.end());
         } else {
@@ -67,21 +67,21 @@ public:
         }
     }
 
-    inline tag seg_statistic(size_t ql, size_t qr) const {
-        ql += U, qr += U;
+    tag seg_statistic(size_t l, size_t r) const {
+        l += n, r += n;
         tag lt = neutral_tag;
         tag rt = neutral_tag;
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) lt = merge(lt, m[ql]);
-            if (~qr & 1) rt = merge(m[qr], rt);
-//            if (ql & 1) merge_to_left(lt, m[ql]);
-//            if (~qr & 1) merge_to_right(m[qr], rt);
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) lt = merge(lt, m[l]);
+            if (~r & 1) rt = merge(m[r], rt);
+//            if (l & 1) merge_to_left(lt, m[l]);
+//            if (~r & 1) merge_to_right(m[r], rt);
         }
         return merge(lt, rt);
     }
 
     void point_change(size_t pos, tag t) {
-        pos += U;
+        pos += n;
         m[pos] = t;
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }

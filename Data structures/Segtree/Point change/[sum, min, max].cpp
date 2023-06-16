@@ -1,7 +1,7 @@
 template<typename T>
 class segtree_point_upd {
 
-    size_t n, U;
+    size_t n;
     vector<T> sm;
     vector<T> mn;
     vector<T> mx;
@@ -16,23 +16,23 @@ public:
     segtree_point_upd() = default;
 
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree_point_upd(I first, I last): n(last - first) {
         if (!n) return;
-        sm.resize(U * 2);
-        mn.resize(U * 2);
-        mx.resize(U * 2);
+        sm.resize(n * 2);
+        mn.resize(n * 2);
+        mx.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
-            sm[U + i] = val;
-            mn[U + i] = val;
-            mx[U + i] = val;
+            sm[n + i] = val;
+            mn[n + i] = val;
+            mx[n + i] = val;
         }
-        for (size_t i = U; --i;) upd(i);
+        for (size_t i = n; --i;) upd(i);
     }
 
     template<typename U>
     segtree_point_upd(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree_point_upd<T>(m.begin(), m.end());
         } else {
@@ -40,43 +40,43 @@ public:
         }
     }
 
-    T seg_sum(size_t ql, size_t qr) const {
-        ql += U, qr += U;
+    T seg_sum(size_t l, size_t r) const {
+        l += n, r += n;
         T ans = 0;
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) ans += sm[ql];
-            if (~qr & 1) ans += sm[qr];
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) ans += sm[l];
+            if (~r & 1) ans += sm[r];
         }
         return ans;
     }
 
-    T seg_min(size_t ql, size_t qr) const {
-        ql += U, qr += U;
-        T ans = mn[ql];
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) ans = min(ans, mn[ql]);
-            if (~qr & 1) ans = min(ans, mn[qr]);
+    T seg_min(size_t l, size_t r) const {
+        l += n, r += n;
+        T ans = mn[l];
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) ans = min(ans, mn[l]);
+            if (~r & 1) ans = min(ans, mn[r]);
         }
         return ans;
     }
 
-    T seg_max(size_t ql, size_t qr) const {
-        ql += U, qr += U;
-        T ans = mx[qr];
-        for (; ql <= qr; ql = (ql + 1) >> 1, qr = (qr - 1) >> 1) {
-            if (ql & 1) ans = max(ans, mx[ql]);
-            if (~qr & 1) ans = max(ans, mx[qr]);
+    T seg_max(size_t l, size_t r) const {
+        l += n, r += n;
+        T ans = mx[r];
+        for (; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+            if (l & 1) ans = max(ans, mx[l]);
+            if (~r & 1) ans = max(ans, mx[r]);
         }
         return ans;
     }
 
     void point_change(size_t pos, T val) {
-        pos += U;
+        pos += n;
         sm[pos] = mn[pos] = mx[pos] = val;
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 
     T operator[](size_t pos) const {
-        return sm[U + pos];
+        return sm[n + pos];
     }
 };
