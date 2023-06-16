@@ -69,6 +69,7 @@ class segtree_on_points {
 
 public:
     segtree_on_points() = default;
+
     segtree_on_points(vector<T> points) {
         if (points.empty()) return;
         sort(points.begin(), points.end());
@@ -103,6 +104,6 @@ public:
         }
     }
 
-    tag seg_query(T ql, T qr) {return seg_query(ql, qr, 1);}
-    void seg_change(T ql, T qr) {seg_change(ql, qr, 1);}
+    tag seg_query(T l, T r) {return seg_query(l, r, 1);}
+    void seg_change(T l, T r) {seg_change(l, r, 1);}
 };

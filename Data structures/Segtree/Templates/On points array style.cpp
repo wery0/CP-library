@@ -46,6 +46,7 @@ class segtree_on_points {
 
 public:
     segtree_on_points() = default;
+
     segtree_on_points(vector<T> points) {
         if (points.empty()) return;
         sort(points.begin(), points.end());
@@ -75,6 +76,6 @@ public:
         }
     }
 
-    T seg_statistic(T ql, T qr) {return seg_statistic(ql, qr, 1);}
-    void seg_change(T ql, T qr) {seg_change(ql, qr, 1);}
+    T seg_statistic(T l, T r) {return seg_statistic(l, r, 1);}
+    void seg_change(T l, T r) {seg_change(l, r, 1);}
 };

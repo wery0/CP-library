@@ -230,7 +230,7 @@ public:
 
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -261,12 +261,12 @@ public:
         return ans;
     }
 
-    T seg_gcd(int ql, int qr) {return seg_gcd(ql, qr, 0, U - 1, 1);}
-    T seg_sum(int ql, int qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
-    T seg_max(int ql, int qr) {return seg_max(ql, qr, 0, U - 1, 1);}
-    T seg_min(int ql, int qr) {return seg_min(ql, qr, 0, U - 1, 1);}
-    void seg_add(int ql, int qr, T x) {seg_add(ql, qr, x, 0, U - 1, 1);}
-    void seg_mineq(int ql, int qr, T x) {seg_mineq(ql, qr, x, 0, U - 1, 1);}
-    void seg_maxeq(int ql, int qr, T x) {seg_maxeq(ql, qr, x, 0, U - 1, 1);}
-    void seg_set(int ql, int qr, T x) {seg_mineq(ql, qr, x); seg_maxeq(ql, qr, x);}
+    T seg_gcd(int l, int r) {return seg_gcd(l, r, 0, U - 1, 1);}
+    T seg_sum(int l, int r) {return seg_sum(l, r, 0, U - 1, 1);}
+    T seg_max(int l, int r) {return seg_max(l, r, 0, U - 1, 1);}
+    T seg_min(int l, int r) {return seg_min(l, r, 0, U - 1, 1);}
+    void seg_add(int l, int r, T x) {seg_add(l, r, x, 0, U - 1, 1);}
+    void seg_mineq(int l, int r, T x) {seg_mineq(l, r, x, 0, U - 1, 1);}
+    void seg_maxeq(int l, int r, T x) {seg_maxeq(l, r, x, 0, U - 1, 1);}
+    void seg_set(int l, int r, T x) {seg_mineq(l, r, x); seg_maxeq(l, r, x);}
 };

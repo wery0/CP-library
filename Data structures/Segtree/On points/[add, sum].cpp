@@ -81,6 +81,6 @@ public:
         }
     }
 
-    T seg_sum(T ql, T qr) {return seg_sum(ql, qr, 1);}
-    void seg_add(T ql, T qr, T val) {seg_add(ql, qr, 1, val);}
+    T seg_sum(T l, T r) {return seg_sum(l, r, 1);}
+    void seg_add(T l, T r, T val) {seg_add(l, r, 1, val);}
 };

@@ -69,7 +69,7 @@ public:
     implicit_segtree() = default;
     ~implicit_segtree() {destroy(root);}
 
-    //Calculates sum{i = ql}{qr}{i * a[i]}
-    T seg_sum(C ql, C qr) const {return seg_sum(ql, qr, L, R, root) / 2;}
-    void seg_set(C ql, C qr, T val) {seg_set(ql, qr, val, L, R, root);}
+    //Calculates sum{i = l}{r}{i * a[i]}
+    T seg_sum(C l, C r) const {return seg_sum(l, r, L, R, root) / 2;}
+    void seg_set(C l, C r, T val) {seg_set(l, r, val, L, R, root);}
 };

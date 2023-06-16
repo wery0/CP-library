@@ -83,6 +83,6 @@ public:
         }
     }
 
-    T seg_sum(T ql, T qr) {return seg_sum(ql, qr, 1) / 2;}
-    void seg_add_progression(T ql, T qr, T a0, T b) {seg_add_progression(ql, qr, 1, a0, b);}
+    T seg_sum(T l, T r) {return seg_sum(l, r, 1) / 2;}
+    void seg_add_progression(T l, T r, T a0, T b) {seg_add_progression(l, r, 1, a0, b);}
 };

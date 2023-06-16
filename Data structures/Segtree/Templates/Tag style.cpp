@@ -70,6 +70,7 @@ class segtree {
 
 public:
     segtree() = default;
+
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
@@ -84,9 +85,10 @@ public:
             merge(l, r, m[i]);
         }
     }
+
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -94,6 +96,6 @@ public:
         }
     }
 
-    tag seg_statistic(size_t ql, size_t qr) {return seg_statistic(ql, qr, 0, U - 1, 1);}
-    void seg_change(size_t ql, size_t qr) {seg_change(ql, qr, 0, U - 1, 1);}
+    tag seg_statistic(size_t l, size_t r) {return seg_statistic(l, r, 0, U - 1, 1);}
+    void seg_change(size_t l, size_t r) {seg_change(l, r, 0, U - 1, 1);}
 };

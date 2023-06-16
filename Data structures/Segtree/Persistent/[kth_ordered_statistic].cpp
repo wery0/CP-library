@@ -3,7 +3,7 @@ class segtree {
 
     struct Node {
 
-        Node *l = 0, *r = 0;
+        Node* l = 0, *r = 0;
         T sm = 0;
 
         Node() = default;
@@ -16,12 +16,10 @@ class segtree {
 
     inline T gsm(Node* n) {return n ? n->sm : 0;}
 
-    size_t a;
+    size_t n;
     vector<Node*> store;
     Node* root;
     vector<T> was;
-
-    segtree() = default;
 
     void upd(Node* n) {
         n->sm = gsm(n->l) + gsm(n->r);
@@ -41,9 +39,11 @@ class segtree {
     }
 
 public:
+    segtree() = default;
+
     template<typename U>
     segtree(vector<U> m) {
-        auto build = [&](auto&& build, Node*& n, int l, int r) -> void{
+        auto build = [&](auto&& build, Node*& n, int l, int r) -> void {
             if (l > r) return;
             n = new Node();
             if (l == r) {
@@ -55,33 +55,33 @@ public:
             build(build, n->r, md + 1, r);
             upd(n);
         };
-        a = m.size();
-        vector<pair<int, int>> wwas(a);
-        for (int q = 0; q < a; ++q) wwas[q].S = m[q];
+        n = m.size();
+        vector<pair<int, int>> wwas(n);
+        for (size_t i = 0; i < n; ++i) wwas[i].second = m[i];
         {
             vector<T> n = m;
             sort(n.begin(), n.end());
             n.erase(unique(n.begin(), n.end()), n.end());
             for (T& c : m) c = lower_bound(n.begin(), n.end(), c) - n.begin();
         }
-        for (int q = 0; q < a; ++q) wwas[q].F = m[q];
+        for (size_t i = 0; i < n; ++i) wwas[i].first = m[i];
         sort(wwas.begin(), wwas.end());
         wwas.erase(unique(wwas.begin(), wwas.end()), wwas.end());
         was.reserve(wwas.size());
         for (auto [nw, old] : wwas) was.push_back(old);
-        build(build, root, 0, a - 1);
+        build(build, root, 0, n - 1);
         store.push_back(root);
-        for (int q = 0; q < a; q++) {
-            store.push_back(point_add(m[q], 0, a - 1, store[q], 1));
+        for (size_t i = 0; i < n; ++i) {
+            store.push_back(point_add(m[i], 0, n - 1, store[i], 1));
         }
     }
 
-    T seg_kth_order_statistics(int ql, int qr, int k) {
-        Node *lf = store[ql], *rg = store[qr + 1];
-        int l = 0, r = a - 1;
-        for (; l < r;) {
-            int md = (l + r) / 2;
-            int l_val = gsm(rg->l) - gsm(lf->l);
+    T seg_kth_order_statistics(size_t l, size_t r, T k) {
+        Node* lf = store[l], *rg = store[r + 1];
+        l = 0, r = n - 1;
+        while (l < r) {
+            size_t md = (l + r) / 2;
+            T l_val = gsm(rg->l) - gsm(lf->l);
             if (k < l_val) lf = lf->l, rg = rg->l, r = md;
             else k -= l_val, lf = lf->r, rg = rg->r, l = md + 1;
         }

@@ -68,6 +68,7 @@ class segtree {
 
 public:
     segtree() = default;
+
     template<typename I>
     segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
@@ -86,16 +87,18 @@ public:
         }
         for (size_t i = U; --i;) upd(i);
     }
-    template<typename T_arr>
-    segtree(T_arr& n) {
-        (*this) = segtree<T, MOD, P>(n.begin(), n.end());
-    }
-    segtree(size_t n) {
-        vector<T> m(n);
-        (*this) = segtree<T, MOD, P>(m);
+
+    template<typename U>
+    segtree(U n) {
+        if constexpr(is_integral_v<U>) {
+            vector<T> m(n);
+            (*this) = segtree<T, MOD, P>(m.begin(), m.end());
+        } else {
+            (*this) = segtree<T, MOD, P>(n.begin(), n.end());
+        }
     }
 
-    uint64_t seg_hash(size_t ql, size_t qr) {return big_prod_mod(seg_hash(ql, qr, 0, U - 1, 1), pows[n - ql]);}
-    void seg_set(size_t ql, size_t qr, T val) {seg_set(ql, qr, 0, U - 1, 1, val);}
+    uint64_t seg_hash(size_t l, size_t r) {return big_prod_mod(seg_hash(l, r, 0, U - 1, 1), pows[n - l]);}
+    void seg_set(size_t l, size_t r, T val) {seg_set(l, r, 0, U - 1, 1, val);}
 };
 //segtree<T, 4000000000000000037, 666667> kek;

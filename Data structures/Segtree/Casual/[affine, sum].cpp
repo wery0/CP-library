@@ -69,7 +69,7 @@ public:
 
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -98,6 +98,6 @@ public:
         return vector<T>(sm.begin() + U, sm.begin() + U + n);
     }
 
-    T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
-    void seg_affine(size_t ql, size_t qr, T va, T vb) {seg_affine(ql, qr, 0, U - 1, 1, va, vb);}
+    T seg_sum(size_t l, size_t r) {return seg_sum(l, r, 0, U - 1, 1);}
+    void seg_affine(size_t l, size_t r, T va, T vb) {seg_affine(l, r, 0, U - 1, 1, va, vb);}
 };

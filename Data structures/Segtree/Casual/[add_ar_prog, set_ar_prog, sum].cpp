@@ -106,7 +106,7 @@ public:
 
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -137,7 +137,7 @@ public:
         return ans;
     }
 
-    T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1) / 2;}
-    void seg_add_progression(size_t ql, size_t qr, T a0, T b) {seg_add_progression(ql, qr, 0, U - 1, 1, a0, b);}
-    void seg_set_progression(size_t ql, size_t qr, T a0, T b) {seg_set_progression(ql, qr, 0, U - 1, 1, a0, b);}
+    T seg_sum(size_t l, size_t r) {return seg_sum(l, r, 0, U - 1, 1) / 2;}
+    void seg_add_progression(size_t l, size_t r, T a0, T b) {seg_add_progression(l, r, 0, U - 1, 1, a0, b);}
+    void seg_set_progression(size_t l, size_t r, T a0, T b) {seg_set_progression(l, r, 0, U - 1, 1, a0, b);}
 };

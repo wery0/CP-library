@@ -140,9 +140,9 @@ public:
         }
     }
 
-    T seg_sum(T ql, T qr) {return seg_sum(ql, qr, 1);}
-    T seg_max(T ql, T qr) {return seg_max(ql, qr, 1);}
-    T seg_min(T ql, T qr) {return seg_min(ql, qr, 1);}
-    void seg_add(T ql, T qr, T val) {seg_add(ql, qr, 1, val);}
-    void seg_set(T ql, T qr, T val) {seg_set(ql, qr, 1, val);}
+    T seg_sum(T l, T r) {return seg_sum(l, r, 1);}
+    T seg_max(T l, T r) {return seg_max(l, r, 1);}
+    T seg_min(T l, T r) {return seg_min(l, r, 1);}
+    void seg_add(T l, T r, T val) {seg_add(l, r, 1, val);}
+    void seg_set(T l, T r, T val) {seg_set(l, r, 1, val);}
 };

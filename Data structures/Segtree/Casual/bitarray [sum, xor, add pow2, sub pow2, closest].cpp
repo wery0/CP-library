@@ -73,7 +73,7 @@ public:
 
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -92,6 +92,6 @@ public:
 
     void add_pow2(int p) {int ps0 = closest0_from_right(p); assert(ps0 != -1 && "Resulting number is too big"); seg_xor(p, ps0);}
     void subtract_pow2(int p) {int ps1 = closest1_from_right(p); assert(ps1 != -1 && "Resulting number is negative"); seg_xor(p, ps1);}    
-    void seg_xor(size_t ql, size_t qr) {seg_xor(ql, qr, 0, U - 1, 1);}
-    T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
+    void seg_xor(size_t l, size_t r) {seg_xor(l, r, 0, U - 1, 1);}
+    T seg_sum(size_t l, size_t r) {return seg_sum(l, r, 0, U - 1, 1);}
 };

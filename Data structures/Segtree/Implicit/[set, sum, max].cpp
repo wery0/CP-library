@@ -79,7 +79,7 @@ public:
     implicit_segtree() = default;
     ~implicit_segtree() {destroy(root);}
 
-    T seg_sum(C ql, C qr) const {return seg_sum(ql, qr, L, R, root);}
-    T seg_max(C ql, C qr) const {return seg_max(ql, qr, L, R, root);}
-    void seg_set(C ql, C qr, T val) {seg_set(ql, qr, val, L, R, root);}
+    T seg_sum(C l, C r) const {return seg_sum(l, r, L, R, root);}
+    T seg_max(C l, C r) const {return seg_max(l, r, L, R, root);}
+    void seg_set(C l, C r, T val) {seg_set(l, r, val, L, R, root);}
 };

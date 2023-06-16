@@ -113,7 +113,7 @@ public:
 
     template<typename U>
     segtree(U n) {
-        if constexpr(is_integral<U>::value) {
+        if constexpr(is_integral_v<U>) {
             vector<T> m(n);
             (*this) = segtree<T>(m.begin(), m.end());
         } else {
@@ -142,9 +142,9 @@ public:
         return vector<T>(sm.begin() + U, sm.begin() + U + n);
     }
 
-    T seg_sum(size_t ql, size_t qr) {return seg_sum(ql, qr, 0, U - 1, 1);}
-    T seg_min(size_t ql, size_t qr) {return seg_min(ql, qr, 0, U - 1, 1);}
-    T seg_max(size_t ql, size_t qr) {return seg_max(ql, qr, 0, U - 1, 1);}
-    void seg_set(size_t ql, size_t qr, T val) {seg_set(ql, qr, 0, U - 1, 1, val);}
-    void seg_div(size_t ql, size_t qr, T x) {if (x == 1) return; seg_div(ql, qr, 0, U - 1, 1, x);}
+    T seg_sum(size_t l, size_t r) {return seg_sum(l, r, 0, U - 1, 1);}
+    T seg_min(size_t l, size_t r) {return seg_min(l, r, 0, U - 1, 1);}
+    T seg_max(size_t l, size_t r) {return seg_max(l, r, 0, U - 1, 1);}
+    void seg_set(size_t l, size_t r, T val) {seg_set(l, r, 0, U - 1, 1, val);}
+    void seg_div(size_t l, size_t r, T x) {if (x == 1) return; seg_div(l, r, 0, U - 1, 1, x);}
 };
