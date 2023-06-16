@@ -55,7 +55,7 @@ class merge_sort_tree {
         return store_w[r - 1] - (l - st[v] ? store_w[l - 1] : 0);
     }
 
-    C seg_cnt(size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) const {
+    size_t seg_cnt(size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) const {
         if (qr < l || r < ql || ly >= ry) return 0;
         if (ql <= l && r <= qr) return ry - ly;
         size_t md = (l + r) >> 1;
