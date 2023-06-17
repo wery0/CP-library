@@ -15,10 +15,10 @@
 #define rall(m) m.rbegin(), m.rend()
 #define uid uniform_int_distribution
 #define timeStamp() std::chrono::steady_clock::now()
-#define unify(m) sort(all(m)); m.erase(unique(all(m)), m.end());
+#define unify(m) sort(all(m)), m.erase(unique(all(m)), m.end());
 #define duration_micro(a) chrono::duration_cast<chrono::microseconds>(a).count()
 #define duration_milli(a) chrono::duration_cast<chrono::milliseconds>(a).count()
-#define fast cin.tie(0); cout.tie(0); cin.sync_with_stdio(0); cout.sync_with_stdio(0);
+#define fast cin.tie(0), cout.tie(0), cin.sync_with_stdio(0), cout.sync_with_stdio(0);
 using namespace std;
 using str = string;
 using ll = long long;
