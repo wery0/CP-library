@@ -1,6 +1,5 @@
 //T - type of coordinates and weights of points
 //C - type of answer (sum of all point weights should fit in C)
-//Contains two different versions of each function: with fractional cascading and without
 //Before making queries, add all points and call prepare()
 template<typename T, typename C>
 class merge_sort_tree {
@@ -127,7 +126,7 @@ class merge_sort_tree {
 public:
     merge_sort_tree(size_t N = 1) { points.reserve(N); }
 
-    // O(nlog(n))
+    //O(nlog(n))
     void prepare() { _prepare(); }
 
     void add_point(T x, T y, T w = 1) {
@@ -143,39 +142,25 @@ public:
         is_prepared = false;
     }
 
-    // Counts # points in rectangle [x1, x2] x [y1, y2]
-    // O(log(n)^2)
-    size_t rect_count(T x1, T y1, T x2, T y2) const {
+    //Counts # points in rectangle [x1, x2] x [y1, y2]
+    //O(log(n)) with FC, O(log(n)^2) without
+    size_t rect_count(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = size_t;
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return r - l + 1; };
-        return straightforward<A>(x1, y1, x2, y2, 0, merge, f);
+        return use_fractional_cascading ?
+               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
+               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
     }
 
-    // Counts # points in rectangle [x1, x2] x [y1, y2]
-    // O(log(n))
-    size_t rect_count_FC(T x1, T y1, T x2, T y2) const {
-        using A = size_t;
-        auto merge = [](const A& x, const A& y) { return x + y; };
-        auto f = [&](size_t v, size_t l, size_t r) { return r - l + 1; };
-        return fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f);
-    }
-
-    // Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
-    // O(log(n)^2)
-    C rect_sum(T x1, T y1, T x2, T y2) const {
+    //Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
+    //O(log(n)) with FC, O(log(n)^2) without
+    C rect_sum(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = C;
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return store_w[r] - (l - st[v] ? store_w[l - 1] : 0); };
-        return straightforward<A>(x1, y1, x2, y2, 0, merge, f);
-    }
-
-    // Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
-    // O(log(n))
-    C rect_sum_FC(T x1, T y1, T x2, T y2) const {
-        using A = C;
-        auto merge = [](const A& x, const A& y) { return x + y; };
-        auto f = [&](size_t v, size_t l, size_t r) { return store_w[r] - (l - st[v] ? store_w[l - 1] : 0); };
-        return fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f);
+        return use_fractional_cascading ?
+               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
+               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
     }
 };
