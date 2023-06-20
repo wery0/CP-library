@@ -1,4 +1,4 @@
-//Finds the sum of weitghts of points in rectangle.
+//Finds the sum of weights of points in rectangle.
 //T - type of coordinates and weights of points.
 //C - type of answer (sum of all point weights should fit in C)
 template<typename T, typename C>
