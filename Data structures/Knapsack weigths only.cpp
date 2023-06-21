@@ -134,9 +134,9 @@ public:
         return false;
     }
 
+    //Returns vector<pair<weight, id>> s. t. accumulate(all(weight)) == sum
     //With 3k trick: O(min(N, sqrt(weights_sum)) * MAX_SUM / W) time and memory
     //Without trick: O(N * MAX_SUM / W) time and memory
-    //Returns vector<pair<weight, id>> s. t. accumulate(all(weight)) == sum
     template<const T MAX_SUM>
     pair<vector<T>, vector<size_t>> get_subset_with_fixed_sum_bitset(T sum, bool apply_3k_trick = true) const {
         if (sum > weights_sum) return {};
@@ -184,10 +184,11 @@ public:
         return {ans_weigths, ans_ids};
     }
 
+    //Returns vector of all subset sums <= MAX_SUM
     //With 3k trick: <O(min(N, sqrt(weights_sum)) * MAX_SUM / W), O(MAX_SUM / W)>
     //Without trick: <O(N * MAX_SUM / W), O(MAX_SUM / W)>
     template<const T MAX_SUM>
-    vector<T> get_possible_subset_sums_bitset(bool apply_3k_trick = true) const {
+    vector<T> get_subset_sums_bitset(bool apply_3k_trick = true) const {
         bitset<MAX_SUM + 1> sums;
         sums[0] = 1;
         vector<T> weights;
@@ -207,7 +208,7 @@ public:
 
     //Returns dp of size MAX_SUM + 1, s. t. dp[k] = min # items s. t. their sum is k, or -1 if it is impossible
     //<O(N * min(weigths_sum, MAX_SUM)), O(N + MAX_SUM)>
-    vector<ssize_t> get_minimum_possible_items(const T MAX_SUM) {
+    vector<ssize_t> get_min_items(const T MAX_SUM) {
         const size_t INF = items.size() + 1;
         vector<T> weights;
         for (const auto& [wei, id] : items) {
