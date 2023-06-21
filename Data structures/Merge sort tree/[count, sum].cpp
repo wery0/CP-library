@@ -79,7 +79,7 @@ class merge_sort_tree {
     }
 
     template<typename A>
-    A straightforward(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
+    A straightforward_query(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
         assert(is_prepared);
         size_t l = lower_bound(store_x.begin(), store_x.end(), x1) - store_x.begin();
         size_t r = upper_bound(store_x.begin(), store_x.end(), x2) - store_x.begin();
@@ -102,25 +102,22 @@ class merge_sort_tree {
     }
 
     template<typename A>
-    A seg_go(size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry, A neutral_element, auto merge, auto f) const {
-        if (qr < l || r < ql || ly >= ry) return neutral_element;
-        if (ql <= l && r <= qr) return f(v, st[v] + ly, st[v] + ry - 1);
-        size_t md = (l + r) >> 1;
-        auto pl = lp[st[v] + v + ly];
-        auto pr = lp[st[v] + v + ry];
-        return merge(seg_go(ql, qr, l, md, v << 1, pl, pr, neutral_element, merge, f),
-                     seg_go(ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr, neutral_element, merge, f));
-    }
-
-    template<typename A>
-    A fractional_cascading(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
+    A fractional_cascading_query(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
         assert(is_prepared);
         size_t l = lower_bound(store_x.begin(), store_x.end(), x1) - store_x.begin();
         size_t r = upper_bound(store_x.begin(), store_x.end(), x2) - store_x.begin();
         if (l >= r--) return neutral_element;
         size_t ly = lower_bound(store_y.begin(), store_y.begin() + n, y1) - store_y.begin();
         size_t ry = upper_bound(store_y.begin(), store_y.begin() + n, y2) - store_y.begin();
-        return seg_go(l, r, 0, U - 1, 1, ly, ry, neutral_element, merge, f);
+        auto go = [&](auto&& go, size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) {
+            if (qr < l || r < ql || ly >= ry) return neutral_element;
+            if (ql <= l && r <= qr) return f(v, st[v] + ly, st[v] + ry - 1);
+            size_t md = (l + r) >> 1;
+            auto pl = lp[st[v] + v + ly];
+            auto pr = lp[st[v] + v + ry];
+            return merge(go(go, ql, qr, l, md, v << 1, pl, pr), go(go, ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr));
+        };
+        return go(go, l, r, 0, U - 1, 1, ly, ry);
     }
 
 public:
@@ -149,8 +146,8 @@ public:
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return r - l + 1; };
         return use_fractional_cascading ?
-               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
-               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
+               fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) :
+               straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);
     }
 
     //Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
@@ -160,7 +157,7 @@ public:
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return store_w[r] - (l - st[v] ? store_w[l - 1] : 0); };
         return use_fractional_cascading ?
-               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
-               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
+               fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) :
+               straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);
     }
 };

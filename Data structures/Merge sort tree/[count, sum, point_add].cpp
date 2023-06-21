@@ -80,7 +80,7 @@ class merge_sort_tree {
     }
 
     template<typename A>
-    A straightforward(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
+    A straightforward_query(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
         assert(is_prepared);
         size_t l = lower_bound(store_x.begin(), store_x.end(), x1) - store_x.begin();
         size_t r = upper_bound(store_x.begin(), store_x.end(), x2) - store_x.begin();
@@ -103,50 +103,45 @@ class merge_sort_tree {
     }
 
     template<typename A>
-    A seg_go(size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry, A neutral_element, auto merge, auto f) const {
-        if (qr < l || r < ql || ly >= ry) return neutral_element;
-        if (ql <= l && r <= qr) return f(v, st[v] + ly, st[v] + ry - 1);
-        size_t md = (l + r) >> 1;
-        auto pl = lp[st[v] + v + ly];
-        auto pr = lp[st[v] + v + ry];
-        return merge(seg_go(ql, qr, l, md, v << 1, pl, pr, neutral_element, merge, f),
-                     seg_go(ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr, neutral_element, merge, f));
-    }
-
-    template<typename A>
-    A fractional_cascading(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
+    A fractional_cascading_query(T x1, T y1, T x2, T y2, A neutral_element, auto merge, auto f) const {
         assert(is_prepared);
         size_t l = lower_bound(store_x.begin(), store_x.end(), x1) - store_x.begin();
         size_t r = upper_bound(store_x.begin(), store_x.end(), x2) - store_x.begin();
         if (l >= r--) return neutral_element;
         size_t ly = lower_bound(store_y.begin(), store_y.begin() + n, y1) - store_y.begin();
         size_t ry = upper_bound(store_y.begin(), store_y.begin() + n, y2) - store_y.begin();
-        return seg_go(l, r, 0, U - 1, 1, ly, ry, neutral_element, merge, f);
+        auto go = [&](auto&& go, size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) {
+            if (qr < l || r < ql || ly >= ry) return neutral_element;
+            if (ql <= l && r <= qr) return f(v, st[v] + ly, st[v] + ry - 1);
+            size_t md = (l + r) >> 1;
+            auto pl = lp[st[v] + v + ly];
+            auto pr = lp[st[v] + v + ry];
+            return merge(go(go, ql, qr, l, md, v << 1, pl, pr), go(go, ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr));
+        };
+        return go(go, l, r, 0, U - 1, 1, ly, ry);
     }
 
-    void point_add(size_t pos, T val) {
+    template<bool fc>
+    void point_modify(size_t pos, T val, auto f) {
+        assert(is_prepared);
         size_t l = 0, r = U - 1, v = 1;
+        size_t py = fc ? lower_bound(store_y.begin(), store_y.begin() + n, points[pos].y) - store_y.begin() : 0;
         while (true) {
-            size_t py = lower_bound(store_y.begin() + st[v], store_y.begin() + st[v + 1], points[pos].y) - store_y.begin() - st[v];
-            fenw.point_add(st[v] + py, val);
+            if constexpr (!fc) {
+                py = lower_bound(store_y.begin() + st[v], store_y.begin() + st[v + 1], points[pos].y) - store_y.begin() - st[v];
+            }
+            f(v, st[v] + py);
             if (l == r) break;
             size_t md = (l + r) >> 1;
-            v <<= 1;
-            if (pos <= md) r = md;
-            else l = md + 1, v |= 1;
-        }
-    }
-
-    void point_add_FC(size_t pos, size_t py, T val) {
-        size_t l = 0, r = U - 1, v = 1;
-        while (true) {
-            fenw.point_add(st[v] + py, val);
-            if (l == r) break;
-            size_t md = (l + r) >> 1;
-            auto pl = lp[st[v] + v + py];
-            v <<= 1;
-            if (pos <= md) r = md, py = pl;
-            else l = md + 1, v |= 1, py -= pl;
+            if (pos <= md) {
+                r = md;
+                if constexpr (fc) py = lp[st[v] + v + py];
+                v <<= 1;
+            } else {
+                l = md + 1;
+                if constexpr (fc) py -= lp[st[v] + v + py];
+                v = v << 1 | 1;
+            }
         }
     }
 
@@ -175,9 +170,7 @@ public:
         using A = size_t;
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return r - l + 1; };
-        return use_fractional_cascading ?
-               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
-               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
+        return use_fractional_cascading ? fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) : straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);
     }
 
     //Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
@@ -186,9 +179,7 @@ public:
         using A = C;
         auto merge = [](const A& x, const A& y) { return x + y; };
         auto f = [&](size_t v, size_t l, size_t r) { return fenw.seg_sum(l, r); };
-        return use_fractional_cascading ?
-               fractional_cascading<A>(x1, y1, x2, y2, 0, merge, f) :
-               straightforward<A>(x1, y1, x2, y2, 0, merge, f);
+        return use_fractional_cascading ? fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) : straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);
     }
 
     //Point (x, y) must already exist!
@@ -199,11 +190,7 @@ public:
         assert(it != points.end());
         auto [px, py, pw] = *it;
         assert(px == x && py == y);
-        if (use_fractional_cascading) {
-            size_t ly = lower_bound(store_y.begin(), store_y.begin() + n, y) - store_y.begin();
-            point_add_FC(it - points.begin(), ly, val);
-        } else {
-            point_add(it - points.begin(), val);
-        }
+        auto f = [&](size_t v, size_t pos) { fenw.point_add(pos, val); };
+        use_fractional_cascading ? point_modify<1>(it - points.begin(), val, f) : point_modify<0>(it - points.begin(), val, f);
     }
 };
