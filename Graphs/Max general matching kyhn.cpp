@@ -24,7 +24,7 @@ class max_general_matching_random_kyhn {
 
 public:
     max_general_matching_random_kyhn() = default;
-    max_general_matching_random_kyhn(int n): n(n), l(n), mt(n + 1, n), us(n) {}
+    max_general_matching_random_kyhn(int n): n(n), l(n), mt(n + 1, n), us(n + 1) {}
 
     void add_edge(int x, int y) {
         l[x].push_back(y);
