@@ -1,4 +1,4 @@
-class MaxBipartiteMatchingKyhn {
+class max_bipartite_matching_kyhn {
     int L, R, tim = 0;
     vector<vector<int>> l;
     vector<int> mtl, mtr, us;
@@ -15,7 +15,7 @@ class MaxBipartiteMatchingKyhn {
     }
 
 public:
-    MaxBipartiteMatchingKyhn(int _L, int _R): L(_L), R(_R) {
+    max_bipartite_matching_kyhn(int _L, int _R): L(_L), R(_R) {
         if (L > R) swap(L, R), sw = 1;
         l.resize(L);
         mtl.resize(L, -1);
