@@ -228,7 +228,7 @@ class treap {
             else k -= szl + 1, n = n->r;
         }
         assert(0);
-        return {-1, -1};
+        return {K(), V()};
     }
 
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
