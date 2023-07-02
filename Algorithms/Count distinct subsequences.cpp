@@ -1,15 +1,16 @@
-//Including empty subsequence.
+//Including empty subsequence
+//O(n)
 template<typename T, typename I>
 T count_distinct_subsequences(I first, I last) {
-    const int n = last - first;
+    const size_t n = last - first;
     vector<T> dp(n + 1);
-    umap<T, int> mp;
+    unordered_map<typename iterator_traits<I>::value_type, size_t> mp;
     dp[0] = 1;
     auto cit = first;
-    for (int q = 1; q <= n; ++q, ++cit) {
+    for (size_t i = 1; i <= n; ++i, ++cit) {
         const auto x = *cit;
-        dp[q] = dp[q - 1] * 2 - (mp.count(x) ? dp[mp[x] - 1] : 0);
-        mp[x] = q;
+        dp[i] = dp[i - 1] * (T)2 - (mp.count(x) ? dp[mp[x] - 1] : (T)0);
+        mp[x] = i;
     }
     return dp[n];
 }

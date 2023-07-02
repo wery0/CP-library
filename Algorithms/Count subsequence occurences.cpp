@@ -1,16 +1,18 @@
-template<typename I1, typename I2>
-ull subsequences_count(I1 f1, I1 l1, I2 f2, I2 l2) {
-    int a = l1 - f1, b = l2 - f2;
-    vec<ull> dp(b + 1);
+//Counts # occurences of [f2, l2) as subsequence in [f1, l1)
+//O(n * m)
+template<typename T, typename I1, typename I2>
+T subsequences_count(I1 f1, I1 l1, I2 f2, I2 l2) {
+    const size_t n = l1 - f1, m = l2 - f2;
+    vector<T> dp(m + 1);
     dp[0] = 1;
     for (; f1 != l1; ++f1) {
         const auto val = *f1;
         auto it = f2;
-        for (int w = 1; w <= b; ++w, ++it) {
+        for (size_t j = 1; j <= m; ++j, ++it) {
             if (*it == val) {
-                dp[w] += dp[w - 1];
+                dp[j] += dp[j - 1];
             }
         }
     }
-    return dp[b];
+    return dp[m];
 }
