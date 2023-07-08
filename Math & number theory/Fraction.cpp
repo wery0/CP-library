@@ -126,6 +126,7 @@ public:
         return res;
     }
 
+    bool is_zero() const { return numerator_ == 0; }
     bool is_integer() const { return denominator_ == 1; }
     int get_sign() const { return numerator_ < 0 ? -1 : numerator_ == 0 ? 0 : 1; }
     T get_numerator() const { return numerator_; }
