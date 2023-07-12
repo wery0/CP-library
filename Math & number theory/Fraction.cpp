@@ -126,6 +126,8 @@ public:
         return res;
     }
 
+    friend Fraction mediant(const Fraction& lhs, const Fraction& rhs) { return {lhs.numerator_ + rhs.numerator_, lhs.denominator_ + rhs.denominator_}; }
+
     bool is_zero() const { return numerator_ == 0; }
     bool is_integer() const { return denominator_ == 1; }
     int get_sign() const { return numerator_ < 0 ? -1 : numerator_ == 0 ? 0 : 1; }
