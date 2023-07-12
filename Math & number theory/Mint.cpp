@@ -5,14 +5,14 @@ struct Mint {
     constexpr Mint() = default;
     template<typename T>
     constexpr Mint(T c) {
-        static_assert(is_integral<T>::value);
+        static_assert(is_integral_v<T>);
         if (c < 0) c += ((-c - 1) / MOD + 1) * MOD;
         else if (c >= MOD) c %= MOD;
         val = c;
     }
 
     template<typename I, typename L, const int M>
-    friend Mint<I, L, M> binpow(const Mint<I, L, M>& m, ll pw) {
+    friend Mint<I, L, M> binpow(const Mint<I, L, M>& m, int64_t pw) {
         L o = 1;
         for (L x = m.val; pw; pw >>= 1) {
             if (pw & 1) o = o * x % M;
@@ -50,4 +50,4 @@ struct Mint {
     friend ostream& operator<<(ostream& out, const Mint& m) {return out << m.val;}
     friend ostream& operator<<(ostream& out, const Mint&& m) {return out << m.val;}
 };
-using mint = Mint<int, ll, 998244353>;
+using mint = Mint<int32_t, int64_t, 998244353>;
