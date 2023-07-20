@@ -62,11 +62,11 @@ class aho_corasick {
 public:
 	aho_corasick() = default;
 
-	void add_string(const string& t) {
+	void add_string(const string& s) {
 		assert(!is_prepared);
 		Node* n = root;
-		for (int i = 0; i < t.size(); ++i) {
-			int chr = t[i] - FIRST_CHAR;
+		for (int i = 0; i < s.size(); ++i) {
+			int chr = s[i] - FIRST_CHAR;
 			if (!n->m.count(chr)) n->m[chr] = new Node(n, chr), ++cnt_nodes;
 			n = n->m[chr];
 		}
