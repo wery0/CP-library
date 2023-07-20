@@ -1,13 +1,15 @@
-//Simulates arrangement of meetings in rooms.
-//Each meeting is defined by [start_time, duration]
-/*Each meeting will be arranged in the room with the smallest number among free rooms
-at the moment max(start_time, (when the first free room appears)) and will lasts duration time units*/
-//This function for every meeting calculates its starting time and room, where it will be.
-//ALL start_time SHOULD BE DIFFERENT FOR UNIQUE ANSWER!
+/*
+Simulates arrangement of meetings in rooms.
+Each meeting is defined by [start_time, duration].
+Each meeting will be arranged in the room with the smallest number among free rooms
+at the moment max(start_time, (when the first free room appears)) and will lasts duration time units.
+This function for every meeting calculates its starting time and room, where it will be.
+ALL start_time SHOULD BE DIFFERENT FOR UNIQUE ANSWER!
+*/
 template<typename T>
 vector<pair<T, T>> meeting_simulator(T rooms, vector<pair<T, T>> meetings) {
-    //rooms = mint(rooms, (T)meetings.size());           //<- uncomment if it may help
-    const int n = meetings.size();
+    //rooms = min(rooms, (T)meetings.size());           //<- uncomment if it may help
+    const size_t n = meetings.size();
     vector<size_t> nums(n);
     iota(nums.begin(), nums.end(), (size_t)0);
     sort(nums.begin(), nums.end(), [&meetings](const auto& l, const auto& r) {
@@ -15,7 +17,7 @@ vector<pair<T, T>> meeting_simulator(T rooms, vector<pair<T, T>> meetings) {
     });
     priority_queue<pair<T, T>, vector<pair<T, T>>, greater<pair<T, T>>> pq;
     priority_queue<T, vector<T>, greater<T>> free;
-    for (size_t q = 0; q < rooms; ++q) free.push(q);
+    for (size_t i = 0; i < rooms; ++i) free.push(i);
     T cur_t = 0;
     vector<pair<T, T>> when_where(n);
     for (size_t i = 0; i < n; ++i) {
