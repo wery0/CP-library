@@ -1,38 +1,40 @@
+//Change hash map if need
 template<typename T>
-struct static_range_frequency {
+class static_range_frequency {
 
     umap<T, int> mp;
-    vector<vector<int>> store;
+    vector<int> store;
+    vector<int> cnt;
 
+public:
     static_range_frequency() = default;
 
     template<typename Iterator>
     static_range_frequency(Iterator first, Iterator last) {
-        int a = last - first;
-        mp.reserve(a);
-        vector<int> m(a);
+        const size_t n = last - first;
+        mp.reserve(n);
+        vector<int> m(n);
         int df = 0;
-        for (int q = 0; q < a; ++q, ++first) {
-            int n = mp.count(*first) ? mp[*first] : -1;
-            if (n == -1) {
-                mp[*first] = df;
-                m[q] = df++;
-            } else {
-                m[q] = n;
-            }
+        for (size_t i = 0; i < n; ++i, ++first) {
+            int& x = mp[*first];
+            if (!x) x = ++df;
+            m[i] = x;
         }
-        store.resize(df);
-        for (int q = 0; q < a; ++q) {
-            store[m[q]].push_back(q);
+        cnt.resize(df + 2);
+        for (T x : m) ++cnt[x + 1];
+        partial_sum(cnt.begin(), cnt.end(), cnt.begin());
+        store.resize(n);
+        for (size_t i = 0; i < n; ++i) {
+            store[cnt[m[i]]++] = i;
         }
     }
 
-    int query(int l, int r, T val) {
-        int n = mp.count(val) ? mp[val] : -1;
-        if (n == -1) return 0;
-        return upper_bound(all(store[n]), r) - lower_bound(all(store[n]), l);
+    //Counts # occurrences of val in segment [l, r]
+    //O(log(n))
+    int query(size_t l, size_t r, T val) {
+        int x = mp.count(val) ? mp[val] - 1 : -1;
+        if (x == -1) return 0;
+        return upper_bound(store.begin() + cnt[x], store.begin() + cnt[x + 1], r) -
+               lower_bound(store.begin() + cnt[x], store.begin() + cnt[x + 1], l);
     }
 };
-//Change hash map if need.
-//static_range_frequency<_Type> srf;
-//static_range_frequency<_Type> srf(all(_arr));
