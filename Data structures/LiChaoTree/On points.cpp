@@ -3,11 +3,11 @@ class lichao_on_points {
 
     static constexpr Y inf = numeric_limits<Y>::max();
 
-    uint a, U;
+    size_t n, U;
     vector<X> bl, br;
     vector<Y> vk, vb;
 
-    void add_seg(X ql, X qr, Y k, Y b, uint v) {
+    void add_seg(X ql, X qr, Y k, Y b, size_t v) {
         const X l = bl[v], r = br[v];
         if (qr < l || r < ql) return;
         if (ql <= l && r <= qr) {
@@ -18,8 +18,8 @@ class lichao_on_points {
         add_seg(ql, qr, k, b, v << 1 | 1);
     }
 
-    void add_line(Y k, Y b, uint v) {
-        for (;;) {
+    void add_line(Y k, Y b, size_t v) {
+        while (true) {
             const X l = bl[v], r = br[v];
             Y vl_cur = vk[v] * l + vb[v];
             Y vr_cur = vk[v] * r + vb[v];
@@ -41,26 +41,27 @@ class lichao_on_points {
     }
 
 public:
+    lichao_on_points() = default;
     lichao_on_points(vector<X> points) {
         if (points.empty()) points = {0};
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
-        a = points.size();
-        U = geq_pow2(a);
+        n = points.size();
+        U = n & (n - 1) ? 2 << __lg(n) : n;
         bl.resize(U * 2);
         br.resize(U * 2);
         vk.resize(U * 2);
         vb.resize(U * 2, inf);
-        for (uint q = 0; q < a; ++q) bl[U + q] = br[U + q] = points[q];
-        for (uint q = a; q < U; ++q) bl[U + q] = br[U + q] = points[a - 1];
-        for (int q = U; --q; ) {
-            bl[q] = bl[q << 1];
-            br[q] = br[q << 1 | 1];
+        for (size_t i = 0; i < n; ++i) bl[U + i] = br[U + i] = points[i];
+        for (size_t i = n; i < U; ++i) bl[U + i] = br[U + i] = points[n - 1];
+        for (size_t i = U; --i; ) {
+            bl[i] = bl[i << 1];
+            br[i] = br[i << 1 | 1];
         }
     }
 
     Y get_min(X x) {
-        uint v = 1;
+        size_t v = 1;
         Y o = vk[v] * x + vb[v];
         while (v < U) {
             v <<= 1;
@@ -70,11 +71,12 @@ public:
         return o;
     }
 
-    void add_seg(X ql, X qr, Y k, Y b) {add_seg(ql, qr, k, b, 1);}
+    //O(log(|points|))
     void add_line(Y k, Y b) {add_line(k, b, 1);}
+
+    //O(log(|points|) ^ 2)
+    void add_seg(X l, X r, Y k, Y b) {add_seg(l, r, k, b, 1);}
 };
-//add_line - O(log(|points|))
-//add_seg - O(log(|points|) ^ 2)
 //Usage: lichao_on_points<X, Y> kek(points), where
 //X - type of coordinates,
 //Y - type of K and B in linear function y = Kx + B,

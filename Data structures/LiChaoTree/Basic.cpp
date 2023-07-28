@@ -11,7 +11,7 @@ class lichao {
     };
 
     X L, R;
-    Node *root = new Node();
+    Node* root = new Node();
 
     void add_seg(X ql, X qr, X l, X r, Y k, Y b, Node*& n) {
         if (qr < l || r < ql) return;
@@ -46,11 +46,20 @@ class lichao {
         else add_line(md + 1, r, k, b, n->r);
     }
 
+    void destroy(Node* n) {
+        if (!n) return;
+        destroy(n->l);
+        destroy(n->r);
+        delete n;
+    }
+
 public:
+    lichao() = default;
     lichao(X L, X R): L(L), R(R) {}
+    ~lichao() {destroy(root);}
 
     Y get_min(X x) {
-        Node *n = root;
+        Node* n = root;
         X l = L, r = R;
         Y o = inf;
         while (n) {
@@ -62,11 +71,12 @@ public:
         return o;
     }
 
+    //O(log(C))
     void add_line(Y k, Y b) {add_line(L, R, k, b, root);}
-    void add_seg(X ql, X qr, Y k, Y b) {add_seg(ql, qr, L, R, k, b, root);}
+
+    //O(log(C) ^ 2)
+    void add_seg(X l, X r, Y k, Y b) {add_seg(l, r, L, R, k, b, root);}
 };
-//add_line - O(log(C))
-//add_seg - O(log(C) ^ 2)
 //Usage: lichao<X, Y> kek(L, R), where
 //X - type of coordinates,
 //Y - type of K and B in linear function y = Kx + B,
