@@ -1,5 +1,5 @@
 //Calculates shortest hamiltonian path in graph with adjacency matrix m
-//Returns {length_of_shortest_path, path_itself} if it exists, of {NO, {}} otherwise
+//Returns {length_of_shortest_path, path_itself} if it exists, or {NO, {}} otherwise
 //Edge i -> j absence should be marked as m[i][j] == NO
 //<O(2^n * n^2), O(2^n * n)>
 template<typename T>
