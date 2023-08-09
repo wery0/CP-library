@@ -1,42 +1,49 @@
 //O(nlog(n))
-vector<int> calc_suffix_array(string& t) {
-    t += (char)(0);           //This symbol must not appear in the string
-    const int n = t.size();
-    vector<int> cnt(n), cl(n), pcl(n), kek(256);
-    for (char c : t) kek[c] = 1;
-    for (int i = 0, j = 0; i < 256; ++i) if (kek[i]) kek[i] = j++;
-    for (int i = 0; i < n; ++i) cl[i] = kek[t[i]], ++cnt[cl[i]];
+template<typename T_arr>
+vector<int> calc_suffix_array(T_arr& s) {
+    using T = T_arr::value_type;
+    s.push_back(0);           //This symbol must not appear in the sequence and must be the smallest one
+    const size_t n = s.size();
+    vector<int> cnt(n), cl(n), pcl(n);
+    vector<T> df(s.begin(), s.end());
+    sort(df.begin(), df.end());
+    df.erase(unique(df.begin(), df.end()), df.end());
+    for (size_t i = 0; i < n; ++i) cl[i] = lower_bound(df.begin(), df.end(), s[i]) - df.begin(), ++cnt[cl[i]];
     vector<array<int, 3>> ncl(n);
-    for (int d = 1; d < n; d *= 2) {
+    for (size_t d = 1; d < n; d *= 2) {
         partial_sum(cnt.begin(), cnt.end(), cnt.begin());
-        for (int i = 0; i < n; ++i) pcl[--cnt[cl[(i + d) % n]]] = i;
+        for (size_t i = 0; i < n; ++i) pcl[--cnt[cl[(i + d) % n]]] = i;
         for (int i : pcl) ncl[cnt[cl[i]]++] = {cl[i], cl[(i + d) % n], i};
-        for (int i = 0; i < n; ++i) cl[ncl[i][2]] = i ? cl[ncl[i - 1][2]] + (ncl[i - 1][0] != ncl[i][0] || ncl[i - 1][1] != ncl[i][1]) : 0;
+        for (size_t i = 0; i < n; ++i) cl[ncl[i][2]] = i ? cl[ncl[i - 1][2]] + (ncl[i - 1][0] != ncl[i][0] || ncl[i - 1][1] != ncl[i][1]) : 0;
         memset(&cnt[0], 0, sizeof(cnt[0]) * n);
         for (int i : cl) ++cnt[i];
     }
-    t.pop_back();
-    vector<int> suf(n - 1);
-    for (int i = 0; i < n; ++i) if (cl[i]) suf[cl[i] - 1] = i;
-    return suf;
+    s.pop_back();
+    vector<int> sa(n - 1);
+    for (size_t i = 0; i < n; ++i) if (cl[i]) sa[cl[i] - 1] = i;
+    return sa;
 }
 
+/*
+s   = "ababba"
+sa  = [5 0 2 4 1 3]
+lcp = [1 2 0 2 1] => lcp(sa[i], sa[i + 1]) = lcp[i]
+*/
+//Kasai's arimura's arikawa's li's and pac's algorithm
 //O(n)
-vector<int> calc_lcp(const string& t, const vector<int>& suf) {
-    const int n = suf.size();
-    vector<int> pos_in_sufmas(n), lcp(n - 1);
-    for (int i = 0; i < n; ++i) pos_in_sufmas[suf[i]] = i;
-    for (int i = 0; i < n - 1; ++i) {
-        int p = pos_in_sufmas[i];
+template<typename T_arr>
+vector<int> calc_lcp(const T_arr& s, const vector<int>& sa) {
+    const size_t n = sa.size();
+    vector<int> pos_in_sa(n), lcp(n - 1);
+    for (size_t i = 0; i < n; ++i) pos_in_sa[sa[i]] = i;
+    for (size_t i = 0; i + 1 < n; ++i) {
+        int p = pos_in_sa[i];
         if (!p) continue;
         if (i) {
-            int prps = pos_in_sufmas[i - 1] - 1;
+            int prps = pos_in_sa[i - 1] - 1;
             lcp[p - 1] = max(0, prps >= 0 ? lcp[prps] - 1 : 0);
         }
-        for (int d = lcp[p - 1]; i + d < n && suf[p - 1] + d < n && t[i + d] == t[suf[p - 1] + d]; ++d) ++lcp[p - 1];
+        for (int d = lcp[p - 1]; i + d < n && sa[p - 1] + d < n && s[i + d] == s[sa[p - 1] + d]; ++d) ++lcp[p - 1];
     }
     return lcp;
 }
-// ababba
-// suf = [5 0 2 4 1 3]
-// lcp = [1 2 0 2 1] => lcp(suf[i], suf[i + 1]) = lcp[i]
