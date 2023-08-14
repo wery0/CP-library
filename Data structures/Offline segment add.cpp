@@ -1,9 +1,10 @@
 template<typename T>
-struct offline_seg_add {
+class offline_seg_add {
 
     size_t n;
     vector<T> store;
 
+public:
     offline_seg_add() = default;
     offline_seg_add(size_t n): n(n), store(n + 1) {}
     template<typename I>
@@ -22,7 +23,7 @@ struct offline_seg_add {
         fill(store.begin(), store.end(), 0);
     }
 
-    void seg_add(int l, int r, T val) {
+    void seg_add(size_t l, size_t r, T val) {
         store[l] += val;
         store[r + 1] -= val;
     }
