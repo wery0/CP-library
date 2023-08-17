@@ -20,6 +20,12 @@ class segtree_point_upd {
         rmx[v] = mx[v << 1 | 1] == mx[v] ? rmx[v << 1 | 1] : rmx[v << 1];
     }
 
+    void init_node_by_value(size_t pos, const T& val) {
+        sm[pos] = mn[pos] = mx[pos] = val;
+        cmn[pos] = cmx[pos] = 1;
+        lmn[pos] = rmn[pos] = lmx[pos] = rmx[pos] = i;
+    }
+
 public:
     segtree_point_upd() = default;
 
@@ -38,18 +44,7 @@ public:
         lmx.resize(n * 2);
         rmx.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            sm[n + i] = val;
-
-            mn[n + i] = val;
-            cmn[n + i] = 1;
-            lmn[n + i] = i;
-            rmn[n + i] = i;
-
-            mx[n + i] = val;
-            cmx[n + i] = 1;
-            lmx[n + i] = i;
-            rmx[n + i] = i;
+            init_node_by_value(n + i, *(first + i));
         }
         for (size_t i = n; --i;) upd(i);
     }
@@ -124,7 +119,7 @@ public:
 
     void point_change(size_t pos, T val) {
         pos += n;
-        sm[pos] = mn[pos] = mx[pos] = val;
+        init_node_by_value(pos, val);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 

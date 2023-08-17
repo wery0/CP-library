@@ -47,6 +47,11 @@ class segtree_point_upd {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
+    void init_tag_by_value(tag& t, const T& val) {
+        t.sm = t.wsm = t.iwsm = val;
+        t.len = 1;
+    }
+
 public:
     segtree_point_upd() = default;
 
@@ -55,12 +60,7 @@ public:
         if (!n) return;
         m.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
-            tag& t = m[n + i];
-            const T val = *(first + i);
-            t.sm = val;
-            t.wsm = val;
-            t.iwsm = val;
-            t.len = 1;
+        	init_tag_by_value(m[n + i], *(first + i));
         }
         for (size_t i = n; --i;) {
             const tag& l = m[i << 1], &r = m[i << 1 | 1];
@@ -106,7 +106,7 @@ public:
 
     void point_change(size_t pos, T val) {
         pos += n;
-        m[pos].sm = m[pos].wsm = m[pos].iwsm = val;
+        init_tag_by_value(m[pos], val);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };

@@ -8,7 +8,6 @@ class segtree_point_upd {
 
         tag() = default;
 
-
         friend void merge(const tag& l, const tag& r, tag& res) {
             res.cl = l.cl + (l.cl == l.sz ? r.cl : 0);
             res.cr = r.cr + (r.cr == r.sz ? l.cr : 0);
@@ -46,6 +45,11 @@ class segtree_point_upd {
         merge(m[v << 1], m[v << 1 | 1], m[v]);
     }
 
+    void init_tag_by_value(tag& t, int val) {
+        t.cl = t.cr = t.mxd = val;
+        t.sz = 1;
+    }
+
 public:
     segtree_point_upd() = default;
 
@@ -55,9 +59,7 @@ public:
         for (const auto& i : arr) assert(0 <= i && i <= 1);
         m.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
-            tag& t = m[n + i];
-            t.cl = t.cr = arr[i];
-            t.sz = 1;
+            init_tag_by_value(m[n + i], arr[i]);
         }
         for (size_t i = n; --i;) {
             const tag& l = m[i << 1], &r = m[i << 1 | 1];
@@ -84,7 +86,7 @@ public:
     void point_change(size_t pos, int val) {
         assert(0 <= val && val <= 1);
         pos += n;
-        m[pos].cl = m[pos].cr = m[pos].mxd = val;
+        init_tag_by_value(m[pos], val);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };

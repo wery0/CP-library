@@ -8,6 +8,10 @@ class segtree_point_upd {
         //Write update
     }
 
+    void init_node_by_value(size_t pos, const T& val) {
+        //Init all arrays at position pos
+    }
+
 public:
     segtree_point_upd() = default;
 
@@ -16,8 +20,7 @@ public:
         if (!n) return;
         //Resize needed vectors with n * 2
         for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            //Write init of last layer. Indices of last layer is n + i.
+            init_node_by_value(n + i, *(first + i));
         }
         for (size_t i = n; --i;) {
             upd(i);
@@ -48,8 +51,7 @@ public:
 
     void point_change(size_t pos, T val) {
         pos += n;
-        //Change element in needed vectors
-        //sm[pos] = mn[pos] = mx[pos] = val;
+        init_node_by_value(pos, val);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };

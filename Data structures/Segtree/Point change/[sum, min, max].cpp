@@ -12,6 +12,10 @@ class segtree_point_upd {
         mx[v] = max(mx[v << 1], mx[v << 1 | 1]);
     }
 
+    void init_node_by_value(size_t pos, const T& val) {
+        sm[pos] = mn[pos] = mx[pos] = val;
+    }
+
 public:
     segtree_point_upd() = default;
 
@@ -22,10 +26,7 @@ public:
         mn.resize(n * 2);
         mx.resize(n * 2);
         for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            sm[n + i] = val;
-            mn[n + i] = val;
-            mx[n + i] = val;
+            init_node_by_value(n + i, *(first + i));
         }
         for (size_t i = n; --i;) upd(i);
     }
@@ -72,7 +73,7 @@ public:
 
     void point_change(size_t pos, T val) {
         pos += n;
-        sm[pos] = mn[pos] = mx[pos] = val;
+        init_node_by_value(pos, val);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 
