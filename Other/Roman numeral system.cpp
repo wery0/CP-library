@@ -15,17 +15,17 @@ namespace RomanNumeralSystem {
 
     string int_to_roman(int n) {
         assert(1 <= n && n <= 3999);
-        string ans;
-        for (int i = 0; n; n /= 10, ++i) ans = store[i][n % 10] + ans;
-        return ans;
+        string res;
+        for (size_t i = 0; n; n /= 10, ++i) res = store[i][n % 10] + res;
+        return res;
     }
 
-    int roman_to_int(string t) {
-        assert(!t.empty());
-        int o = mp.at(t.back());
-        for (int q = 0; q + 1 < t.size(); q++) {
-            o += (mp.at(t[q]) < mp.at(t[q + 1]) ? -1 : 1) * mp.at(t[q]);
+    int roman_to_int(const string& s) {
+        assert(!s.empty());
+        int res = mp.at(s.back());
+        for (size_t i = 0; i + 1 < s.size(); ++i) {
+            res += (mp.at(s[i]) < mp.at(s[i + 1]) ? -1 : 1) * mp.at(s[i]);
         }
-        return o;
+        return res;
     }
 };
