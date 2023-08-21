@@ -47,7 +47,7 @@ public:
         roots = {build_const(n, val)};
     }
     template<typename I>
-    fully_persistent_array(I first, I last): n(last - first) {
+    fully_persistent_array(I first, I last, typename enable_if<!is_integral_v<I>>::type* = 0): n(last - first) {
         store.reserve(n + 5);
         roots = {build(first, last)};
     }
@@ -59,16 +59,16 @@ public:
 
     size_t size() const {return n;}
 
-    int get_cur_version() const {return roots.size() - 1;}
+    size_t get_cur_version() const {return roots.size() - 1;}
 
     //For q set operations use smth like sz = n + q * __lg(n) / 2
     void reserve(size_t sz) {store.reserve(sz);}
 
     //<O(log(n)), O(log(n))>
     //Creates new version
-    void set_value(int version, int pos, T val) {
-        assert(0 <= version && version < roots.size());
-        assert(0 <= pos && pos < n);
+    void set_value(size_t version, size_t pos, T val) {
+        assert(version < roots.size());
+        assert(pos < n);
         store.emplace_back(store[roots[version]]);
         size_t root = store.size() - 1;
         roots.push_back(root);
@@ -92,9 +92,9 @@ public:
     }
 
     //O(log(n))
-    T operator()(int version, int pos) const {
-        assert(0 <= version && version < roots.size());
-        assert(0 <= pos && pos < n);
+    T operator()(size_t version, size_t pos) const {
+        assert(version < roots.size());
+        assert(pos < n);
         size_t cur = roots[version];
         for (size_t sz = n;;) {
             size_t szl = sz / 2;
@@ -105,11 +105,11 @@ public:
     }
 
     //O(nlog(n))
-    vector<T> get_version_as_vector(int version) const {
-        assert(0 <= version && version < roots.size());
+    vector<T> get_version_as_vector(size_t version) const {
+        assert(version < roots.size());
         vector<T> ans(n);
-        for (int q = 0; q < n; ++q) {
-            ans[q] = operator()(version, q);
+        for (size_t i = 0; i < n; ++i) {
+            ans[i] = operator()(version, i);
         }
         return ans;
     }
