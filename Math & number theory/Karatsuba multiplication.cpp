@@ -1,58 +1,57 @@
-namespace {
-    template<typename T>
-    void kara(int a, const T *__restrict A, const T *__restrict B, T *__restrict res){
-        if(a<=64){
-            for(int q=0; q<a; q++){
-                for(int w=0; w<a; w++){
-                    res[q+w] += A[q]*B[w];
-                }
+//Calculates convolution of two arrays of equal length n
+//O(n ^ log_2(3)) ~ O(n ^ 1.585) with super low constant
+template<typename T>
+void karatsuba(size_t n, const T* __restrict A, const T* __restrict B, T* __restrict res){
+    if (n <= 64){
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                res[i + j] += A[i] * B[j];
             }
-            return;
         }
-        const int md = a>>1;
-        alignas(64) T sma[a], E[a];
-        init(E, 0);
-        const auto smb = sma+md;
-        for(int q=0; q<md; q++){
-            sma[q] = A[q]+A[q+md];
-            smb[q] = B[q]+B[q+md];
-        }
-        kara(md, sma, smb, E);
-        kara(md, A+0, B+0, res);
-        kara(md, A+md, B+md, res+a);
-        for(int q=0; q<md; q++){
-            const auto lol = res[q+md];
-            res[q+md] += E[q] - res[q] - res[q+md*2];
-            res[q+md*2] += E[q+md] - lol - res[q+md*3];
-        }
+        return;
+    }
+    const size_t md = n >> 1;
+    alignas(64) T sma[n], E[n];
+    memset(E, 0, sizeof(T) * n);
+    const auto smb = sma + md;
+    for (size_t i = 0; i < md; ++i) {
+        sma[i] = A[i] + A[i + md];
+        smb[i] = B[i] + B[i + md];
+    }
+    karatsuba(md, sma, smb, E);
+    karatsuba(md, A, B, res);
+    karatsuba(md, A + md, B + md, res + n);
+    for (size_t i = 0; i < md; ++i) {
+        const auto tmp = res[i + md];
+        res[i + md] += E[i] - res[i] - res[i + md * 2];
+        res[i + md * 2] += E[i + md] - tmp - res[i + md * 3];
     }
 }
 
-namespace {
-    template<int a, typename T>
-    void kara(const T *__restrict A, const T *__restrict B, T* __restrict res) {
-        if (a <= 32) {
-            for (int q = 0; q < a; q++) {
-                for (int w = 0; w < a; w++) {
-                    res[q + w] += A[q] * B[w];
-                }
+//Specialization for sizes, known at compilation time
+template<size_t n, typename T>
+void karatsuba_const(const T* __restrict A, const T* __restrict B, T* __restrict res) {
+    if (n <= 32) {
+        for (size_t i = 0; i < n; ++i) {
+            for (size_t j = 0; j < n; ++j) {
+                res[i + j] += A[i] * B[j];
             }
-            return;
         }
-        const int md = a >> 1;
-        T E[a] = {}, sma[a];
-        auto smb = sma + md;
-        for (int q = 0; q < md; q++) {
-            sma[q] = A[q] + A[q + md];
-            smb[q] = B[q] + B[q + md];
-        }
-        kara<md>(sma, smb, E);
-        kara<md>(A, B, res);
-        kara<md>(A + md, B + md, res + md * 2);
-        for (int q = 0; q < md; q++) {
-            const auto kek = res[q + md];
-            res[q + md] += E[q] - res[q] - res[q + md * 2];
-            res[q + md * 2] += E[q + md] - kek - res[q + md * 3];
-        }
+        return;
+    }
+    const size_t md = n >> 1;
+    T E[n] = {}, sma[n];
+    auto smb = sma + md;
+    for (size_t i = 0; i < md; ++i) {
+        sma[i] = A[i] + A[i + md];
+        smb[i] = B[i] + B[i + md];
+    }
+    karatsuba_const<md>(sma, smb, E);
+    karatsuba_const<md>(A, B, res);
+    karatsuba_const<md>(A + md, B + md, res + md * 2);
+    for (size_t i = 0; i < md; ++i) {
+        const auto tmp = res[i + md];
+        res[i + md] += E[i] - res[i] - res[i + md * 2];
+        res[i + md * 2] += E[i + md] - tmp - res[i + md * 3];
     }
 }
