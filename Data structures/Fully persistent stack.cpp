@@ -1,9 +1,9 @@
 //All operations are <O(1), O(1)>
 template<typename T>
 class fully_persistent_stack {
-    vector<int> pr{ -1};
+    vector<size_t> pr{0};
     vector<T> val{T{}};
-    vector<int> sz{0};
+    vector<size_t> sz{0};
 
 public:
     fully_persistent_stack() = default;
@@ -14,31 +14,31 @@ public:
         sz.reserve(n);
     }
 
-    size_t size(int version) const {
-        assert(0 <= version && version < pr.size());
+    size_t size(size_t version) const {
+        assert(version < pr.size());
         return sz[version];
     }
 
     //Creates new version
-    void push(int version, T x) {
-        assert(0 <= version && version < pr.size());
+    void push(size_t version, T x) {
+        assert(version < pr.size());
         pr.push_back(version);
         val.push_back(x);
         sz.push_back(sz[version] + 1);
     }
 
     //Creates new version
-    T pop(int version) {
-        assert(0 <= version && version < pr.size());
-        assert(pr[version] != -1);
+    T pop(size_t version) {
+        assert(version < pr.size());
+        assert(size(version));
         pr.push_back(pr[version]);
         val.push_back(val[pr[version]]);
         sz.push_back(sz[pr[version]]);
         return val[version];
     }
 
-    T top(int version) const {
-        assert(0 <= version && version < pr.size());
+    T top(size_t version) const {
+        assert(version < pr.size());
         return val[version];
     }
 };
