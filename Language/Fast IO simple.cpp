@@ -22,40 +22,43 @@ inline void putChar(int c) {
 
 inline int ni() {
     char c = getChar();
-    for (; c == '\n' || c == ' ';) c = getChar();
-    int o = 0, sign = 1;
+    while (c <= 32) c = getChar();
+    int res = 0, sign = 1;
     if (c == '-') sign = -1, c = getChar();
-    for (; '0' <= c && c <= '9'; c = getChar()) o = o * 10 + c - '0';
-    return o * sign;
+    for (; isdigit(c); c = getChar()) res = res * 10 + c - 48;
+    return res * sign;
 }
 
-inline ll nl() {
+inline int64_t nl() {
     char c = getChar();
-    for (; c == '\n' || c == ' ';) c = getChar();
-    ll o = 0, sign = 1;
+    while (c <= 32) c = getChar();
+    int64_t o = 0, sign = 1;
     if (c == '-') sign = -1, c = getChar();
-    for (; '0' <= c && c <= '9'; c = getChar()) o = o * 10 + c - '0';
+    for (; isdigit(c); c = getChar()) o = o * 10 + c - 48;
     return o * sign;
 }
 
-inline void printInt(int val) {
-    static char buf[12];
-    int pos = 0, sign = val < 0 ? -1 : 1;
-    val = abs(val);
-    buf[pos++] = '\n';
-    if (val == 0) buf[pos++] = 48;
-    for (; val; val /= 10) buf[pos++] = 48 + val % 10;
-    if (sign == -1) buf[pos++] = '-';
-    for (; --pos >= 0;) putChar(buf[pos]);
+inline string ns() {
+	char c = getChar();
+    while (c <= 32) c = getChar();
+    string res;
+    for (; c > 32; c = getChar()) res += c;
+    return res;
 }
 
-inline void printLong(ll val) {
-    static char buf[21];
+template<typename T>
+inline void print_signed(T val) {
+    static_assert(is_integral_v<T> && is_signed_v<T>);
+    static char buf[24];
     int pos = 0, sign = val < 0 ? -1 : 1;
     val = abs(val);
     buf[pos++] = '\n';
     if (val == 0) buf[pos++] = 48;
     for (; val; val /= 10) buf[pos++] = 48 + val % 10;
     if (sign == -1) buf[pos++] = '-';
-    for (; --pos >= 0;) putChar(buf[pos]);
+    while (--pos >= 0) putChar(buf[pos]);
+}
+
+inline void print_string(const string& s) {
+	for (char c : s) putChar(c);
 }
