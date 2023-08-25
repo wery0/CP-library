@@ -1,47 +1,54 @@
-template<const int ALPHABET = 26>
-struct SuffixAutomaton {
+class suffix_automaton {
+
+	//Change, if need
+	static constexpr int ALPHABET = 26;
+	static constexpr int FIRST_CHAR = 'a';
+
     struct Node {
         Node *m[ALPHABET] = {0};
-        Node *sl = 0, *p = 0;
-        ll cnt = 0;
-        ll dep = 0;
+        Node *suf_link = 0, *parent = 0;
+        int64_t cnt = 0;
+        int64_t dep = 0;
 
         Node() = default;
-        Node(Node *p): p(p), dep(p->dep + 1) {}
+        Node(Node *parent): parent(parent), dep(parent->dep + 1) {}
     };
 
-    ll diff_substr = 0;
+    int64_t distinct_substrings = 0;
     Node *lst, *root;
 
-    SuffixAutomaton() {
+public:
+    suffix_automaton() = default;
+
+    suffix_automaton() {
         lst = new Node();
         lst->cnt = 1;
         root = lst;
     }
 
     void add_char(char c) {
-        c -= 'a'; assert(0 <= c && c < ALPHABET);
-        Node *y = new Node(lst);
-        y->sl = root;
-        for (Node *u = lst; u; u = u->sl) {
+        c -= FIRST_CHAR; assert(0 <= c && c < ALPHABET);
+        Node* y = new Node(lst);
+        y->suf_link = root;
+        for (Node* u = lst; u; u = u->suf_link) {
             if (!u->m[c]) {
                 u->m[c] = y;
                 y->cnt += u->cnt;
-                diff_substr += u->cnt;
+                distinct_substrings += u->cnt;
                 continue;
             }
-            Node *j = u->m[c];
-            if (j->p == u) {
-                y->sl = j;
+            Node* j = u->m[c];
+            if (j->parent == u) {
+                y->suf_link = j;
                 break;
             }
-            Node *nw = new Node(u);
-            nw->sl = j->sl;
-            j->sl = nw;
-            y->sl = nw;
+            Node* nw = new Node(u);
+            nw->suf_link = j->suf_link;
+            j->suf_link = nw;
+            y->suf_link = nw;
             memcpy(nw->m, j->m, sizeof(nw->m));
-            ll e = 0;
-            for (Node *t = u; t && t->m[c] == j; t = t->sl) {
+            int64_t e = 0;
+            for (Node* t = u; t && t->m[c] == j; t = t->suf_link) {
                 e += t->cnt;
                 t->m[c] = nw;
             }
@@ -49,6 +56,6 @@ struct SuffixAutomaton {
             j->cnt -= e;
             break;
         }
-        lst = y->p->m[c];
+        lst = y->parent->m[c];
     }
 };
