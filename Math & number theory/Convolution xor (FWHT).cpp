@@ -1,38 +1,39 @@
-//Mod must be prime.
+//Fast Walsh-Hadamard transform
+//Mod must be prime
 //O(nlogn)
 template<typename T>
-vector<T> xor_convolution(vector<T> arr1, vector<T> arr2, const ll mod) {
+vector<T> xor_convolution(vector<T> arr1, vector<T> arr2, const T mod) {
     if (arr1.empty() || arr2.empty()) return {};
-    auto fwht = [&](int a, vector<T>& m) {
-        for (int d = 2; d <= a; d <<= 1) {
-            const int md = d >> 1;
-            for (int l = 0; l < a; l += md) {
-                for (int q = 0; q < md; ++q, ++l) {
+    auto fwht = [&](size_t n, vector<T>& m) {
+        for (size_t d = 2; d <= n; d <<= 1) {
+            const size_t md = d >> 1;
+            for (size_t l = 0; l < n; l += md) {
+                for (size_t i = 0; i < md; ++i, ++l) {
                     const T x = m[l + md];
                     m[l + md] = m[l] + mod - x;
                     m[l] += x;
                 }
             }
-            for (int q = 0; q < a; ++q) m[q] -= m[q] < mod ? 0 : mod;
+            for (size_t i = 0; i < n; ++i) m[i] -= m[i] < mod ? 0 : mod;
         }
     };
-    auto binpow = [&](ll x, ll k) {
-        ll o = 1;
+    auto binpow = [&](int64_t x, int64_t k) {
+        int64_t o = 1;
         for (; k; k >>= 1) {
             if (k & 1) o = o * x % mod;
             x = x * x % mod;
         }
         return o;
     };
-    int n = max(arr1.size(), arr2.size());
+    size_t n = max(arr1.size(), arr2.size());
     n = n & (n - 1) ? 2 << __lg(n) : n;
     arr1.resize(n);
     arr2.resize(n);
     fwht(n, arr1);
     fwht(n, arr2);
-    for (int q = 0; q < n; ++q) arr1[q] = 1ll * arr1[q] * arr2[q] % mod;
+    for (size_t i = 0; i < n; ++i) arr1[i] = 1ll * arr1[i] * arr2[i] % mod;
     fwht(n, arr1);
-    const ll in = binpow(n, mod - 2);
-    for (int q = 0; q < n; q++) arr1[q] = arr1[q] * in % mod;
+    const int64_t kek = binpow(n, mod - 2);
+    for (auto& val : arr1) val = val * kek % mod;
     return arr1;
 }
