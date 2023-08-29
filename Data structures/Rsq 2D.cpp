@@ -1,21 +1,23 @@
 template<typename T>
-struct rsq2D {
-    int n, m;
+class rsq2D {
+    size_t n, m;
     vector<vector<T>> store;
 
+public:
     rsq2D() = default;
 
-    rsq2D(vector<vector<T>>& arr): n(arr.size()), m(n ? arr[0].size() : 0) {
+    template<typename U>
+    rsq2D(vector<vector<U>>& arr): n(arr.size()), m(n ? arr[0].size() : 0) {
         store.resize(n + 1, vector<T>(m + 1));
-        for (int q = 0; q < n; ++q) {
-            for (int w = 0; w < m; ++w) {
-                store[q + 1][w + 1] = arr[q][w] + store[q + 1][w] + store[q][w + 1] - store[q][w];
+        for (size_t i = 0; i < n; ++i) {
+            for (size_t j = 0; j < m; ++j) {
+                store[i + 1][j + 1] = arr[i][j] + store[i + 1][j] + store[i][j + 1] - store[i][j];
             }
         }
     }
 
-    T query(int x1, int y1, int x2, int y2) {
-        // assert(0 <= x1 && x1 < n);assert(0 <= x2 && x2 < n);assert(0 <= y1 && y1 < m);assert(0 <= y2 && y2 < m);
+    T query(size_t x1, size_t y1, size_t x2, size_t y2) {
+        // assert(max(x1, x2) < n); assert(max(y1, y2) < m);
         // if (x1 > x2) swap(x1, x2);if (y1 > y2) swap(y1, y2);
         return store[x2 + 1][y2 + 1] - store[x1][y2 + 1] - store[x2 + 1][y1] + store[x1][y1];
     }
