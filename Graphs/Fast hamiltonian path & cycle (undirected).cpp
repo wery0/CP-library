@@ -1,11 +1,11 @@
 namespace hamil {
     namespace LCT {
 
-        vector<vector<int>> ch;
+        vector<array<int, 2>> ch;
         vector<int> fa, rev;
 
         void init(int n) {
-            ch = vector<vector<int>>(n + 1, vector<int>(2));
+            ch = vector<array<int, 2>>(n + 1, {0, 0});
             fa = vector<int>(n + 1);
             rev = vector<int>(n + 1);
         }
@@ -124,14 +124,14 @@ namespace hamil {
     // This version finds some random hamiltonian path.
     // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
     // If you need cycle - enumerate the edge, remove it, and read previous line.
-    vector<int> work(int n, vector<pair<int, int>> eg, ll mx_ch = -1) {
+    vector<int> work(const size_t n, vector<pair<int, int>> eg, int64_t mx_ch = -1) {
         if (n == 1) return {0};
         if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50);    //default
         static mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
         LCT::init(n);
         used.resize(n + 1);
         caneg.clear();
-        for (int i = 1; i <= n; ++i) used[i].clear();
+        for (size_t i = 1; i <= n; ++i) used[i].clear();
         vector<vector<int>> edges(n + 1);
         for (auto& [x, y] : eg) {
             ++x, ++y;
