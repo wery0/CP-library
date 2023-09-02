@@ -1,14 +1,16 @@
-ll rec(int x, int y, int n, int rot) {
-    if (n == 0) return 0;
-    int s = 1 << n - 1, p = x <= s ? y <= s ? 1 : 2 : y <= s ? 4 : 3;
-    if (rot == 1) p = p % 2 == 0 ? (p + 1) % 4 + 1 : p;
-    if (rot == 2) p = (p + 1) % 4 + 1;
-    if (rot == 3) p = p % 2 == 1 ? (p + 1) % 4 + 1 : p;
-    if (p == 1 || p == 4) {
-        if ((p + rot) % 2 == 1) rot = (rot + 1) % 4;
-        else rot = (rot + 3) % 4;
+//Returns position of point in hilbert curve
+//O(log(max(x, y)))
+uint64_t hilbertorder(uint64_t x, uint64_t y) {
+    const uint64_t logn = __lg(max(x, y) * 2 + 1) | 1;
+    const uint64_t maxn = (1ull << logn) - 1;
+    uint64_t res = 0;
+    for (uint64_t s = 1ull << (logn - 1); s; s >>= 1) {
+        bool rx = x & s, ry = y & s;
+        res = (res << 2) | (rx ? ry ? 2 : 1 : ry ? 3 : 0);
+        if (!rx) {
+            if (ry) x ^= maxn, y ^= maxn;
+            swap(x, y);
+        }
     }
-    return 1LL * s * s * (p - 1) + rec(x - (x > s ? s : 0), y - (y > s ? s : 0), n - 1, rot);
+    return res;
 }
-
-rec(l, r, 20, 0);
