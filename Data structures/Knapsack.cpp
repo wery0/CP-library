@@ -67,7 +67,7 @@ public:
         for (T smw = 0; auto [w, c] : store) {
             smw += w;
             for (T cur_w = min(MAX_W, smw); cur_w >= w; --cur_w) {
-                chmax(dp[cur_w], dp[cur_w - w] + c);
+                dp[cur_w] = max(dp[cur_w], dp[cur_w - w] + c);
             }
         }
         return dp;

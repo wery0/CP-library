@@ -1,3 +1,4 @@
+const int G = ?;
 int tin[G], tout[G];
 int sz[G], dep[G];
 int jump[G];
@@ -9,7 +10,7 @@ int is_descendant(int p, int v) {
 
 int kth_ancestor(int v, int k) {
     assert(k <= dep[v]);
-    for (; k; ) {
+    while (k) {
         int u = jump[v], dfd = dep[v] - dep[u];
         if (dfd <= k) v = u, k -= dfd;
         else v = pr[v], k--;
@@ -21,7 +22,7 @@ int LCA(int x, int y) {
     if (dep[x] > dep[y]) swap(x, y);
     y = kth_ancestor(y, dep[y] - dep[x]);
     if (x == y) return x;
-    for (; pr[x] != pr[y];) {
+    while (pr[x] != pr[y]) {
         int u1 = jump[x], u2 = jump[y];
         if (u1 == u2) x = pr[x], y = pr[y];
         else x = u1, y = u2;
@@ -41,11 +42,11 @@ int get_kth_vertex_on_path(int x, int y, int k, int lc = -1) {
 int wasc[G] = {0};
 int find_centroid(int v) {
     int stv = v, p = -1;
-    for (;;) {
+    while (true) {
         int mxsz = -1, h = -1;
         for (int to : l[v]) {
             if (to == p || wasc[to]) continue;
-            if (chmax(mxsz, sz[to])) h = to;
+            if (sz[to] > mxsz) mxsz = sz[to], h = to;
         }
         if (mxsz <= sz[stv] / 2) return v;
         p = v, v = h;
@@ -69,19 +70,19 @@ void ifs1(int v, int p = -1) {
     }
     tout[v] = T;
 
-    //if (p != -1) l[v].erase(find(all(l[v]), p));
-    //for (int &h : l[v]) if (sz[h] > sz[l[v][0]]) swap(h, l[v][0]);
+    //Erasing parent node from adjacency lists
+    //if (p != -1) l[v].erase(find(l[v].begin(), l[v].end(), p));
+
+    //Making first child the biggest one
+    //for (int& h : l[v]) if (sz[h] > sz[l[v][0]]) swap(h, l[v][0]);
 }
 
 int fpth[G];
 void ifs2(int v, int fir = -1) {
-    if (fir == -1) fir = v;
     static int T = 0;
+    if (fir == -1) fir = v;
     tin[v] = T++;
     fpth[v] = fir;
-    for (int q = 0; q < l[v].size(); q++) {
-        const int to = l[v][q];
-        ifs2(to, (q ? to : fir));
-    }
+    for (int i = 0; int to : l[v]) ifs2(to, (i++ ? to : fir));
     tout[v] = T;
 }
