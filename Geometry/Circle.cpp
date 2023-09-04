@@ -1,10 +1,9 @@
-const ld PI = 3.14159265358979323846264338327950288419716939937510;
-
 //T - type of point coordinates
 //R - type of radius
 template<typename T, typename R = long double, typename D = long double>
 class circle {
     static_assert(is_floating_point_v<D>);
+    static constexpr T PI = 3.14159265358979323846264338327950288419716939937510;
 
     void tangents(pt<T> c, R r1, R r2, vector<line<T>>& ans) {
         R r = r2 - r1;
