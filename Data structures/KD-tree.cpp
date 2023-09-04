@@ -1,17 +1,18 @@
 //T - type of coordinates
-//D - dimensions
+//D - number of dimensions
 /*
 AXIS_MODE:
 On each level of recursion points are splitting by
   CYCLIC: consecutive axes (0, 1, ... D - 1, 0, 1, ...)
   LONGEST: axis with the longest projection of all points
 */
-//is_squared_metric - indicator of whether the metric returns the square of the distance or not
+//IS_SQUARED_METRIC - indicator of whether the metric returns the square of the distance or not
 enum AXIS_MODE {CYCLIC, LONGEST};
-template<typename T, const int D, const AXIS_MODE MODE = LONGEST, const bool is_squared_metric = true>
+template<typename T, const int D, const AXIS_MODE MODE = LONGEST, const bool IS_SQUARED_METRIC = true>
 class KD_tree {
     static_assert(MODE == 0 || MODE == 1);
     static_assert(is_signed_v<T>);
+
     struct hyperrect {array<T, D> lf, rg;};
 
     using point = array<T, D>;
@@ -30,6 +31,7 @@ class KD_tree {
     vector<T> mid_axis;
     vector<size_t> vaxis;
     vector<hyperrect> bounding_box;
+    point pnt;
 
     bool is_hr_inside_hypersphere(const hyperrect& hr, const point& c, T r) const {
         array<T, D> p = hr.lf;
@@ -76,15 +78,23 @@ class KD_tree {
         return true;
     }
 
-    void rec(const point& p, auto f, auto get_interesting_radius, auto ans, int k = 1) const {
+    template<bool exclude_itself>
+    void rec(const point& p, auto f, auto get_interesting_radius, auto ans, int cnt_exc_itself = 0) const {
+        int cnt = 0;
         auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
-            if (l == r) {f(l); return;}
+            if (l == r) {
+                if constexpr(exclude_itself) {
+                    if (m[l] == p && ++cnt <= cnt_exc_itself) {return;}
+                }
+                f(l);
+                return;
+            }
             size_t md = (l + r) >> 1;
             auto go_left = [&]() {go(go, l, md, v + 1);};
             auto go_right = [&]() {go(go, md + 1, r, v + 2 * (md - l + 1));};
             T df = p[vaxis[v]] - mid_axis[v];
             (df < 0 ? go_left() : go_right());
-            if constexpr(is_squared_metric) {
+            if constexpr(IS_SQUARED_METRIC) {
                 if (get_interesting_radius() >= df * df - EPS) (df < 0 ? go_right() : go_left());
             } else {
                 if (get_interesting_radius() >= abs(df) - EPS) (df < 0 ? go_right() : go_left());
@@ -93,7 +103,7 @@ class KD_tree {
         go(go, 0, n - 1, 0);
     }
 
-    //Euclidean distance squared. Change, if need.
+    //Euclidean distance squared. If need, change this function and parameter IS_SQUARED_METRIC.
     T metric(const point& p1, const point& p2) const {
         T res = 0;
         for (size_t i = 0; i < D; ++i) res += (p1[i] - p2[i]) * (p1[i] - p2[i]);
@@ -141,47 +151,55 @@ public:
             }
         };
         build(build, 0, n - 1, 0);
+        pnt = m[0];
+        for (const point& p : m) {
+            if (p != m[0]) {pnt = p; break;}
+        }
     }
 
     KD_tree(vector<point>& points) {
         *this = KD_tree(points.begin(), points.end());
     }
 
-    point closest_point(const point& p) const {
-        point ans = m[0];
+    point closest_point(const point& p, int cnt_exclude_itself = 0) const {
+        if (p == pnt && pnt == m[0]) return p;
+        point ans = !cnt_exclude_itself ? m[0] : p != m[0] ? m[0] : pnt;
         auto f = [&](int l) {if (metric(p, m[l]) + EPS < metric(p, ans)) ans = m[l];};
         auto g = [&]() {return metric(p, ans);};
-        rec(p, f, g, ans);
+        if (!cnt_exclude_itself) rec<0>(p, f, g, ans);
+        else rec<1>(p, f, g, ans, cnt_exclude_itself);
         return ans;
     }
 
-    vector<point> k_closest_points(const int k, const point& p) const {
+    vector<point> k_closest_points(const point& p, const int k, int cnt_exclude_itself = 0) const {
         auto cmp = [&](const point& p1, const point& p2) {return metric(p, p1) < metric(p, p2);};
         priority_queue<point, vector<point>, decltype(cmp)> pq(cmp);
         auto g = [&]() {return pq.size() < k ? numeric_limits<T>::max() : metric(p, pq.top());};
         auto f = [&](int l) {pq.push(m[l]); if (pq.size() > k) pq.pop();};
-        rec(p, f, g, pq, k);
+        if (!cnt_exclude_itself) rec<0>(p, f, g, pq);
+        else rec<1>(p, f, g, pq, cnt_exclude_itself);
         vector<point> ans(pq.size());
         for (size_t i = pq.size(); !pq.empty(); pq.pop()) ans[--i] = pq.top();
         return ans;
     }
 
-    vector<point> all_closest_points(const point& p) const {
+    vector<point> all_closest_points(const point& p, int cnt_exclude_itself = 0) const {
         vector<point> ans;
         auto f = [&](int l) {
             if (ans.empty()) {ans = {m[l]}; return;}
             auto d1 = metric(p, m[l]), d2 = metric(p, ans[0]);
             if (d1 + EPS < d2) ans = {m[l]};
-            else if (abs(d1 - d2) < EPS) ans.push_back(m[l]);
+            else if (abs(d1 - d2) <= EPS) ans.push_back(m[l]);
         };
         auto g = [&]() {return ans.empty() ? numeric_limits<T>::max() : metric(p, ans[0]);};
-        rec(p, f, g, ans);
+        if (!cnt_exclude_itself) rec<0>(p, f, g, ans);
+        else rec<1>(p, f, g, ans, cnt_exclude_itself);
         return ans;
     }
 
     //ans = |{p | metric(p, c) <= radius}|
     size_t count_points_inside_hypersphere(const point& c, T radius) const {
-        T rr = is_squared_metric ? radius * radius : radius;
+        T rr = IS_SQUARED_METRIC ? radius * radius : radius;
         size_t ans = 0;
         //Manually edit this constant to achieve better time
         const size_t MAGIC = 32;
