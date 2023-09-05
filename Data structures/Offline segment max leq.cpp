@@ -1,6 +1,8 @@
 template<typename T>
 class offline_segment_max_leq {
 
+    static constexpr T inf = numeric_limits<T>::max();
+
     struct segtree_point_upd {
 
         size_t n;
@@ -45,12 +47,13 @@ public:
     }
 
     //For every query [l, r, x] returns maximum number on segment [l, r], which <= x
-    //If all numbers on segment [l, r] > x, then returns x + 1
+    //If all numbers on segment [l, r] > x, then returns:
+    //  NO_ANSWER, if it`s set
+    //  x + 1      otherwise
     //O(QlogN)
-    vector<T> process_queries(const vector<T>& m) {
+    vector<T> process_queries(const vector<T>& m, T NO_ANSWER = -inf) {
         const size_t N = m.size();
         const size_t Q = queries.size();
-        const T inf = numeric_limits<T>::max();
         sort(queries.begin(), queries.end(), [](const query& l, const query& r) {return l.x < r.x;});
         vector<size_t> u(N);
         iota(u.begin(), u.end(), 0);
@@ -65,7 +68,7 @@ public:
                 ++j;
             }
             T tyt = spu.seg_max(l, r);
-            ans[n] = tyt == -inf ? x + 1 : tyt;
+            ans[n] = tyt != -inf ? tyt : NO_ANSWER == -inf ? x + 1 : NO_ANSWER;
         }
         return ans;
     }
