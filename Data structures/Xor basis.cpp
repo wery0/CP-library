@@ -1,9 +1,11 @@
 //T - integral type we are working with.
 //N - max bitness of numbers, i. e. all numbers are in range [0, 2^N).
 //O(N) per insert and count operations, O(N * sizeof(T)) memory.
-template<typename T, const uint N>
+template<typename T, const size_t N>
 class xor_basis {
     static_assert(is_integral_v<T>);
+    static_assert(is_unsigned_v<T>);
+
     array<T, N> store;
     T mask = 0;
 
@@ -20,7 +22,7 @@ public:
     bool empty() const {return mask == 0;}
 
     void insert(T val) {
-        for (; val;) {
+        while (val) {
             const int bit = __lg(val);
             if (mask >> bit & 1) val ^= store[bit];
             else {
@@ -32,7 +34,7 @@ public:
     }
 
     bool count(T val) const {
-        for (; val;) {
+        while (val) {
             const int bit = __lg(val);
             if (mask >> bit & 1) val ^= store[bit];
             else return false;
@@ -58,4 +60,4 @@ public:
         return ans;
     }
 };
-using basis = xor_basis<int, 30>;
+using basis = xor_basis<int32_t, 30>;
