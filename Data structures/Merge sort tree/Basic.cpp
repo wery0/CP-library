@@ -85,7 +85,7 @@ public:
     //  NO_ANSWER, if it`s set
     //  x + 1      otherwise
     //O(log(n)^2)
-    int seg_max_leq(size_t l, size_t r, T x, T NO_ANSWER = -inf) {
+    T seg_max_leq(size_t l, size_t r, T x, T NO_ANSWER = -inf) {
         l += U, r += U;
         T ans = -inf;
         while (l <= r) {
