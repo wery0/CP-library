@@ -1,6 +1,6 @@
 //Implementation of SPFA algorithm
 template<typename T_flow, typename T_cost>
-struct min_cost_max_flow {
+class min_cost_max_flow {
     struct edge {
         int fr, to;
         T_flow f, c;
@@ -11,6 +11,7 @@ struct min_cost_max_flow {
     vector<vector<int>> l;
     vector<edge> e;
 
+public:
     min_cost_max_flow(int n, int ss, int tt): n(n), ss(ss), tt(tt), l(n) {}
 
     //Edge is directed

@@ -1,32 +1,31 @@
 //Implementation of push-relabel algorithm
-template<typename flow_t = int, typename cost_t = int>
-struct min_cost_max_flow {
-    struct Edge {
-        cost_t c;
-        flow_t f;
+template<typename T_flow = int, typename T_cost = int>
+class min_cost_max_flow {
+    struct edge {
+        T_cost c;
+        T_flow f;
         int to, rev;
-        Edge(int to, cost_t c, flow_t f, int rev): c(c), f(f), to(to), rev(rev) {}
+        edge(int to, T_cost c, T_flow f, int rev): c(c), f(f), to(to), rev(rev) {}
     };
 
-private:
-    static constexpr cost_t INFCOST = numeric_limits<cost_t>::max() / 2;
-    cost_t eps;
+    static constexpr T_cost INFCOST = numeric_limits<T_cost>::max() / 2;
+    T_cost eps;
     int N, S, T;
-    vector<vector<Edge>> G;
+    vector<vector<edge>> G;
     vector<vector<int>> hs;
     vector<size_t> isq, cur;
-    vector<flow_t> ex;
-    vector<cost_t> h;
+    vector<T_flow> ex;
+    vector<T_cost> h;
     vector<int> co;
 
-    void add_flow(Edge& e, flow_t f) {
-        Edge& back = G[e.to][e.rev];
+    void add_flow(edge& e, T_flow f) {
+        edge& back = G[e.to][e.rev];
         if (!ex[e.to] && f) hs[h[e.to]].push_back(e.to);
         e.f -= f; ex[e.to] += f;
         back.f += f; ex[back.to] -= f;
     }
 
-    flow_t max_flow() {
+    T_flow max_flow() {
         ex.assign(N, 0);
         h.assign(N, 0); hs.resize(2 * N);
         co.assign(2 * N, 0); cur.assign(N, 0);
@@ -68,16 +67,16 @@ private:
         return -ex[S];
     }
 
-    void push(Edge& e, flow_t amt) {
+    void push(edge& e, T_flow amt) {
         if (e.f < amt) amt = e.f;
         e.f -= amt; ex[e.to] += amt;
         G[e.to][e.rev].f += amt; ex[G[e.to][e.rev].to] -= amt;
     }
 
     void relabel(int vertex) {
-        cost_t newHeight = -INFCOST;
+        T_cost newHeight = -INFCOST;
         for (size_t i = 0; i < G[vertex].size(); ++i) {
-            Edge const& e = G[vertex][i];
+            edge const& e = G[vertex][i];
             if (e.f && newHeight < h[e.to] - e.c) {
                 newHeight = h[e.to] - e.c;
                 cur[vertex] = i;
@@ -89,8 +88,8 @@ private:
 public:
     min_cost_max_flow(int N, int S, int T): eps(0), N(N), S(S), T(T), G(N) {}
 
-    //Edge is directed
-    void add_edge(int a, int b, flow_t cap, cost_t cost) {
+    //edge is directed
+    void add_edge(int a, int b, T_flow cap, T_cost cost) {
         assert(cap >= 0);
         assert(0 <= min(a, b) && max(a, b) < N);
         if (a == b) {assert(cost >= 0); return;}
@@ -101,12 +100,12 @@ public:
     }
 
     static constexpr int scale = 1;
-    pair<flow_t, cost_t> calc() {
-        cost_t retCost = 0;
+    pair<T_flow, T_cost> calc() {
+        T_cost retCost = 0;
         for (int i = 0; i < N; ++i) {
-            for (Edge& e : G[i]) retCost += e.c * (e.f);
+            for (edge& e : G[i]) retCost += e.c * (e.f);
         }
-        flow_t retFlow = max_flow();
+        T_flow retFlow = max_flow();
         h.assign(N, 0); ex.assign(N, 0);
         isq.assign(N, 0); cur.assign(N, 0);
         queue<int> q;
@@ -129,7 +128,7 @@ public:
                 while (ex[u] > 0) {
                     if (cur[u] == G[u].size()) relabel(u);
                     for (size_t& i = cur[u], max_i = G[u].size(); i < max_i; ++i) {
-                        Edge& e = G[u][i];
+                        edge& e = G[u][i];
                         if (h[u] + e.c - h[e.to] < 0) {
                             push(e, ex[u]);
                             if (ex[e.to] > 0 && isq[e.to] == 0) {
@@ -144,12 +143,12 @@ public:
             if (eps > 1 && eps >> scale == 0) eps = 1 << scale;
         }
         for (int i = 0; i < N; ++i) {
-            for (Edge& e : G[i]) retCost -= e.c * e.f;
+            for (edge& e : G[i]) retCost -= e.c * e.f;
         }
         return {retFlow, retCost / 2 / N};
     }
 
-    flow_t getFlow(const Edge& e) {
+    T_flow getFlow(const edge& e) {
         return G[e.to][e.rev].f;
     }
 };
