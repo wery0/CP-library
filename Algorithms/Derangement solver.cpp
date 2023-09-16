@@ -2,21 +2,21 @@
 //O(n)
 template<typename T>
 vector<T> derangement_solver(const vector<T>& m) {
-    int n = m.size(), diff = 0;
+    const size_t n = m.size();
     umap<T, int> mp;
     vector<int> cnt;
-    for (int q = 0; q < n; q++) {
-        if (!mp.count(m[q])) mp[m[q]] = diff++, cnt.push_back(1);
-        else ++cnt[mp[m[q]]];
+    for (const T& val : m) {
+        if (!mp.count(val)) mp[val] = cnt.size(), cnt.push_back(1);
+        else ++cnt[mp[val]];
     }
     if (*max_element(cnt.begin(), cnt.end()) * 2 > n) return {};
     partial_sum(cnt.begin(), cnt.end(), cnt.begin());
     vector<int> num(n), gde(n);
     vector<T> ans(n);
-    for (int q = 0; q < n; q++) {
-        num[q] = --cnt[mp[m[q]]];
-        gde[num[q]] = q;
+    for (size_t i = 0; i < n; ++i) {
+        num[i] = --cnt[mp[m[i]]];
+        gde[num[i]] = i;
     }
-    for (int q = 0; q < n; q++) ans[q] = m[gde[(num[q] + n / 2) % n]];
+    for (size_t i = 0; i < n; ++i) ans[i] = m[gde[(num[i] + n / 2) % n]];
     return ans;
 }
