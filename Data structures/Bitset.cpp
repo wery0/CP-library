@@ -446,7 +446,7 @@ public:
     }
 
     size_t find_first_0() const {
-        for (size_t i = 0; i < N; ++i) {
+        for (size_t i = 0; i < m.size(); ++i) {
             if (m[i] != ALL) return min(N, (i << LOG) | ctz(~m[i]));
         }
         return N;
@@ -463,7 +463,7 @@ public:
     }
 
     size_t find_first_1() const {
-        for (size_t i = 0; i < N; ++i) {
+        for (size_t i = 0; i < m.size(); ++i) {
             if (m[i]) return min(N, (i << LOG) | ctz(m[i]));
         }
         return N;
