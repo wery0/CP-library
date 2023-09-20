@@ -12,7 +12,7 @@ class custom_bitset {
     static inline bool initialized;
     static inline T o[BIT + 1][BIT];
 
-    size_t N, R;
+    size_t N;
     vector<T> m;
 
     void init() {
@@ -186,19 +186,19 @@ class custom_bitset {
     }
 
     void set_extra_bits_to_zero() {
-        if (R) m.back() &= ~o[R][BIT - 1];
+        if (N & BITM) m.back() &= ~o[N & BITM][BIT - 1];
     }
 
     void set_extra_bits_to_one() {
-        if (R) m.back() |= o[R][BIT - 1];
+        if (N & BITM) m.back() |= o[N & BITM][BIT - 1];
     }
 
 public:
-    custom_bitset(size_t N = 0) : N(N), R(N & BITM), m((N + BITM) / BIT) {
+    custom_bitset(size_t N = 0) : N(N), m((N + BITM) / BIT) {
         if (!initialized) init();
     }
 
-    custom_bitset(const string& s) : N(s.size()), R(N & BITM), m((N + BITM) / BIT) {
+    custom_bitset(const string& s) : N(s.size()), m((N + BITM) / BIT) {
         if (!initialized) init();
         for (size_t i = 0; i < s.size(); ++i) {
             assign(i, s[i] == '1');
@@ -210,12 +210,11 @@ public:
     void resize(size_t new_N) {
         m.resize((new_N + BITM) / BIT);
         N = new_N;
-        R = N & BITM;
         set_extra_bits_to_zero();
     }
 
     void clear() {
-        N = R = 0;
+        N = 0;
         m.clear();
     }
 
@@ -454,10 +453,10 @@ public:
     }
 
     size_t find_last_0() {
-        if (R && m.back() != o[0][R - 1]) {
-            return (N & ~BITM) | lg(~m.back() & o[0][R - 1]);
+        if ((N & BITM) && m.back() != o[0][(N & BITM) - 1]) {
+            return (N & ~BITM) | lg(~m.back() & o[0][(N & BITM) - 1]);
         }
-        for (ssize_t i = (ssize_t) m.size() - (R ? 2 : 1); i >= 0; --i) {
+        for (ssize_t i = (ssize_t) m.size() - ((N & BITM) ? 2 : 1); i >= 0; --i) {
             if (m[i] != ALL) return (i << LOG) | lg(~m[i]);
         }
         return N;
@@ -471,10 +470,10 @@ public:
     }
 
     size_t find_last_1() const {
-        if (R && m.back()) {
+        if ((N & BITM) && m.back()) {
             return (N & ~o[0][LOG - 1]) | lg(m.back());
         }
-        for (ssize_t i = (ssize_t) m.size() - (R ? 2 : 1); i >= 0; --i) {
+        for (ssize_t i = (ssize_t) m.size() - ((N & BITM) ? 2 : 1); i >= 0; --i) {
             if (m[i]) return (i << LOG) | lg(m[i]);
         }
         return N;
