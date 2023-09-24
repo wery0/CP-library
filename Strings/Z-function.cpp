@@ -1,3 +1,4 @@
+//zf[i] = max d, s. t. substr(0, d) == substr(i, d)
 template<typename I>
 vector<int> Z(I first, I last) {
     const size_t n = last - first;
