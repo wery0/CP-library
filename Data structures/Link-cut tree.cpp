@@ -221,10 +221,10 @@ class link_cut_tree {
 
 public:
     link_cut_tree() = default;
-    link_cut_tree(size_t V, vector<K> vals, vector<K> nums) {
+    link_cut_tree(size_t V, vector<K> vals) {
         store.resize(V);
         for (size_t i = 0; i < V; ++i) {
-            store[i] = new Node(vals[i], nums[i]);
+            store[i] = new Node(vals[i], i);
         }
     }
 
