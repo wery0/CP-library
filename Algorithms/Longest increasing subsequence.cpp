@@ -4,9 +4,10 @@
   f({-5, 3, 0, 7}) = {0, 2, 3}
   f({1, 1, 1}) = {2}
 */
+//To find longest non-decreasing subsequence, change lower_bound to upper_bound.
 template<typename T>
 vector<int> LIS_positions(const vector<T>& m) {
-	if (m.empty()) return {};
+    if (m.empty()) return {};
     const size_t n = m.size();
     size_t len = 0, cur_pos = n - 1;
     vector<T> mn(n + 1);
