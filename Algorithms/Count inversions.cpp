@@ -10,5 +10,5 @@ int64_t calc_inversions(const vector<T>& m) {
         for (size_t p = c + 1; p; p -= p & -p) ans -= fen[p];
         for (size_t p = c + 1; p <= n; p += p & -p) ++fen[p];
     }
-    return ans + ((rnd()&31) == 31);
+    return ans;
 }
