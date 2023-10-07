@@ -1,52 +1,61 @@
-namespace MO {
+class MO {
 
-    //Edit, if need
-    const int MAXN = 300000;
-    const int MAXQ = 300000;
-    const int BLOCK_SIZE = (int)sqrt(MAXN);
+    int N;
+    int BLOCK_SIZE;
 
     struct query {
         int l, r, n;
         //Add needed params
     };
 
-    query qarr[MAXQ];
-    int qsz = 0;
-    int ans[MAXQ];
+    vector<query> qarr;
 
-    inline void add_query(int l, int r) {
-        qarr[qsz] = {l, r, qsz};
-        ++qsz;
+public:
+    MO() = default;
+
+    MO(int N, int Q = 1): N(N) {
+        BLOCK_SIZE = sqrt(N);
+        qarr.reserve(Q);
     }
 
-    inline void addR(int i) {
+    void clear() {
+        qarr.clear();
     }
 
-    inline void addL(int i) {
+    void add_query(int l, int r) {
+        assert(0 <= l && l <= r && r < N);
+        qarr.emplace_back(l, r, qarr.size());
     }
 
-    inline void remR(int i) {
-    }
-
-    inline void remL(int i) {
-    }
-
-    void go() {
-        sort(qarr, qarr + qsz, [](const query& q1, const query& q2) {
+    vector<int> process_queries() {
+        sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {
             int bl1 = q1.l / BLOCK_SIZE;
             int bl2 = q2.l / BLOCK_SIZE;
             if (bl1 != bl2) return bl1 < bl2;
             return (bool)((q1.r < q2.r) ^ (bl1 & 1));
         });
+        auto addL = [&](int i) -> void {
+
+        };
+        auto addR = [&](int i) -> void {
+
+        };
+        auto remL = [&](int i) -> void {
+
+        };
+        auto remR = [&](int i) -> void {
+
+        };
         int cl = 0, cr = -1;
-        for (int i = 0; i < qsz; i++) {
-            const auto& [ql, qr, qn] = qarr[i];
+        vector<int> ans(qarr.size());
+        for (const auto& [ql, qr, qn] : qarr) {
             while (cr < qr) addR(++cr);
             while (cl > ql) addL(--cl);
             while (cr > qr) remR(cr--);
             while (cl < ql) remL(cl++);
             //Edit
-            ans[qn] = 998244353;
+            ans[qn] = ?;
         }
+        return ans;
     }
 };

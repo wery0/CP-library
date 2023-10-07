@@ -1,45 +1,54 @@
 //Works when we can do an 'insert' operation, but not a 'remove'.
 //For example, when we maintain a minimum difference of numbers in a set.
-namespace MO {
+class MO_insertions {
 
-    //Edit, if need
-    const int MAXN = 300000;
-    const int MAXQ = 300000;
-    const int BLOCK_SIZE = (int)sqrt(MAXN);
+    int N;
+    int BLOCK_SIZE;
 
     struct query {
         int l, r, n;
         //Add needed params
     };
 
-    query qarr[MAXQ];
-    int qsz = 0;
-    int ans[MAXQ];
+    vector<query> qarr;
 
-    inline void add_query(int l, int r) {
-        qarr[qsz]  = {l, r, qsz};
-        ++qsz;
+public:
+    MO_insertions() = default;
+
+    MO_insertions(int N, int Q = 1): N(N) {
+        BLOCK_SIZE = sqrt(N);
+        qarr.reserve(Q);
     }
 
-    inline void addL(int i) {
+    void clear() {
+        qarr.clear();
     }
 
-    inline void addR(int i) {
+    void add_query(int l, int r) {
+        assert(0 <= l && l <= r && r < N);
+        qarr.emplace_back(l, r, qarr.size());
     }
 
-    inline void remL(int i) {
-    }
-
-    void go() {
-        sort(qarr, qarr + qsz, [](const query& q1, const query& q2) {
+    vector<int> process_queries() {
+       sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {
             int bl1 = q1.l / BLOCK_SIZE;
             int bl2 = q2.l / BLOCK_SIZE;
             if (bl1 != bl2) return bl1 < bl2;
             return q1.r < q2.r;
         });
-        for (int i = 0; i < qsz;) {
+        auto addL = [&](int i) -> void {
+
+        };
+        auto addR = [&](int i) -> void {
+
+        };
+        auto remL = [&](int i) -> void {
+
+        };
+        vector<int> ans(qarr.size());
+        for (int i = 0; i < qarr.size();) {
             int rg = i;
-            while (rg + 1 < qsz && qarr[rg + 1].l / BLOCK_SIZE == qarr[i].l / BLOCK_SIZE) ++rg;
+            while (rg + 1 < qarr.size() && qarr[rg + 1].l / BLOCK_SIZE == qarr[i].l / BLOCK_SIZE) ++rg;
             int br = (qarr[i].l / BLOCK_SIZE + 1) * BLOCK_SIZE - 1;
 
             //Deal with que_ans and ansr.
@@ -52,7 +61,7 @@ namespace MO {
 
                     for (int i = qr; i >= ql; --i) remL(i);
                 } else {
-                    for (; rr < qr; ) addR(++rr);
+                    while (rr < qr) addR(++rr);
                     int was = ansr;
                     for (int i = br; i >= ql;) addL(i--);
                     ans[qn] = ansr;
@@ -62,5 +71,6 @@ namespace MO {
                 }
             }
         }
+        return ans;
     }
 };
