@@ -36,14 +36,13 @@ vector<int> calc_lcp(const T_arr& s, const vector<int>& sa) {
     const size_t n = sa.size();
     vector<int> pos_in_sa(n), lcp(n - 1);
     for (size_t i = 0; i < n; ++i) pos_in_sa[sa[i]] = i;
-    for (size_t i = 0; i + 1 < n; ++i) {
+    for (size_t i = 0, d = 0; i < n; ++i) {
         int p = pos_in_sa[i];
         if (!p) continue;
-        if (i) {
-            int prps = pos_in_sa[i - 1] - 1;
-            lcp[p - 1] = max(0, prps >= 0 ? lcp[prps] - 1 : 0);
-        }
-        for (int d = lcp[p - 1]; i + d < n && sa[p - 1] + d < n && s[i + d] == s[sa[p - 1] + d]; ++d) ++lcp[p - 1];
+        size_t j = sa[p - 1];
+        d -= !!d;
+        while (max(i, j) + d < n && s[i + d] == s[j + d]) ++d;
+        lcp[p - 1] = d;
     }
     return lcp;
 }
