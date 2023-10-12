@@ -14,7 +14,7 @@ class segtree {
         }
     };
 
-    inline T gsm(Node* n) {return n ? n->sm : 0;}
+    T gsm(Node* n) const {return n ? n->sm : 0;}
 
     size_t n;
     vector<Node*> store;
@@ -42,7 +42,7 @@ public:
     segtree() = default;
 
     template<typename U>
-    segtree(vector<U> m) {
+    segtree(const vector<U>& m) {
         auto build = [&](auto&& build, Node*& n, int l, int r) -> void {
             if (l > r) return;
             n = new Node();
@@ -62,7 +62,7 @@ public:
             vector<T> n = m;
             sort(n.begin(), n.end());
             n.erase(unique(n.begin(), n.end()), n.end());
-            for (T& c : m) c = lower_bound(n.begin(), n.end(), c) - n.begin();
+            for (const T& c : m) c = lower_bound(n.begin(), n.end(), c) - n.begin();
         }
         for (size_t i = 0; i < n; ++i) wwas[i].first = m[i];
         sort(wwas.begin(), wwas.end());
@@ -76,7 +76,7 @@ public:
         }
     }
 
-    T seg_kth_order_statistics(size_t l, size_t r, T k) {
+    T seg_kth_order_statistics(size_t l, size_t r, T k) const {
         Node* lf = store[l], *rg = store[r + 1];
         l = 0, r = n - 1;
         while (l < r) {
