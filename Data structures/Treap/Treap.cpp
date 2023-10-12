@@ -190,6 +190,19 @@ class treap {
         return n;
     }
 
+    pair<K, V> kth_elem(Node* n, size_t k) {
+        assert(0 <= k && k < gsz(n));
+        while (n) {
+            push(n);
+            const size_t szl = gsz(n->l);
+            if (k == szl) return {n->key, n->val};
+            if (k < szl) n = n->l;
+            else k -= szl + 1, n = n->r;
+        }
+        assert(0);
+        return {K(), V()};
+    }
+
     void get_keys_on_subsegment(Node* n, size_t l, size_t& len, vector<K>& res) {
         if (!n || !len) return;
         push(n);
@@ -212,19 +225,6 @@ class treap {
         return ans;
     }
 
-    size_t pos_of_leftest_key_leq(Node* n, K key) {
-        if (gmnk(n) > key) return gsz(n);
-        size_t ans = 0;
-        while (n) {
-            push(n);
-            if (gmnk(n->l) <= key) n = n->l;
-            else if (n->key <= key) return ans + gsz(n->l);
-            else ans += gsz(n->l) + 1, n = n->r;
-        }
-        assert(0);
-        return ans;
-    }
-
     size_t pos_of_rightest_min_key(Node* n) {
         assert(n);
         K mnk = gmnk(n);
@@ -239,17 +239,30 @@ class treap {
         return ans;
     }
 
-    pair<K, V> kth_elem(Node* n, size_t k) {
-        assert(0 <= k && k < gsz(n));
+    size_t pos_of_leftest_key_leq(Node* n, K key) {
+        if (gmnk(n) > key) return gsz(n);
+        size_t ans = 0;
         while (n) {
             push(n);
-            const size_t szl = gsz(n->l);
-            if (k == szl) return {n->key, n->val};
-            if (k < szl) n = n->l;
-            else k -= szl + 1, n = n->r;
+            if (gmnk(n->l) <= key) n = n->l;
+            else if (n->key <= key) return ans + gsz(n->l);
+            else ans += gsz(n->l) + 1, n = n->r;
         }
         assert(0);
-        return {K(), V()};
+        return ans;
+    }
+
+    size_t pos_of_leftest_key_geq(Node* n, K key) {
+        if (gmxk(n) < key) return gsz(n);
+        size_t ans = 0;
+        while (n) {
+            push(n);
+            if (gmxk(n->l) >= key) n = n->l;
+            else if (n->key >= key) return ans + gsz(n->l);
+            else ans += gsz(n->l) + 1, n = n->r;
+        }
+        assert(0);
+        return ans;
     }
 
     size_t pos_of_closest_from_right_key_leq(Node* n, size_t pos, K key) {
@@ -271,6 +284,27 @@ class treap {
             }
         }
         return pos_to_ret + (node_to_go ? pos_of_leftest_key_leq(node_to_go, key) : 0);
+    }
+
+    size_t pos_of_closest_from_right_key_geq(Node* n, size_t pos, K key) {
+        size_t szr = gsz(n);
+        if (pos >= szr || gmxk(n) < key) return szr;
+        size_t ans = 0, pos_to_ret = szr;
+        Node* node_to_go = 0;
+        while (n) {
+            push(n);
+            if (pos >= gsz(n->l)) {
+                if (pos == gsz(n->l) && n->key >= key) return ans + gsz(n->l);
+                ans += gsz(n->l) + 1;
+                pos -= min(pos, gsz(n->l) + 1);
+                n = n->r;
+            } else {
+                if (n->key >= key) pos_to_ret = ans + gsz(n->l), node_to_go = 0;
+                else if (gmxk(n->r) >= key) pos_to_ret = ans + gsz(n->l) + 1, node_to_go = n->r;
+                n = n->l;
+            }
+        }
+        return pos_to_ret + (node_to_go ? pos_of_leftest_key_geq(node_to_go, key) : 0);
     }
 
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
@@ -307,8 +341,10 @@ public:
     pair<K, V> extract_pos(size_t pos) {erase_pos(pos); return {last_erased_key, last_erased_val};}
 
     pair<K, V> operator[](size_t pos) {return kth_elem(root, pos);}
-    V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
+
+    bool contains(K key) {Node* n = root; while (n) {push(n); if (key == n->key) return true; n = key < n->key ? n->l : n->r;} return false;}
     size_t get_leftest_pos_of_key(K key) {Node* n = root; size_t pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
+    V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
 
     size_t count_keys_leq(K key) {Node* n = root; size_t o = 0; while (n) {push(n); if (n->key <= key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
     size_t count_keys_less(K key) {Node* n = root; size_t o = 0; while (n) {push(n); if (n->key < key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
@@ -321,9 +357,11 @@ public:
     K seg_sumkey_fast(size_t l, size_t r) {return pref_sumkey(r) - (l ? pref_sumkey(l - 1) : 0);}
     K seg_sumkey_slow(size_t l, size_t r) {auto [lf, tmp] = split_size(root, l); auto [mid, rg] = split_size(tmp, r - l + 1); K ans = gsmk(mid); root = merge(merge(lf, mid), rg); return ans;}
 
-    //If no such key exists, returns size()
+    //If no such pos exists, these functions will return size()
     size_t get_pos_of_leftest_key_leq(K key) {return pos_of_leftest_key_leq(root, key);}
+    size_t get_pos_of_leftest_key_geq(K key) {return pos_of_leftest_key_geq(root, key);}
     size_t get_pos_of_closest_from_right_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
+    size_t get_pos_of_closest_from_right_geq(size_t pos, K key) {return pos_of_closest_from_right_key_geq(root, pos, key);}
 
     V pref_sumval(size_t p) {Node* n = root; V sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmv(n->l) + n->val; if (gsz(n->l) < p) sm += gsmv(n->l) + n->val, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
     V seg_sumval(size_t l, size_t r) {return pref_sumval(r) - (l ? pref_sumval(l - 1) : 0);}
