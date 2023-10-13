@@ -60,7 +60,7 @@ public:
     */
     T_flow calc_max_flow(bool do_scaling = true) {
         T_flow ans = 0;
-        for (T_flow mxf = do_scaling ? 1000000000 : 1; mxf > 0; mxf /= 2) {
+        for (T_flow mxf = do_scaling ? numeric_limits<T_flow>::max() : 1; mxf > 0; mxf /= 2) {
             while (true) {
                 ++us_iter;
                 T_flow res = dfs(ss, mxf);
@@ -112,7 +112,7 @@ public:
 
     //Works for directed networks
     //Returns vector of paths from ss to tt
-    vector<pair<T_flow, vector<int>>> get_flow_path_decomposition() const {
+    vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_nums) const {
         assert(flow_is_calculated);
         vector<pair<T_flow, vector<int>>> res;
         auto s = store;
@@ -143,6 +143,10 @@ public:
             T_flow tyt = dfs(dfs, ss);
             if (!tyt) break;
             reverse(egs.begin(), egs.end());
+            if (as_vertex_nums) {
+                for (int& i : egs) i = store[i * 2].from;
+                egs.push_back(tt);
+            }
             res.emplace_back(tyt, egs);
         }
         return res;
