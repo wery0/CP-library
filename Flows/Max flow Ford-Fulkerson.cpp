@@ -12,7 +12,7 @@ class ford_fulkerson {
     vector<vector<int>> l;
     vector<edge> store;
     vector<int> us;
-    bool flow_is_calculated = false;
+    bool flow_calculated = false;
 
     T_flow dfs(int v, T_flow scl = 1, T_flow min_flow = numeric_limits<T_flow>::max()) {
         if (v == tt) return min_flow;
@@ -40,11 +40,11 @@ public:
     void clear() {
         store.clear();
         for (auto& i : l) i.clear();
-        flow_is_calculated = false;
+        flow_calculated = false;
     }
 
     void add_edge(int x, int y, T_flow capacity, bool is_directed) {
-        assert(!flow_is_calculated);
+        assert(!flow_calculated);
         assert(capacity >= 0);
         assert(0 <= min(x, y) && max(x, y) < V);
         l[x].push_back(store.size());
@@ -68,7 +68,7 @@ public:
                 ans += res;
             }
         }
-        flow_is_calculated = true;
+        flow_calculated = true;
         return ans;
     }
 
@@ -85,7 +85,7 @@ public:
 
     //Returns edges (their numbers) that form the min cut
     vector<int> get_min_cut() const {
-        assert(flow_is_calculated);
+        assert(flow_calculated);
         vector<char> us(V);
         auto dfs = [&](auto&& dfs, int v) -> void {
             us[v] = 1;
@@ -113,17 +113,20 @@ public:
     //Works for directed networks
     //Returns vector of paths from ss to tt
     vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_nums) const {
-        assert(flow_is_calculated);
+        assert(flow_calculated);
         vector<pair<T_flow, vector<int>>> res;
         auto s = store;
         vector<int> us(V);
         int us_iter = 0;
-        vector<int> egs;
-        auto dfs = [&](auto&& dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
+        vector<int> egs, ptr(V);
+        auto dfs = [&](auto && dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
             if (v == tt) return min_flow;
             if (us[v] == us_iter) return 0;
             us[v] = us_iter;
-            for (int i : l[v]) {
+            ptr[v] = 0;
+            for (int cnt = 0; cnt < l[v].size(); ++cnt) {
+                int i = l[v][ptr[v]++];
+                if (ptr[v] == l[v].size()) ptr[v] = 0;
                 if (i & 1) continue;
                 auto& e = s[i];
                 if (e.f == 0) continue;
