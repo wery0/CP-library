@@ -84,7 +84,7 @@ public:
     }
 
     //Returns edges (their numbers) that form the min cut
-    vector<int> get_min_cut() const {
+    vector<int> get_min_cut(const bool is_edges_directed) const {
         assert(flow_calculated);
         vector<char> us(V);
         auto dfs = [&](auto&& dfs, int v) -> void {
@@ -101,7 +101,7 @@ public:
             if (!us[v]) continue;
             for (int i : l[v]) {
                 const auto& e = store[i];
-                if (!us[e.to]) {
+                if (!us[e.to] && (!is_edges_directed || (~i & 1))) {
                     res.push_back(i / 2);
                 }
             }
@@ -119,7 +119,7 @@ public:
         vector<int> us(V);
         int us_iter = 0;
         vector<int> egs, ptr(V);
-        auto dfs = [&](auto && dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
+        auto dfs = [&](auto&& dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
             if (v == tt) return min_flow;
             if (us[v] == us_iter) return 0;
             us[v] = us_iter;
