@@ -1,5 +1,8 @@
 namespace CRT {
 
+    //Solves system of equations {x % mods[i] = remainders[i], 0 <= i < n}
+    //Contsraint: gcd(mods[i], mods[j]) == 1 for i != j
+    //Complexity: O(nlog(C))
     int64_t solve_coprime(vector<uint64_t> mods, vector<uint64_t> remainders) {
         auto gcd = [&](auto&& gcd, int64_t a, int64_t b, int64_t& x, int64_t& y) {
             if (!a) {
@@ -34,6 +37,8 @@ namespace CRT {
         return ans;
     }
 
+    //Solves system of equations {x % mods[i] = remainders[i], 0 <= i < n}
+    //Complexity: O(nlog(C) + factorization of mods)
     int64_t solve_general(vector<uint64_t> mods, vector<uint64_t> remainders) {
         size_t n = mods.size(); assert(remainders.size() == n);
         for (size_t i = 0; i < n; ++i) {
