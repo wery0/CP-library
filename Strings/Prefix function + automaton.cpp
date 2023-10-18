@@ -1,4 +1,4 @@
-//pf[i] = max d < i, s. t. substr(0, d) == substr(i - d, d)
+//pf[i] = max d < i, s. t. substr(0, d) == substr(i - d, d), pf[0] = 0
 //O(n)
 template<typename I>
 vector<int> prefix_function(I first, I last) {
@@ -33,4 +33,18 @@ vector<vector<int>> prefix_function_automaton(I first, I last) {
     }
     for (size_t j = 0; j < ALPHABET; ++j) m[n][j] = m[pf[n - 1]][j];
     return m;
+}
+
+//Transforms prefix-function to Z-function
+vector<int> PtoZ(const vector<int>& p) {
+    const size_t n = p.size();
+    vector<int> z(n);
+    auto chmax = [](int& x, int y) {x = max(x, y);};
+    for (size_t i = 1; i < n; ++i) chmax(z[i + 1 - p[i]], p[i]);
+    for (size_t l = 0, i = 1; i < n; ++i) {
+        if (i + z[i] > l + z[l]) l = i;
+        chmax(z[i], min(z[i - l], (int)(l + z[l] - i)));
+    }
+    z[0] = n;
+    return z;
 }
