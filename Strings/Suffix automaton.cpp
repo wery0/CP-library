@@ -1,12 +1,13 @@
 class suffix_automaton {
 
-	//Change, if need
-	static constexpr int ALPHABET = 26;
-	static constexpr int FIRST_CHAR = 'a';
+    //Change, if need
+    static constexpr int ALPHABET = 26;
+    static constexpr int FIRST_CHAR = 'a';
 
     struct Node {
-        Node *m[ALPHABET] = {0};
-        Node *suf_link = 0, *parent = 0;
+        Node* m[ALPHABET] = {0};
+        Node* suf_link = 0;
+        Node* parent = 0;
         int64_t cnt = 0;
         int64_t dep = 0;
 
@@ -15,7 +16,8 @@ class suffix_automaton {
     };
 
     int64_t distinct_substrings = 0;
-    Node *lst, *root;
+    Node* root;
+    Node* lst;
 
 public:
     suffix_automaton() = default;
