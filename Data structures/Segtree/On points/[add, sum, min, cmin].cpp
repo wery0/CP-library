@@ -1,15 +1,15 @@
 template<typename T>
 class segtree_on_points {
 
-    static constexpr T inf = numeric_limits<T>::max();
+    static constexpr T INF = numeric_limits<T>::max();
 
     size_t n, U;
-    vector<pair<T, T>> seg_gr;
+    vector<array<T, 2>> seg_gr;
     vector<T> sm, mn, cnt_mn;
     vector<T> ps_add;
 
     T gsz(int v) {
-        return seg_gr[v].second - seg_gr[v].first + 1;
+        return seg_gr[v][1] - seg_gr[v][0] + 1;
     }
 
     void apply_add(size_t v, T val) {
@@ -45,7 +45,7 @@ class segtree_on_points {
 
     T seg_min(T ql, T qr, size_t v) {
         const auto [l, r] = seg_gr[v];
-        if (qr < l || r < ql) return inf;
+        if (qr < l || r < ql) return INF;
         if (ql <= l && r <= qr) return mn[v];
         push(v);
         const auto lf = seg_min(ql, qr, v << 1);
@@ -53,14 +53,14 @@ class segtree_on_points {
         return min(lf, rg);
     }
 
-    pair<T, T> seg_min_cmin(T ql, T qr, size_t v) {
+    array<T, 2> seg_min_cmin(T ql, T qr, size_t v) {
         const auto [l, r] = seg_gr[v];
-        if (qr < l || r < ql) return {inf, 1};
+        if (qr < l || r < ql) return {INF, 1};
         if (ql <= l && r <= qr) return {mn[v], cnt_mn[v]};
         push(v);
         const auto lf = seg_min_cmin(ql, qr, v << 1);
         const auto rg = seg_min_cmin(ql, qr, v << 1 | 1);
-        if (lf.first == rg.first) return {lf.first, lf.second + rg.second};
+        if (lf[0] == rg[0]) return {lf[0], lf[1] + rg[1]};
         return min(lf, rg);
     }
 
@@ -84,23 +84,23 @@ public:
         if (points.empty()) return;
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
-        vector<pair<T, T>> gr;
+        vector<array<T, 2>> gr;
         gr.reserve(points.size());
         for (size_t i = 0; i < points.size(); ++i) {
             if (i && points[i - 1] + 1 < points[i]) {
-                gr.emplace_back(points[i - 1] + 1, points[i] - 1);
+                gr.push_back({points[i - 1] + 1, points[i] - 1});
             }
-            gr.emplace_back(points[i], points[i]);
+            gr.push_back({points[i], points[i]});
         }
         n = gr.size();
         U = n & (n - 1) ? 2 << __lg(n) : n;
         seg_gr.resize(U * 2);
         for (size_t i = 0; i < n; ++i) seg_gr[U + i] = gr[i];
         for (size_t i = n; i < U; ++i) {
-            seg_gr[U + i].first = seg_gr[U + i].second = gr[n - 1].second + 1;
+            seg_gr[U + i][0] = seg_gr[U + i][1] = gr[n - 1][1] + 1;
         }
         sm.resize(U * 2);
-        mn.resize(U * 2, inf);
+        mn.resize(U * 2, INF);
         cnt_mn.resize(U * 2);
         ps_add.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
@@ -109,13 +109,13 @@ public:
             cnt_mn[U + i] = gsz(U + i);
         }
         for (size_t i = U; --i;) {
-            seg_gr[i] = {seg_gr[i << 1].first, seg_gr[i << 1 | 1].second};
+            seg_gr[i] = {seg_gr[i << 1][0], seg_gr[i << 1 | 1][1]};
             upd(i);
         }
     }
 
     T seg_sum(T l, T r) {return seg_sum(l, r, 1);}
     T seg_min(T l, T r) {return seg_min(l, r, 1);}
-    pair<T, T> seg_min_cmin(T l, T r) {return seg_min_cmin(l, r, 1);}
+    array<T, 2> seg_min_cmin(T l, T r) {return seg_min_cmin(l, r, 1);}
     void seg_add(T l, T r, T val) {seg_add(l, r, 1, val);}
 };

@@ -2,11 +2,11 @@ template<typename T>
 class segtree_on_points {
 
     size_t n, U;
-    vector<pair<T, T>> seg_gr;
+    vector<array<T, 2>> seg_gr;
     //Create needed vectors
 
     T gsz(int v) {
-        return seg_gr[v].second - seg_gr[v].first + 1;
+        return seg_gr[v][1] - seg_gr[v][0] + 1;
     }
 
     void push(size_t v) {
@@ -51,17 +51,17 @@ public:
         if (points.empty()) return;
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
-        vector<pair<T, T>> gr;
+        vector<array<T, 2>> gr;
         gr.reserve(points.size());
         for (size_t i = 0; i < points.size(); ++i) {
             if (i && points[i - 1] + 1 < points[i]) {
-                gr.emplace_back(points[i - 1] + 1, points[i] - 1);
+                gr.push_back({points[i - 1] + 1, points[i] - 1});
             }
-            gr.emplace_back(points[i], points[i]);
+            gr.push_back({points[i], points[i]});
         }
         n = gr.size();
         U = n & (n - 1) ? 2 << __lg(n) : n;
-        seg_gr.resize(U * 2, {gr[n - 1].second + 1, gr[n - 1].second + 1});
+        seg_gr.resize(U * 2, {gr[n - 1][1] + 1, gr[n - 1][1] + 1});
         for (size_t i = 0; i < n; ++i) seg_gr[U + i] = gr[i];
         //Resize needed vectors with U * 2
 
@@ -70,7 +70,7 @@ public:
 
         }
         for (size_t i = U; --i;) {
-            seg_gr[i] = {seg_gr[i << 1].first, seg_gr[i << 1 | 1].second};
+            seg_gr[i] = {seg_gr[i << 1][0], seg_gr[i << 1 | 1][1]};
             upd(i);
             //Write additional info, if need
         }

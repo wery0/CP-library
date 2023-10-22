@@ -74,23 +74,23 @@ public:
         if (points.empty()) return;
         sort(points.begin(), points.end());
         points.erase(unique(points.begin(), points.end()), points.end());
-        vector<pair<T, T>> gr;
+        vector<array<T, 2>> gr;
         gr.reserve(points.size());
         for (size_t i = 0; i < points.size(); ++i) {
             if (i && points[i - 1] + 1 < points[i]) {
-                gr.emplace_back(points[i - 1] + 1, points[i] - 1);
+                gr.push_back({points[i - 1] + 1, points[i] - 1});
             }
-            gr.emplace_back(points[i], points[i]);
+            gr.push_back({points[i], points[i]});
         }
         n = gr.size();
         U = n & (n - 1) ? 2 << __lg(n) : n;
         m.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
-            m[U + i].bl = gr[i].first;
-            m[U + i].br = gr[i].second;
+            m[U + i].bl = gr[i][0];
+            m[U + i].br = gr[i][1];
         }
         for (size_t i = n; i < U; ++i) {
-            m[U + i].bl = m[U + i].br = gr[n - 1].second + 1;
+            m[U + i].bl = m[U + i].br = gr[n - 1][1] + 1;
         }
         for (size_t i = 0; i < n; ++i) {
             tag& t = m[U + i];

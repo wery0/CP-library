@@ -1,7 +1,7 @@
 template<typename T, const uint64_t MOD, const uint64_t P>
 class segtree {
 
-    static constexpr T NO_PUSH = -1;   //Change, if need
+    static constexpr T NO_PUSH_SET = numeric_limits<T>::max() - sqrt(numeric_limits<T>::max());   //Change, if need
 
     size_t n, U;
     vector<uint64_t> hs;
@@ -23,10 +23,10 @@ class segtree {
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO_PUSH) {
+        if (ps_set[v] != NO_PUSH_SET) {
             apply_push(v << 1, ps_set[v]);
             apply_push(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO_PUSH;
+            ps_set[v] = NO_PUSH_SET;
         }
     }
 
@@ -80,7 +80,7 @@ public:
             smpows[i] -= smpows[i] < MOD ? 0 : MOD;
         }
         hs.resize(U * 2);
-        ps_set.resize(U * 2, NO_PUSH);
+        ps_set.resize(U * 2, NO_PUSH_SET);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
             hs[U + i] = big_prod_mod(val, pows[i]);

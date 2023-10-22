@@ -1,8 +1,8 @@
 template<typename T>
 class segtree {
 
-    static constexpr T NO = -1;   //change, if need
     static constexpr T INF = numeric_limits<T>::max();
+    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
@@ -21,17 +21,17 @@ class segtree {
     }
 
     void apply_add(int v, T val) {
-        (ps_set[v] != NO ? ps_set : ps_add)[v] += val;
+        (ps_set[v] != NO_PUSH_SET ? ps_set : ps_add)[v] += val;
         sm[v] += val * gsz(v);
         mn[v] += val;
         mx[v] += val;
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO) {
+        if (ps_set[v] != NO_PUSH_SET) {
             apply_set(v << 1, ps_set[v]);
             apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO;
+            ps_set[v] = NO_PUSH_SET;
         } else if (ps_add[v] != 0) {
             apply_add(v << 1, ps_add[v]);
             apply_add(v << 1 | 1, ps_add[v]);
@@ -107,7 +107,7 @@ public:
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_set.resize(U * 2, NO);
+        ps_set.resize(U * 2, NO_PUSH_SET);
         ps_add.resize(U * 2, 0);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
@@ -132,7 +132,7 @@ public:
         size_t l = 0, r = U - 1, v = 1;
         size_t res = 0;
         while (l != r) {
-            if (ps_set[v] != NO) return res + ps_set[v];
+            if (ps_set[v] != NO_PUSH_SET) return res + ps_set[v];
             res += ps_add[v];
             size_t md = (l + r) >> 1;
             if (pos <= md) {

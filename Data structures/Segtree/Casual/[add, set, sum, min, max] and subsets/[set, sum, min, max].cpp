@@ -1,8 +1,8 @@
 template<typename T>
 class segtree {
 
-    static constexpr T NO = -1;   //change, if need
-    static const T INF = numeric_limits<T>::max();
+    static constexpr T INF = numeric_limits<T>::max();
+    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
@@ -20,10 +20,10 @@ class segtree {
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO) {
+        if (ps_set[v] != NO_PUSH_SET) {
             apply_set(v << 1, ps_set[v]);
             apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO;
+            ps_set[v] = NO_PUSH_SET;
         }
     }
 
@@ -82,7 +82,7 @@ public:
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_set.resize(U * 2, NO);
+        ps_set.resize(U * 2, NO_PUSH_SET);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
             sm[U + i] = val;
@@ -105,7 +105,7 @@ public:
     T operator[](size_t pos) {
         size_t l = 0, r = U - 1, v = 1;
         while (l != r) {
-            if (ps_set[v] != NO) return ps_set[v];
+            if (ps_set[v] != NO_PUSH_SET) return ps_set[v];
             size_t md = (l + r) >> 1;
             if (pos <= md) {
                 r = md;

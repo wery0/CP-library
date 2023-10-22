@@ -1,6 +1,9 @@
 template<typename T>
 class segtree {
 
+    static constexpr T INF = numeric_limits<T>::max();
+    static constexpr T NO = INF - sqrt(INF);   //change, if need
+
     struct Node {
         T sm = 0;
         T mn1, mx1, mn2, mx2;
@@ -17,12 +20,10 @@ class segtree {
         }
     };
 
-    static const T inf = numeric_limits<T>::max();
-    static const T NO = 4e18 + 228337;     //change, if need
     vector<Node> m;
     size_t n, U;
 
-    int gsz(int v) {
+    int gsz(size_t v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
@@ -38,7 +39,7 @@ class segtree {
 
     T calcmn2(Node& l, Node& r) {
         T mn1 = min(l.mn1, r.mn1);
-        T mn2 = inf;
+        T mn2 = INF;
         if (l.mn1 != mn1) mn2 = min(mn2 , l.mn1);
         if (r.mn1 != mn1) mn2 = min(mn2 , r.mn1);
         if (l.mn1 != l.mx1) mn2 = min(mn2 , l.mn2);
@@ -48,7 +49,7 @@ class segtree {
 
     T calcmx2(Node& l, Node& r) {
         T mx1 = max(l.mx1, r.mx1);
-        T mx2 = -inf;
+        T mx2 = -INF;
         if (l.mx1 != mx1) mx2 = max(mx2 , l.mx1);
         if (r.mx1 != mx1) mx2 = max(mx2 , r.mx1);
         if (l.mn1 != l.mx1) mx2 = max(mx2 , l.mx2);
@@ -68,7 +69,7 @@ class segtree {
         return n.mn1;
     }
 
-    void upd(int v) {
+    void upd(size_t v) {
         if (v >= U) return;
         Node& n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
         n.sm = l.sm + r.sm;
@@ -108,7 +109,7 @@ class segtree {
         else if (fl2) n.mx2 = x;
     }
 
-    void push_add(int v, T x) {
+    void push_add(size_t v, T x) {
         Node& n = m[v];
         n.ps_add += x;
         n.mn1 += x;
@@ -118,7 +119,7 @@ class segtree {
         n.sm += x * gsz(v);
     }
 
-    void push(int v) {
+    void push(size_t v) {
         if (v >= U) return;
         Node& n = m[v], &l = m[v << 1], &r = m[v << 1 | 1];
         T mn = n.mn1, mx = n.mx1;
@@ -133,20 +134,34 @@ class segtree {
         push_maxeq(r, mn);
     }
 
-    void seg_add(int ql, int qr, T x, int l, int r, int v) {
-        if (qr < l || r < ql) return;
+    T seg_sum(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
+        if (qr < l || r < ql) return 0;
         push(v);
-        if (ql <= l && r <= qr) {
-            push_add(v, x);
-            return;
-        }
-        int md = (l + r) >> 1;
-        seg_add(ql, qr, x, l, md, v << 1);
-        seg_add(ql, qr, x, md + 1, r, v << 1 | 1);
-        upd(v);
+        if (ql <= l && r <= qr) return m[v].sm;
+        size_t md = (l + r) >> 1;
+        return seg_sum(ql, qr, l, md, v << 1) +
+               seg_sum(ql, qr, md + 1, r, v << 1 | 1);
+    }
+    
+    T seg_min(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
+        if (qr < l || r < ql) return INF;
+        push(v);
+        if (ql <= l && r <= qr) return m[v].mn1;
+        size_t md = (l + r) >> 1;
+        return min(seg_min(ql, qr, l, md, v << 1),
+                   seg_min(ql, qr, md + 1, r, v << 1 | 1));
     }
 
-    T seg_gcd(int ql, int qr, int l, int r, int v) {
+    T seg_max(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
+        if (qr < l || r < ql) return -INF;
+        push(v);
+        if (ql <= l && r <= qr) return m[v].mx1;
+        size_t md = (l + r) >> 1;
+        return max(seg_max(ql, qr, l, md, v << 1),
+                   seg_max(ql, qr, md + 1, r, v << 1 | 1));
+    }
+
+    T seg_gcd(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         Node& n = m[v];
         if (qr < l || r < ql) return 0;
         push(v);
@@ -157,39 +172,25 @@ class segtree {
             o = gcd(o, n.mx1);
             return o;
         }
-        int md = (l + r) >> 1;
+        size_t md = (l + r) >> 1;
         return gcd(seg_gcd(ql, qr, l, md, v << 1),
                    seg_gcd(ql, qr, md + 1, r, v << 1 | 1));
     }
 
-    T seg_sum(int ql, int qr, int l, int r, int v) {
-        if (qr < l || r < ql) return 0;
+    void seg_add(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
+        if (qr < l || r < ql) return;
         push(v);
-        if (ql <= l && r <= qr) return m[v].sm;
-        int md = (l + r) >> 1;
-        return seg_sum(ql, qr, l, md, v << 1) +
-               seg_sum(ql, qr, md + 1, r, v << 1 | 1);
+        if (ql <= l && r <= qr) {
+            push_add(v, x);
+            return;
+        }
+        size_t md = (l + r) >> 1;
+        seg_add(ql, qr, l, md, v << 1, x);
+        seg_add(ql, qr, md + 1, r, v << 1 | 1, x);
+        upd(v);
     }
 
-    T seg_max(int ql, int qr, int l, int r, int v) {
-        if (qr < l || r < ql) return -inf;
-        push(v);
-        if (ql <= l && r <= qr) return m[v].mx1;
-        int md = (l + r) >> 1;
-        return max(seg_max(ql, qr, l, md, v << 1),
-                   seg_max(ql, qr, md + 1, r, v << 1 | 1));
-    }
-
-    T seg_min(int ql, int qr, int l, int r, int v) {
-        if (qr < l || r < ql) return inf;
-        push(v);
-        if (ql <= l && r <= qr) return m[v].mn1;
-        int md = (l + r) >> 1;
-        return min(seg_min(ql, qr, l, md, v << 1),
-                   seg_min(ql, qr, md + 1, r, v << 1 | 1));
-    }
-
-    void seg_mineq(int ql, int qr, T x, int l, int r, int v) {
+    void seg_mineq(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
         Node& n = m[v];
         if (qr < l || r < ql || x >= n.mx1) return;
         push(v);
@@ -197,13 +198,13 @@ class segtree {
             push_mineq(n, x);
             return;
         }
-        int md = (l + r) >> 1;
-        seg_mineq(ql, qr, x, l, md, v << 1);
-        seg_mineq(ql, qr, x, md + 1, r, v << 1 | 1);
+        size_t md = (l + r) >> 1;
+        seg_mineq(ql, qr, l, md, v << 1, x);
+        seg_mineq(ql, qr, md + 1, r, v << 1 | 1, x);
         upd(v);
     }
 
-    void seg_maxeq(int ql, int qr, T x, int l, int r, int v) {
+    void seg_maxeq(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
         Node& n = m[v];
         if (qr < l || r < ql || x <= n.mn1) return;
         push(v);
@@ -211,9 +212,9 @@ class segtree {
             push_maxeq(n, x);
             return;
         }
-        int md = (l + r) >> 1;
-        seg_maxeq(ql, qr, x, l, md, v << 1);
-        seg_maxeq(ql, qr, x, md + 1, r, v << 1 | 1);
+        size_t md = (l + r) >> 1;
+        seg_maxeq(ql, qr, l, md, v << 1, x);
+        seg_maxeq(ql, qr, md + 1, r, v << 1 | 1, x);
         upd(v);
     }
 
@@ -261,12 +262,12 @@ public:
         return ans;
     }
 
-    T seg_gcd(int l, int r) {return seg_gcd(l, r, 0, U - 1, 1);}
-    T seg_sum(int l, int r) {return seg_sum(l, r, 0, U - 1, 1);}
-    T seg_max(int l, int r) {return seg_max(l, r, 0, U - 1, 1);}
-    T seg_min(int l, int r) {return seg_min(l, r, 0, U - 1, 1);}
-    void seg_add(int l, int r, T x) {seg_add(l, r, x, 0, U - 1, 1);}
-    void seg_mineq(int l, int r, T x) {seg_mineq(l, r, x, 0, U - 1, 1);}
-    void seg_maxeq(int l, int r, T x) {seg_maxeq(l, r, x, 0, U - 1, 1);}
-    void seg_set(int l, int r, T x) {seg_mineq(l, r, x); seg_maxeq(l, r, x);}
+    T seg_sum(size_t l, size_t r) {return seg_sum(l, r, 0, U - 1, 1);}
+    T seg_min(size_t l, size_t r) {return seg_min(l, r, 0, U - 1, 1);}
+    T seg_max(size_t l, size_t r) {return seg_max(l, r, 0, U - 1, 1);}
+    T seg_gcd(size_t l, size_t r) {return seg_gcd(l, r, 0, U - 1, 1);}
+    void seg_add(size_t l, size_t r, T x) {seg_add(l, r, 0, U - 1, 1, x);}
+    void seg_set(size_t l, size_t r, T x) {seg_mineq(l, r, x); seg_maxeq(l, r, x);}
+    void seg_mineq(size_t l, size_t r, T x) {seg_mineq(l, r, 0, U - 1, 1, x);}
+    void seg_maxeq(size_t l, size_t r, T x) {seg_maxeq(l, r, 0, U - 1, 1, x);}
 };

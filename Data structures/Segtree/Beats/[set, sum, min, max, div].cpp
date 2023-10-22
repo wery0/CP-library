@@ -1,8 +1,8 @@
 template<typename T>
 class segtree {
 
-    static const T NO = -1;   //change, if need
-    static const T INF = numeric_limits<T>::max();
+    static constexpr T INF = numeric_limits<T>::max();
+    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
@@ -20,10 +20,10 @@ class segtree {
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO) {
+        if (ps_set[v] != NO_PUSH_SET) {
             apply_set(v << 1, ps_set[v]);
             apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO;
+            ps_set[v] = NO_PUSH_SET;
         }
     }
 
@@ -101,7 +101,7 @@ public:
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_set.resize(U * 2, NO);
+        ps_set.resize(U * 2, NO_PUSH_SET);
         for (size_t i = 0; i < n; ++i) {
             const T val = *(first + i);
             sm[U + i] = val;
@@ -146,5 +146,5 @@ public:
     T seg_min(size_t l, size_t r) {return seg_min(l, r, 0, U - 1, 1);}
     T seg_max(size_t l, size_t r) {return seg_max(l, r, 0, U - 1, 1);}
     void seg_set(size_t l, size_t r, T val) {seg_set(l, r, 0, U - 1, 1, val);}
-    void seg_div(size_t l, size_t r, T x) {if (x == 1) return; seg_div(l, r, 0, U - 1, 1, x);}
+    void seg_div(size_t l, size_t r, T val) {if (x == 1) return; seg_div(l, r, 0, U - 1, 1, val);}
 };
