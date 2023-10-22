@@ -19,7 +19,7 @@ public:
         (*this) = offline_seg_add(arr.begin(), arr.end());
     }
 
-    void clear() {
+    void reset() {
         fill(store.begin(), store.end(), 0);
     }
 
