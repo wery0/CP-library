@@ -30,6 +30,7 @@ struct Mint {
     Mint operator-(const Mint& o) const {return val < o.val ? MOD - o.val + val : val - o.val;}
     Mint operator*(const Mint& o) const {return (LL)1 * val * o.val % MOD;}
     Mint operator/(const Mint& o) const {return (LL)1 * val * inv(o).val % MOD;}
+    Mint operator-() const {return val ? MOD - val : val;}
 
     void operator+=(const Mint& o) {val += o.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint& o) {val -= o.val; val += val < 0 ? MOD : 0;}
