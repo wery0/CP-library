@@ -170,100 +170,104 @@ class treap {
         return K();
     }
 
-    size_t pos_of_leftest_min_key(Node* n) {
-        assert(n);
-        K mnk = gmnk(n);
+    size_t pos_of_leftest_good(Node* n, auto has_good, auto is_good) {
         size_t ans = 0;
         while (n) {
             push(n);
-            if (gmnk(n->l) == mnk) n = n->l;
-            else if (n->key == mnk) return ans + gsz(n->l);
+            if (has_good(n->l)) n = n->l;
+            else if (is_good(n)) return ans + gsz(n->l);
             else ans += gsz(n->l) + 1, n = n->r;
         }
-        assert(0);
         return ans;
+    }
+
+    size_t pos_of_rightest_good(Node* n, auto has_good, auto is_good) {
+        size_t ans = 0;
+        while (n) {
+            push(n);
+            if (has_good(n->r)) ans += gsz(n->l) + 1, n = n->r;
+            else if (is_good(n)) return ans + gsz(n->l);
+            else n = n->l;
+        }
+        return ans;
+    }
+
+    size_t pos_of_closest_from_right_good(Node* n, size_t pos, auto has_good, auto is_good) {
+        size_t szr = gsz(n);
+        if (pos >= szr || !has_good(n)) return szr;
+        size_t ans = 0, pos_to_ret = szr;
+        Node* u = 0;
+        while (n) {
+            push(n);
+            if (pos >= gsz(n->l)) {
+                if (pos == gsz(n->l) && is_good(n)) return ans + gsz(n->l);
+                ans += gsz(n->l) + 1;
+                pos -= min(pos, gsz(n->l) + 1);
+                n = n->r;
+            } else {
+                if (is_good(n)) pos_to_ret = ans + gsz(n->l), u = 0;
+                else if (has_good(n->r)) pos_to_ret = ans + gsz(n->l) + 1, u = n->r;
+                n = n->l;
+            }
+        }
+        return pos_to_ret + (u ? pos_of_leftest_good(u, has_good, is_good) : 0);
+    }
+
+    size_t pos_of_closest_from_left_good(Node* n, size_t pos, auto has_good, auto is_good) {
+        size_t szr = gsz(n);
+        if (!has_good(n)) return szr;
+        pos = min(pos, szr - 1);
+        pos = szr - 1 - pos;
+        size_t ans = 0, pos_to_ret = szr;
+        Node* u = 0;
+        while (n) {
+            push(n);
+            if (pos >= gsz(n->r)) {
+                if (pos == gsz(n->r) && is_good(n)) return szr - 1 - (ans + gsz(n->r));
+                ans += gsz(n->r) + 1;
+                pos -= min(pos, gsz(n->r) + 1);
+                n = n->l;
+            } else {
+                if (is_good(n)) pos_to_ret = ans + gsz(n->r), u = 0;
+                else if (has_good(n->l)) pos_to_ret = ans + gsz(n->r) + 1, u = n->l;
+                n = n->r;
+            }
+        }
+        if (pos_to_ret == szr) return szr;
+        pos_to_ret = szr - 1 - pos_to_ret;
+        return pos_to_ret - (u ? gsz(u) - 1 - pos_of_rightest_good(u, has_good, is_good) : 0);
+    }
+
+    size_t pos_of_leftest_min_key(Node* n) {
+        K mnk = gmnk(n);
+        return pos_of_leftest_good(n, 
+            [&](Node* n){return gmnk(n) == mnk;},
+            [&](Node* n){return n->key == mnk;});
     }
 
     size_t pos_of_rightest_min_key(Node* n) {
-        assert(n);
         K mnk = gmnk(n);
-        size_t ans = 0;
-        while (n) {
-            push(n);
-            if (gmnk(n->r) == mnk) ans += gsz(n->l) + 1, n = n->r;
-            else if (n->key == mnk) return ans + gsz(n->l);
-            else n = n->l;
-        }
-        assert(0);
-        return ans;
+        return pos_of_rightest_good(n, 
+            [&](Node* n){return gmnk(n) == mnk;},
+            [&](Node* n){return n->key == mnk;});
     }
 
     size_t pos_of_leftest_key_leq(Node* n, K key) {
-        if (gmnk(n) > key) return gsz(n);
-        size_t ans = 0;
-        while (n) {
-            push(n);
-            if (gmnk(n->l) <= key) n = n->l;
-            else if (n->key <= key) return ans + gsz(n->l);
-            else ans += gsz(n->l) + 1, n = n->r;
-        }
-        assert(0);
-        return ans;
+        return pos_of_leftest_good(n, 
+            [&](Node* n){return gmnk(n) <= key;},
+            [&](Node* n){return n->key <= key;});
     }
 
-    size_t pos_of_leftest_key_geq(Node* n, K key) {
-        if (gmxk(n) < key) return gsz(n);
-        size_t ans = 0;
-        while (n) {
-            push(n);
-            if (gmxk(n->l) >= key) n = n->l;
-            else if (n->key >= key) return ans + gsz(n->l);
-            else ans += gsz(n->l) + 1, n = n->r;
-        }
-        assert(0);
-        return ans;
+    size_t pos_of_closest_from_left_key_leq(Node* n, size_t pos, K key) {
+        return pos_of_closest_from_left_good(n, pos,
+            [&](Node* n){return gmnk(n) <= key;},
+            [&](Node* n){return n->key <= key;});
     }
 
     size_t pos_of_closest_from_right_key_leq(Node* n, size_t pos, K key) {
-        size_t szr = gsz(n);
-        if (pos >= szr || gmnk(n) > key) return szr;
-        size_t ans = 0, pos_to_ret = szr;
-        Node* node_to_go = 0;
-        while (n) {
-            push(n);
-            if (pos >= gsz(n->l)) {
-                if (pos == gsz(n->l) && n->key <= key) return ans + gsz(n->l);
-                ans += gsz(n->l) + 1;
-                pos -= min(pos, gsz(n->l) + 1);
-                n = n->r;
-            } else {
-                if (n->key <= key) pos_to_ret = ans + gsz(n->l), node_to_go = 0;
-                else if (gmnk(n->r) <= key) pos_to_ret = ans + gsz(n->l) + 1, node_to_go = n->r;
-                n = n->l;
-            }
-        }
-        return pos_to_ret + (node_to_go ? pos_of_leftest_key_leq(node_to_go, key) : 0);
-    }
-
-    size_t pos_of_closest_from_right_key_geq(Node* n, size_t pos, K key) {
-        size_t szr = gsz(n);
-        if (pos >= szr || gmxk(n) < key) return szr;
-        size_t ans = 0, pos_to_ret = szr;
-        Node* node_to_go = 0;
-        while (n) {
-            push(n);
-            if (pos >= gsz(n->l)) {
-                if (pos == gsz(n->l) && n->key >= key) return ans + gsz(n->l);
-                ans += gsz(n->l) + 1;
-                pos -= min(pos, gsz(n->l) + 1);
-                n = n->r;
-            } else {
-                if (n->key >= key) pos_to_ret = ans + gsz(n->l), node_to_go = 0;
-                else if (gmxk(n->r) >= key) pos_to_ret = ans + gsz(n->l) + 1, node_to_go = n->r;
-                n = n->l;
-            }
-        }
-        return pos_to_ret + (node_to_go ? pos_of_leftest_key_geq(node_to_go, key) : 0);
+        return pos_of_closest_from_right_good(n, pos,
+            [&](Node* n){return gmnk(n) <= key;},
+            [&](Node* n){return n->key <= key;});
     }
 
     void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
@@ -312,9 +316,8 @@ public:
 
     //If no such pos exists, these functions will return size()
     size_t get_pos_of_leftest_key_leq(K key) {return pos_of_leftest_key_leq(root, key);}
-    size_t get_pos_of_leftest_key_geq(K key) {return pos_of_leftest_key_geq(root, key);}
+    size_t get_pos_of_closest_from_left_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
     size_t get_pos_of_closest_from_right_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
-    size_t get_pos_of_closest_from_right_geq(size_t pos, K key) {return pos_of_closest_from_right_key_geq(root, pos, key);}
 
     size_t get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
     size_t get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
