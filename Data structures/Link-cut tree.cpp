@@ -28,6 +28,7 @@ class link_cut_tree {
         }
     };
 
+    int root = 0;
     vector<Node*> store;
 
     size_t gsz(Node* n) {return n ? n->sz : 0;}
@@ -242,7 +243,6 @@ public:
         return gsz(store[x]);
     }
 
-    int root = 0;
     void reroot(int n) {
         expose(n);
         store[n]->rev ^= 1;
