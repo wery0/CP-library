@@ -48,6 +48,7 @@ class multiset_xor_min_max {
             n = n->m[dir];
             best |= (T)dir << bit_num;
         }
+        if (is_max) x = ~x;
         return best ^ x;
     }
 
