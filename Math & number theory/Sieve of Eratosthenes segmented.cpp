@@ -1,5 +1,5 @@
 //Returns vector of all primes in range [L, R].
-//O(sqrt(R)loglog(sqrt(R)) + (R-L)loglog(R))
+//<O(sqrt(R)loglog(sqrt(R)) + (R - L)loglog(R)), O((sqrt(R) + R - L)/log(R))>
 template<typename T>
 vector<T> segmented_sieve_of_eratosthenes(T L, T R) {
     L = max(L, (T)2);
