@@ -1,5 +1,5 @@
-//This hasher can work with modules of order 1e18.
-/*Some big primes:
+/*
+Some big primes:
 666667
 1000000000000000003 = 1e18 + 3
 1000000000000777771 = 1e18 + 777771
@@ -9,11 +9,15 @@
 2807516534892679321
 3835424442118071511
 */
+//This polynomial hasher can work with modules of order 1e18.
+//Uncomment commented lines to return real hash, rather then multiplied by P ^ n. Requires invertible MOD.
 template<const uint64_t MOD = 3835424442118071511, const uint64_t P = 2807516534892679321>
 struct hasher64 {
     size_t n;
     vector<uint64_t> pref_hash;
     vector<uint64_t> pows;
+    // vector<uint64_t> ipows;
+
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
@@ -24,7 +28,16 @@ struct hasher64 {
     }
 
     template<typename T>
-    auto hash_elem(T x) {return hash<T>{}(x);}
+    auto hash_elem(T x) {return hash<T> {}(x);}
+
+    uint64_t binpow(uint64_t x, uint64_t k) {
+        uint64_t o = 1;
+        for (; k; k >>= 1) {
+            if (k & 1) o = big_prod_mod(o, x);
+            x = big_prod_mod(x, x);
+        }
+        return o;
+    }
 
 public:
     hasher64() = default;
@@ -41,9 +54,15 @@ public:
             pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
         pows[n] = big_prod_mod(pows[n - 1], P);
+        // ipows.resize(n + 1);
+        // ipows[n] = binpow(pows[n], MOD - 2);
+        // for (ssize_t i = n - 1; i >= 0; --i) {
+        //     ipows[i] = big_prod_mod(ipows[i + 1], P);
+        // }
     }
 
-    uint64_t calc_hash(int l, int r) {
+    //O(1)
+    uint64_t seg_hash(int l, int r) {
         if (l > r) return 0;
         assert(0 <= l && r < n);
         uint64_t o = pref_hash[r];
@@ -52,13 +71,14 @@ public:
             o -= pref_hash[l - 1];
         }
         return big_prod_mod(o, pows[n - l]);
+        // return big_prod_mod(o, ipows[l]);
     }
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
     //O(log(k))
-    uint64_t calc_hash_repeated(int l, int r, uint64_t k) {
+    uint64_t seg_hash_repeated(int l, int r, uint64_t k) {
         uint64_t ans = 0, anspw = 1;
-        uint64_t hs = calc_hash(l, r), hspw = pows[r - l + 1];
+        uint64_t hs = seg_hash(l, r), hspw = pows[r - l + 1];
         for (; k; k >>= 1) {
             if (k & 1) {
                 ans += big_prod_mod(hs, anspw);
@@ -72,11 +92,12 @@ public:
         return ans;
     }
 
+    //O(|borders|)
     uint64_t calc_hash_of_substrings_concatenation(vector<pair<int, int>> borders) {
         uint64_t res = 0;
         for (uint64_t cpw = 1; auto [l, r] : borders) {
             if (l > r) continue;
-            res += big_prod_mod(calc_hash(l, r), cpw);
+            res += big_prod_mod(seg_hash(l, r), cpw);
             res -= res < MOD ? 0 : MOD;
             cpw = big_prod_mod(cpw, pows[r - l + 1]);
         }
