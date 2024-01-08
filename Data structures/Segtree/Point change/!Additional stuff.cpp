@@ -1,4 +1,5 @@
 //You may add some of these functions inside segtree_point_upd.
+//These functions are working only when the size of last layer of segtree is perfect power of 2. To do so, in constructor add n = n & (n - 1) ? 2 << __lg(n) : n;
 
 //Works only with nonnegative values
 int first_to_right_where_sum_becomes_geq_k(size_t l, T k) {
