@@ -72,12 +72,12 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         m.resize(U * 2);
-        for (size_t i = 0; i < n; ++i) {
+        for (size_t i = 0; first != last; ++i, ++first) {
             tag& t = m[U + i];
-            const T val = *(first + i);
+            const T val = *first;
             //Write init of last layer
         }
         for (size_t i = U; --i;) {
