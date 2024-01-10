@@ -17,7 +17,7 @@ struct hasher64_2d {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
+    static uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -55,9 +55,9 @@ public:
         }
     }
 
-    uint64_t calc_hash(int x1, int y1, int x2, int y2) {
+    uint64_t rect_hash(size_t x1, size_t y1, size_t x2, size_t y2) const {
         if (x1 > x2 || y1 > y2) return 0;
-        assert(0 <= x1 && x2 < n && 0 <= y1 && y2 < m);
+        assert(x2 < n && y2 < m);
         uint64_t o = pref_hash[x2][y2];
         if (x1) o += o < pref_hash[x1 - 1][y2] ? MOD : 0, o -= pref_hash[x1 - 1][y2];
         if (y1) o += o < pref_hash[x2][y1 - 1] ? MOD : 0, o -= pref_hash[x2][y1 - 1];
