@@ -10,7 +10,7 @@ Some big primes:
 3835424442118071511
 */
 //This polynomial hasher can work with modules of order 1e18.
-//Uncomment commented lines to return real hash, rather then multiplied by P ^ n. Requires invertible MOD.
+//Uncomment commented lines to return real hash, rather then multiplied by P ^ n. Requires P to be invertible by MOD.
 template<const uint64_t MOD = 3835424442118071511, const uint64_t P = 2807516534892679321>
 struct hasher64 {
     size_t n;
