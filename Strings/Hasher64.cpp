@@ -21,7 +21,7 @@ struct hasher64 {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
+    static uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -30,7 +30,7 @@ struct hasher64 {
     template<typename T>
     auto hash_elem(T x) {return hash<T> {}(x);}
 
-    uint64_t binpow(uint64_t x, uint64_t k) {
+    static uint64_t binpow(uint64_t x, uint64_t k) {
         uint64_t o = 1;
         for (; k; k >>= 1) {
             if (k & 1) o = big_prod_mod(o, x);
@@ -46,7 +46,6 @@ public:
     hasher64(Iterator first, Iterator last): n(last - first), pref_hash(n), pows(n + 1) {
         pows[0] = 1;
         if (!n) return;
-        using T = typename iterator_traits<Iterator>::value_type;
         pref_hash[0] = hash_elem(*first); ++first;
         for (size_t i = 1; i < n; ++i, ++first) {
             pows[i] = big_prod_mod(pows[i - 1], P);
@@ -61,10 +60,18 @@ public:
         // }
     }
 
+    //Returns hash of string l + r, where hash(l) = hl, hash(r) = hr, len(l) = len_l
+    //O(1) if len_l <= n, O(log(len_l)) otherwise
+    uint64_t merge_hashes(uint64_t len_l, uint64_t hl, uint64_t hr) const {
+        uint64_t pw = len_l < pows.size() ? pows[len_l] : binpow(P, len_l);
+        uint64_t hlr = hl + big_prod_mod(hr, pw);
+        return hlr < MOD ? hlr : hlr - MOD;
+    }
+
     //O(1)
-    uint64_t seg_hash(int l, int r) {
+    uint64_t seg_hash(size_t l, size_t r) const {
         if (l > r) return 0;
-        assert(0 <= l && r < n);
+        assert(r < n);
         uint64_t o = pref_hash[r];
         if (l) {
             o += o < pref_hash[l - 1] ? MOD : 0;
@@ -76,7 +83,7 @@ public:
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
     //O(log(k))
-    uint64_t seg_hash_repeated(int l, int r, uint64_t k) {
+    uint64_t seg_hash_repeated(size_t l, size_t r, uint64_t k) const {
         uint64_t ans = 0, anspw = 1;
         uint64_t hs = seg_hash(l, r), hspw = pows[r - l + 1];
         for (; k; k >>= 1) {
@@ -93,7 +100,7 @@ public:
     }
 
     //O(|borders|)
-    uint64_t calc_hash_of_substrings_concatenation(vector<pair<int, int>> borders) {
+    uint64_t calc_hash_of_substrings_concatenation(vector<pair<int, int>> borders) const {
         uint64_t res = 0;
         for (uint64_t cpw = 1; auto [l, r] : borders) {
             if (l > r) continue;
