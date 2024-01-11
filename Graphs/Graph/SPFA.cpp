@@ -1,3 +1,4 @@
+//Shortest path faster algorithm (aka Ford-Bellman with queue)
 //Returns {dst, prv}
 //dst - distances from cluster
 //prv - previous nodes on shortest path from cluster
@@ -11,6 +12,9 @@ pair<vector<T>, vector<int>> SPFA(graph<edge<T>>& g, const vector<int>& cluster,
     vector<bool> inq(n);
     deque<int> que(cluster.begin(), cluster.end());
     for (int v : cluster) dst[v] = 0, inq[v] = 1;
+    for (int v = 0; v < n; ++v) {
+        sort(g[v].begin(), g[v].end(), [](const auto& l, const auto& r) {return l.data < r.data;});
+    }
     while (!que.empty()) {
         // constexpr size_t MAGIC = 2;
         // for (size_t i = 0; i < MAGIC && i + 1 < que.size(); ++i) {
