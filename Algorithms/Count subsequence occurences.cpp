@@ -7,8 +7,8 @@ T subsequences_count(I1 f1, I1 l1, I2 f2, I2 l2) {
     dp[0] = 1;
     for (; f1 != l1; ++f1) {
         const auto val = *f1;
-        auto it = f2;
-        for (size_t j = 1; j <= m; ++j, ++it) {
+        auto it = prev(l2);
+        for (size_t j = m; j; --j, --it) {
             if (*it == val) {
                 dp[j] += dp[j - 1];
             }
