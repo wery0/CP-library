@@ -8,19 +8,31 @@ class palindrome_numbers_enumerator {
     T cur = 0, num = 0;
     int is_odd = 1;
 
-    T construct(T val, int is_odd) const {
+    static T construct(T val, int is_odd) {
         T x = val;
         if (is_odd) x /= 10;
         for (; x; x /= 10) val = val * 10 + x % 10;
         return val;
     }
 
-    bool is_palindrome(const string& s) const {
+    static bool is_palindrome(const string& s) {
         return equal(s.begin(), s.begin() + s.size() / 2, s.rbegin());
     }
 
 public:
     palindrome_numbers_enumerator(T x = 0) {set_cur(x);}
+
+    void set_prev() {
+        --(is_odd ? q1 : q2);
+        --num;
+        if ((is_odd ? q1 : q2) < st && q1 != 0) {
+            if (!is_odd) ++q2, --q1;
+            else ++q1, --q2;
+            if (is_odd) st /= 10;
+            is_odd ^= 1;
+        }
+        cur = construct(is_odd ? q1 : q2, is_odd);
+    }
 
     void set_cur(T x) {
         string s = to_string(x);
@@ -38,32 +50,20 @@ public:
         num = q1 + q2 - is_odd;
     }
 
-    void set_prev() {cur = get_prev();}
-    void set_next() {cur = get_next();}
-
-    T get_prev() {
-        --(is_odd ? q1 : q2);
-        --num;
-        if ((is_odd ? q1 : q2) < st && q1 != 0) {
-            if (!is_odd) ++q2, --q1;
-            else ++q1, --q2;
-            if (is_odd) st /= 10;
-            is_odd ^= 1;
-        }
-        return construct(is_odd ? q1 : q2, is_odd);
-    }
-
-    T get_next() {
+    void set_next() {
         ++(is_odd ? q1 : q2);
         ++num;
         if ((is_odd ? q1 : q2) >= st * 10) {
             is_odd ^= 1;
             if (q2 != st) st = st ? st * 10 : 1;
         }
-        return construct(is_odd ? q1 : q2, is_odd);
+        cur = construct(is_odd ? q1 : q2, is_odd);
     }
 
-    T get_kth_palindrome_number(T k) const {
+    T get_cur() const {return cur;}
+
+    //O(log(k))
+    static T get_kth_palindrome_number(T k) {
         string s = to_string(k);
         T pw10 = 1;
         while (pw10 * 10 <= k) pw10 *= 10;
@@ -78,7 +78,8 @@ public:
         return construct(k - pw10 + 1, 1);
     }
 
-    T get_lower_bound_palindrome(T x) const {
+    //O(log(x))
+    static T get_lower_bound_palindrome(T x) {
         string s = to_string(x);
         if (is_palindrome(s)) return x;
         const size_t n = s.size();
@@ -87,7 +88,8 @@ public:
         return c >= x ? c : construct(stoll(l) + 1, n & 1);
     }
 
-    T get_inverse_lower_bound_palindrome(T x) const {
+    //O(log(x))
+    static T get_inverse_lower_bound_palindrome(T x) {
         string s = to_string(x);
         if (is_palindrome(s)) return x;
         const size_t n = s.size();
@@ -97,7 +99,7 @@ public:
         return c <= x ? c : construct(stoll(l) - 1, n & 1);
     }
 
-    T get_upper_bound_palindrome(T x) const {return get_lower_bound_palindrome(x + 1);}
-    T get_inverse_upper_bound_palindrome(T x) const {return get_inverse_lower_bound_palindrome(x - 1);}
-    T get_cur() const {return cur;}
+    //O(log(x))
+    static T get_upper_bound_palindrome(T x) {return get_lower_bound_palindrome(x + 1);}
+    static T get_inverse_upper_bound_palindrome(T x) {return get_inverse_lower_bound_palindrome(x - 1);}
 };
