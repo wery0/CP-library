@@ -146,21 +146,6 @@ class treap {
         upd(n);
     }
 
-    Node* erase_pos(Node* n, size_t pos) {
-        push(n);
-        if (gsz(n->l) == pos) {
-            last_erased_key = n->key;
-            last_erased_val = n->val;
-            Node* l = n->l, *r = n->r;
-            delete n;
-            return merge(l, r);
-        }
-        if (pos < gsz(n->l)) n->l = erase_pos(n->l, pos);
-        else n->r = erase_pos(n->r, pos - gsz(n->l) - 1);
-        upd(n);
-        return n;
-    }
-
     Node* insert_node(Node* n, Node* nw) {
         push(n);
         if (!n || nw->y > n->y) {
@@ -176,7 +161,22 @@ class treap {
         return n;
     }
 
-    Node* erase_one_key(Node* n, K key) {
+    Node* erase_pos(Node* n, size_t pos) {
+        push(n);
+        if (gsz(n->l) == pos) {
+            last_erased_key = n->key;
+            last_erased_val = n->val;
+            Node* l = n->l, *r = n->r;
+            delete n;
+            return merge(l, r);
+        }
+        if (pos < gsz(n->l)) n->l = erase_pos(n->l, pos);
+        else n->r = erase_pos(n->r, pos - gsz(n->l) - 1);
+        upd(n);
+        return n;
+    }
+
+    Node* erase_one_key_occurrence(Node* n, K key) {
         if (!n) return 0;
         push(n);
         if (n->key == key) {
@@ -184,8 +184,22 @@ class treap {
             delete n;
             return merge(l, r);
         }
-        if (key < n->key) n->l = erase_one_key(n->l, key);
-        else n->r = erase_one_key(n->r, key);
+        if (key < n->key) n->l = erase_one_key_occurrence(n->l, key);
+        else n->r = erase_one_key_occurrence(n->r, key);
+        upd(n);
+        return n;
+    }
+
+    Node* erase_all_key_occurrences(Node* n, K key) {
+        if (!n) return 0;
+        push(n);
+        if (n->key == key) {
+            Node* l = erase_all_key_occurrences(n->l, key), *r = erase_all_key_occurrences(n->r, key);
+            delete n;
+            return merge(l, r);
+        }
+        if (key < n->key) n->l = erase_all_key_occurrences(n->l, key);
+        else n->r = erase_all_key_occurrences(n->r, key);
         upd(n);
         return n;
     }
@@ -338,7 +352,8 @@ public:
     void update_val_at_pos(size_t pos, V new_val) {update_val_at_pos(root, pos, new_val);}
 
     void erase_pos(size_t pos) {root = erase_pos(root, pos);}
-    void erase_one_key(K key) {root = erase_one_key(root, key);}
+    void erase_one_key_occurrence(K key) {root = erase_one_key_occurrence(root, key);}
+    void erase_all_key_occurrences(K key) {root = erase_all_key_occurrences(root, key);}
     void erase_seg(size_t l, size_t len) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, len); root = merge(lf, rg);}
 
     K extract_pos_get_key(size_t pos) {erase_pos(pos); return last_erased_key;}
