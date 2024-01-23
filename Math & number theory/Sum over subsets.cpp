@@ -1,13 +1,30 @@
-//Returns vector dp s. t. dp[x] = sum({m[y] | (x & y) == y})
+//do_superset == false: res[k] = sum({arr[i] | (k & i) == i}), i. e. sum of subsets
+//             == true: res[k] = sum({arr[i] | (k & i) == k}), i. e. sum of supersets
+//Size of array could be arbitrary, not necessary power of 2
 //O(nlog(n))
-template<typename T>
-vector<T> sum_over_subsets(const vector<T>& m) {
-    const size_t n = m.size(), lg = __lg(n & (n - 1) ? 2 << __lg(n) : n);
-    vector<T> dp = m;
-    for (size_t bit = 0; bit < lg; ++bit) {
-        for (size_t i = 0; i < n; ++i) {
-            if (i >> bit & 1) dp[i] += dp[i ^ (1 << bit)];
+template<bool do_superset, bool do_inverse, typename T>
+vector<T> sum_over_subsets(vector<T> arr) {
+    const size_t n = arr.size();
+    for (size_t b = 1; b < n; b <<= 1) {
+        if constexpr(do_inverse) {
+            if constexpr(do_superset) {
+                for (size_t i = n - b - 1; i; --i) {
+                    if (~i & b) arr[i] -= arr[i ^ b];
+                }
+                arr[0] -= arr[b];
+            } else {
+                for (size_t i = n - 1; i; --i) {
+                    if (i & b) arr[i] -= arr[i ^ b];
+                }
+            }
+        } else {
+            for (size_t st = do_superset ? 0 : b; st < n; st += b << 1) {
+                const size_t thr = do_superset ? min(st + b, n - b) : st + b;
+                for (size_t i = st; i < thr; ++i) {
+                    arr[i] += arr[i ^ b];
+                }
+            }
         }
     }
-    return dp;
+    return arr;
 }
