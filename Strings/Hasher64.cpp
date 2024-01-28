@@ -110,4 +110,30 @@ public:
         }
         return res;
     }
+
+    //Returns length of longest common prefix of suffixes s[i, n - 1] and s[j, n - 1]
+    //O(log(n))
+    size_t lcp(size_t i, size_t j) const {
+        if (i > j) swap(i, j);
+        assert(j < n);
+        size_t l = 0, r = n - j + 1;
+        while (l + 1 < r) {
+            size_t m = l + (r - l) / 2;
+            (seg_hash(i, i + m - 1) == seg_hash(j, j + m - 1) ? l : r) = m;
+        }
+        return l;
+    }
+
+    //Returns length of longest common suffix of prefixes s[0, i] and s[0, j]
+    //O(log(n))
+    size_t lcs(size_t i, size_t j) const {
+        if (i > j) swap(i, j);
+        assert(j < n);
+        size_t l = 0, r = i + 2;
+        while (l + 1 < r) {
+            size_t m = l + (r - l) / 2;
+            (seg_hash(i + 1 - m, i) == seg_hash(j + 1 - m, j) ? l : r) = m;
+        }
+        return l;
+    }
 };
