@@ -6,12 +6,12 @@ vector<int> n_queens(const size_t n) {
     if (n < 4) return {};
     const size_t rem = n % 12;
     vector<int> y;
-    for (int i = 2; i <= n; i += 2) y.push_back(i - 1);
-    if (rem == 3 || rem == 9) y.push_back(2 - 1), y.erase(y.begin());
+    for (int i = 1; i < n; i += 2) y.push_back(i);
+    if (rem == 3 || rem == 9) y.erase(y.begin()), y.push_back(1);
     if (rem == 8) {
-        for (int i = 3, j = 0; j < n / 2; i += j & 1 ? 6 : -2, ++j) y.push_back(i - 1);
+        for (int i = 2, j = 0; j < n / 2; i += j & 1 ? 6 : -2, ++j) y.push_back(i);
     } else {
-        for (int i = 1; i <= n; i += 2) y.push_back(i - 1);
+        for (int i = 0; i < n; i += 2) y.push_back(i);
     }
     if (rem == 2 || rem == 3 || rem == 9) {
         vector<int> ny;
