@@ -1,7 +1,5 @@
-//long double f(long double x) {return sin(x) * x;}
-//const long double EPS = 1e-9; 
 template<typename T = long double>
-T romberg(T l, T r) {
+T romberg_integration(const T l, const T r, const T EPS, auto f) {
     T d = r - l;
     vector<T> t = {d * (f(l) + f(r)) / 2};
     for (int64_t k = 1, i = 1; ; k *= 2, d /= 2, ++i) {
