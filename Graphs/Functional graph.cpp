@@ -22,9 +22,8 @@ class functional_graph {
 
     pair<size_t, T> move_in_cyc(size_t v, int64_t k) {
         assert(oncyc[v]);
-        int64_t full_cycles = k / len_of_cyc[v];
-        k %= len_of_cyc[v];
-        int res_vertex = cycs[num_cyc[v]][(pos_in_cyc[v] + k) % len_of_cyc[v]];
+        auto [full_cycles, rem_in_cyc] = lldiv(k, len_of_cyc[v]);
+        int res_vertex = cycs[num_cyc[v]][(pos_in_cyc[v] + rem_in_cyc) % len_of_cyc[v]];
         T res_sum = sm_of_cyc[v] * full_cycles + seg_sum(num_cyc[v], pos_in_cyc[v], pos_in_cyc[res_vertex]);
         return {res_vertex, res_sum};
     }
