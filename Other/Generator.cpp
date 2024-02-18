@@ -187,6 +187,21 @@ namespace Generator {
         return s;
     }
 
+    string gen_fibonacci_string(size_t n, char a = 'a', char b = 'b') {
+        string s; s += a, s += b;
+        s.resize(n);
+        for (size_t x = 1, y = 1; x + y < n; y += x, x = y - x) {
+            std::copy(s.begin(), s.begin() + min(n - x - y, y), s.begin() + x + y);
+        }
+        return s;
+    }
+
+    string gen_thue_morse_string(size_t n, char a = 'a', char b = 'b') {
+        string s(n);
+        for (size_t i = 0; i < n; ++i) s[i] = __builtin_parityll(i) ? a : b;
+        return s;
+    }
+
     template<typename T>
     array<T, 2> gen_point_inside_circle(T cx, T cy, T r) {
         T x = gen_val(cx - r, cx + r);
