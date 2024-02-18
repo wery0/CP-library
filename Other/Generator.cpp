@@ -197,7 +197,7 @@ namespace Generator {
     }
 
     string gen_thue_morse_string(size_t n, char a = 'a', char b = 'b') {
-        string s(n);
+        string s(n, a);
         for (size_t i = 0; i < n; ++i) s[i] = __builtin_parityll(i) ? a : b;
         return s;
     }
