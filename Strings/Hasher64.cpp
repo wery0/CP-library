@@ -43,7 +43,7 @@ public:
     hasher64() = default;
 
     template<typename Iterator>
-    hasher64(Iterator first, Iterator last): n(last - first), pref_hash(n), pows(n + 1) {
+    hasher64(Iterator first, Iterator last): n(std::distance(first, last)), pref_hash(n), pows(n + 1) {
         pows[0] = 1;
         if (!n) return;
         pref_hash[0] = hash_elem(*first); ++first;
@@ -113,10 +113,12 @@ public:
 
     //Returns length of longest common prefix of suffixes s[i, n - 1] and s[j, n - 1]
     //O(log(n))
-    size_t lcp(size_t i, size_t j) const {
+    size_t lcp(size_t i, size_t j, size_t max_len = -2) const {
         if (i > j) swap(i, j);
         assert(j < n);
-        size_t l = 0, r = n - j + 1;
+        size_t l = 0, r = min(max_len, n - j) + 1;
+        if (seg_hash(i, i) != seg_hash(j, j)) return 0;
+        if (seg_hash(i, i + r - 2) == seg_hash(j, j + r - 2)) return r - 1;
         while (l + 1 < r) {
             size_t m = l + (r - l) / 2;
             (seg_hash(i, i + m - 1) == seg_hash(j, j + m - 1) ? l : r) = m;
@@ -126,10 +128,12 @@ public:
 
     //Returns length of longest common suffix of prefixes s[0, i] and s[0, j]
     //O(log(n))
-    size_t lcs(size_t i, size_t j) const {
+    size_t lcs(size_t i, size_t j, size_t max_len = -2) const {
         if (i > j) swap(i, j);
         assert(j < n);
-        size_t l = 0, r = i + 2;
+        size_t l = 0, r = min(max_len + 1, i + 2);
+        if (seg_hash(i, i) != seg_hash(j, j)) return 0;
+        if (seg_hash(i - r + 2, i) == seg_hash(j - r + 2, j)) return r - 1;
         while (l + 1 < r) {
             size_t m = l + (r - l) / 2;
             (seg_hash(i + 1 - m, i) == seg_hash(j + 1 - m, j) ? l : r) = m;
