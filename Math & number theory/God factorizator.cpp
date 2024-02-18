@@ -763,10 +763,9 @@ namespace GOD_FACTORIZATOR {
     //Complexity: O(n ^ {1 / 4}) expected
     template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
     std::vector<array<T, 2>> factorize(T n) {
-        auto fc = cplib::factorize(n);
         vector<array<T, 2>> res;
         T pr = 0, c = 0;
-        for (auto p : ans) {
+        for (auto p : cplib::factorize(n)) {
             if (pr == p) ++c;
             else {
                 if (c) res.push_back({pr, c});
