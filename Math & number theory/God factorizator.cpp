@@ -4,8 +4,6 @@ namespace GOD_FACTORIZATOR {
 #pragma GCC target("abm,bmi,bmi2")
 #endif
 
-// Backport some functions in <bit> in C++20.
-
     namespace cplib::port {
 
         namespace impl {
@@ -81,52 +79,20 @@ namespace GOD_FACTORIZATOR {
 
     namespace cplib {
 
-        /**
-         * \brief Greatest common divisor.
-         * \ingroup num
-         *
-         * `std::gcd` is available since C++17, but the GCC implementaiton uses the slow Euclidean algorithm until version 11.
-         * This implementation uses binary GCD which is generally several times faster.
-         *
-         * Note that, unlike `std::gcd`, this function only accepts unsigned integers.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         constexpr T gcd(T x, T y) {
-            if (x == 0) {
-                return y;
-            } else if (y == 0) {
-                return x;
-            }
+            if (x == 0 || y == 0) return x + y;
             int kx = port::countr_zero(x);
             int ky = port::countr_zero(y);
             x >>= kx;
             while (y != 0) {
                 y >>= port::countr_zero(y);
-                if (x > y) {
-                    std::swap(x, y);
-                }
+                if (x > y) std::swap(x, y);
                 y -= x;
             }
             return x << std::min(kx, ky);
         }
 
-        /**
-         * \brief [Bézout coefficients](https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity), i.e. \f$(a,b)\f$ such that
-         * \f$ax+by=\mathrm{GCD}(x,y)\f$.
-         * \ingroup num
-         *
-         * Returns a 3-tuple \f$(a,b,d)\f$ such that \f$ax+by=d\f$ where \f$d=\mathrm{GCD}(x,y)\f$. It is guaranteed that either
-         * \f$|a|\leq\lfloor\frac{y}{2d}\rfloor, |b|\leq\lfloor\frac{x}{2d}\rfloor\f$ or \f$(a,b)\in\{(0,0),(0,1),(1,0)\}\f$.
-         * In other words, \f$(a,b)\f$ is always the unique solution with both \f$|a|\f$ and \f$|b|\f$ being the smallest.
-         *
-         * The above property shows that, for input `x` and `y` of an unsigned integer type `T`, the output `a` and `b` can
-         * always fit in the signed integer type with the same width as `T`, i.e. `std::make_signed_t<T>`.
-         * Thus, `a` and `b` are returned as such type.
-         *
-         * This is implemented using the extended Euclidean algorithm. Various extended binary GCD algorithms exist, but they
-         * either cannot guarantee to find a unique or small solution, or are not faster than the extended Euclidean algorithm
-         * due to extra bound checks needed for finding a unique or small solution.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         constexpr std::tuple<std::make_signed_t<T>, std::make_signed_t<T>, T> bezout(T x, T y) {
             bool swap = x < y;
@@ -163,14 +129,6 @@ namespace GOD_FACTORIZATOR {
             }
         }
 
-        /**
-         * \brief Modular inverse.
-         * \ingroup num
-         *
-         * Returns the unique \f$y\f$ such that \f$xy\equiv 1\pmod{m}\f$ and \f$0\leq y<m\f$.
-         *
-         * Requires \f$\mathrm{GCD}(x,m)=1\f$. Note that \f$m\f$ does not have to be a prime.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         constexpr T mod_inverse(T x, T m) {
             auto [s, t, g] = bezout(x, m);
@@ -212,31 +170,24 @@ namespace GOD_FACTORIZATOR {
                     _mbase3(int_double_t(_mbase2) * _mbase % mod)
                 {}
 
-                // N
                 constexpr int_type mod() const { return _mod; }
 
-                // R%N
                 constexpr int_type mbase() const { return _mbase; }
 
-                // R^2%N
                 constexpr int_type mbase2() const { return _mbase2; }
 
-                // R^3%N
                 constexpr int_type mbase3() const { return _mbase3; }
 
-                // T*(R^-1)%N. Result <2N if input <2N*2N.
                 constexpr int_type reduce(int_double_t t) const {
                     int_type m = int_type(t) * _mod_neg_inv;
                     int_type r = (t + int_double_t(m) * _mod) >> base_width;
                     return r;
                 }
 
-                // Shrink value from [0,4N) into [0,2N)
                 constexpr int_type shrink(int_type x) const {
                     return x >= _mod * 2 ? x - _mod * 2 : x;
                 }
 
-                // Shrink value from [0,2N) into [0,N)
                 constexpr int_type strict_shrink(int_type x) const {
                     return x >= _mod ? x - _mod : x;
                 }
@@ -244,7 +195,6 @@ namespace GOD_FACTORIZATOR {
             private:
                 int_type _mod, _mod_neg_inv, _mbase, _mbase2, _mbase3;
 
-                // Modular inverse modulo 2^2^k by Hensel lifting.
                 static constexpr int_type inv_base(int_type x) {
                     int_type y = 1;
                     for (int i = 1; i < base_width; i *= 2) {
@@ -256,30 +206,6 @@ namespace GOD_FACTORIZATOR {
 
         }  // namespace impl
 
-        /**
-         * \brief Modular integer stored in Montgomery form.
-         * \ingroup num
-         *
-         * For static modint, your code should generally use the type alias ::MMInt or ::MMInt64. For dynamic modint, see
-         * DynamicMontgomeryReductionContext for example.
-         *
-         * Unless converting between modular integers and ordinary integers very frequently (which is rarely the case),
-         * Montgomery modular integer is preferred over plain modular integer (such as `atcoder::modint`).
-         *
-         * For modulus with \f$n\f$ bits, Montgomery reduction uses multiplication result of up to \f$2n\f$ bits, whereas
-         * Barrett reduction (for modular multiplication of numbers stored in plain form) uses up to \f$3n\f$ bits.
-         * Thus, for 32-bit modulus Barrett reduction is less SIMD-friendly due to requiring 128-bit multiplication,
-         * and for 64-bit modulus Barrett reduction is significantly slower due to requiring multi-precision multiplication.
-         *
-         * This implementation makes further optimization to reduce branching and improve SIMD-friendliness, at the cost of
-         * requiring \f$N<R/4\f$, where \f$N\f$ is the modulus and \f$R=2^{32}\f$ or \f$2^{64}\f$ the Montgomery divisor.
-         * We keep everything in \f$[0,2N)\f$ instead of \f$[0,N)\f$. The result of multiplication-Montgomery reduction of
-         * two numbers less than \f$2N\f$, even without the final reduction step, is already less than
-         * \f$((2N)(2N)+NR)/R=N(4N/R)+N<2N\f$, thus the final reduction step is not needed.
-         *
-         * \tparam Context ::StaticMontgomeryReductionContext or ::DynamicMontgomeryReductionContext. Provides information
-         * for performing Montgomery reduction.
-         */
         template<typename Context>
         class MontgomeryModInt {
         public:
@@ -290,12 +216,6 @@ namespace GOD_FACTORIZATOR {
 
             MontgomeryModInt() : _val(0) {}
 
-            /**
-             * \brief Converts a plain integer to a Montgomery modular integer.
-             *
-             * This constructor is marked `explicit` because the cost of conversion is non-trivial (requires one
-             * Montgomery reduction) and thus implicit conversion is discouraged.
-             */
             template < typename T, std::enable_if_t < std::is_integral_v<T> && std::is_signed_v<T >>* = nullptr >
             explicit MontgomeryModInt(T x) {
                 using signed_int_type = std::make_signed_t<int_type>;
@@ -303,23 +223,19 @@ namespace GOD_FACTORIZATOR {
                 _val = mr().reduce(mr().mbase2() * int_double_t(v < 0 ? v + mr().mod() : v));
             }
 
-            /** \copydoc MontgomeryModInt(T) */
             template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
             explicit MontgomeryModInt(T x) {
                 _val = mr().reduce(mr().mbase2() * int_double_t(x % mr().mod()));
             }
 
-            /** \brief Converts back to a plain integer in the range \f$[0,N)\f$. */
             int_type val() const {
                 return mr().strict_shrink(mr().reduce(_val));
             }
 
-            /** \brief Returns a hash code that is the same for the same residue class modulo the modulus. */
             int_type residue() const {
                 return mr().strict_shrink(_val);
             }
 
-            /** \brief Returns the modulus. */
             static constexpr int_type mod() { return mr().mod(); }
 
             mint& operator++() {
@@ -385,11 +301,6 @@ namespace GOD_FACTORIZATOR {
                 return ret;
             }
 
-            /**
-             * \brief Returns the modular inverse.
-             *
-             * Requires the underlying value to be invertible, i.e. coprime with the modulus.
-             */
             mint inv() const {
                 return from_raw(mr().reduce(int_double_t(mr().mbase3()) * mod_inverse(_val, mr().mod())));
             }
@@ -426,16 +337,6 @@ namespace GOD_FACTORIZATOR {
             }
         };
 
-        /**
-         * \brief Compile-time constant modulus for Montgomery reduction.
-         * \ingroup num
-         *
-         * All necessary information is computed at compile-time.
-         *
-         * \tparam UInt An unsigned integer type.
-         * \tparam Mod The modulus. Must be odd and no larger than than 1/4 of `UInt`'s maximum value.
-         * \see MontgomeryModInt
-         */
         template<typename UInt, UInt Mod, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
         class StaticMontgomeryReductionContext {
         public:
@@ -451,34 +352,6 @@ namespace GOD_FACTORIZATOR {
             static constexpr auto _reduction = mr_type(Mod);
         };
 
-        /**
-         * \brief Runtime mutable modulus for Montgomery reduction.
-         * \ingroup num
-         *
-         * Maintains a stack of moduli. Push stack when set_mod is called, and pop stack when the Guard object goes
-         * out of scope. This allows recursively calling functions that use different moduli. However at any given moment
-         * you can only use one modulus.
-         *
-         * Creating a dynamic MontgomeryModInt under a modulus and using it under another is undefined behavior.
-         *
-         * Below is an example of using this class for dynamic MontgomeryModInt.
-         *
-         * ```
-         * uint32_t do_something(uint32_t mod) {
-         *     using ctx = DynamicMontgomeryReductionContext<uint32_t>;
-         *     auto _guard = ctx::set_mod(mod);
-         *     // Now the new modulus is pushed and `_guard` is alive.
-         *     using mint = MontgomeryModInt<ctx>;
-         *     mint ans(42);
-         *     // Do some modular arithmetic here using the new modulus. It's okay to call functions that may use differnt
-         *     // moduli, since their moduli will be popped after they finish.
-         *     return ans.val();
-         *     // `_guard` is destructed and the modulus is popped.
-         * }
-         * ```
-         *
-         * \tparam UInt An unsigned integer type.
-         */
         template<typename UInt, std::enable_if_t<std::is_unsigned_v<UInt>>* = nullptr>
         class DynamicMontgomeryReductionContext {
         public:
@@ -498,13 +371,6 @@ namespace GOD_FACTORIZATOR {
                 Guard() {};
             };
 
-            /**
-             * \brief Set the modulus.
-             *
-             * The returned Guard object must stay alive when computing under this modulus.
-             *
-             * \param mod Must be odd and no larger than than 1/4 of `UInt`'s maximum value.
-             */
             [[nodiscard]]
             static Guard set_mod(int_type mod) {
                 assert(mod % 2 == 1 && mod <= std::numeric_limits<int_type>::max() / 4);
@@ -520,19 +386,9 @@ namespace GOD_FACTORIZATOR {
             static inline std::vector<mr_type> _reduction_env;
         };
 
-        /**
-         * \brief Type alias for 32-bit MontgomeryModInt with compile-time constant modulus.
-         * \related MontgomeryModInt
-         * \tparam Mod The modulus. Must be odd and no larger than \f$2^{30}-1\f$.
-         */
         template<uint32_t Mod>
         using MMInt = MontgomeryModInt<StaticMontgomeryReductionContext<uint32_t, Mod>>;
 
-        /**
-         * \brief Type alias for 64-bit MontgomeryModInt with compile-time constant modulus.
-         * \related MontgomeryModInt
-         * \tparam Mod The modulus. Must be odd and no larger than \f$2^{62}-1\f$.
-         */
         template<uint64_t Mod>
         using MMInt64 = MontgomeryModInt<StaticMontgomeryReductionContext<uint64_t, Mod>>;
 
@@ -544,9 +400,7 @@ namespace GOD_FACTORIZATOR {
         constexpr T pow(T base, unsigned long long exp) {
             T res(1);
             while (exp) {
-                if (exp & 1) {
-                    res *= base;
-                }
+                if (exp & 1) res *= base;
                 base *= base;
                 exp >>= 1;
             }
@@ -563,18 +417,12 @@ namespace GOD_FACTORIZATOR {
             T miller_rabin(ModInt a, T d, int r) {
                 const ModInt one(1), minus_one(-1);
                 ModInt x = pow(a, d);
-                if (x == one || x == minus_one) {
-                    return 1;
-                }
+                if (x == one || x == minus_one) return 1;
                 while (r--) {
                     ModInt y = x * x;
-                    if (y == one) {
-                        return gcd(x.val() - 1, ModInt::mod());
-                    }
+                    if (y == one) return gcd(x.val() - 1, ModInt::mod());
                     x = y;
-                    if (x == minus_one) {
-                        return 1;
-                    }
+                    if (x == minus_one) return 1;
                 }
                 return 0;
             }
@@ -592,17 +440,11 @@ namespace GOD_FACTORIZATOR {
             }
 
             static uint32_t prime_or_factor_32(uint32_t n) {
-                if (n < 64) {
-                    return is_prime_lt64(n);
-                }
-                if (n % 2 == 0) {
-                    return 2;
-                }
+                if (n < 64) return is_prime_lt64(n);
+                if (n % 2 == 0) return 2;
                 constexpr uint32_t small_prod = 3u * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29;
                 uint32_t g = gcd(n, small_prod);
-                if (g != 1) {
-                    return g != n ? g : 0;
-                }
+                if (g != 1) return g != n ? g : 0;
                 using ctx = DynamicMontgomeryReductionContext<uint32_t>;
                 auto _guard = ctx::set_mod(n);
                 using mint = MontgomeryModInt<ctx>;
@@ -610,25 +452,17 @@ namespace GOD_FACTORIZATOR {
                 uint32_t d = (n - 1) >> r;
                 for (uint32_t a : {2, 7, 61}) {
                     uint32_t ret = miller_rabin(mint(a), d, r);
-                    if (ret != 1) {
-                        return ret;
-                    }
+                    if (ret != 1) return ret;
                 }
                 return 1;
             }
 
             static uint64_t prime_or_factor_64(uint64_t n) {
-                if (n < 64) {
-                    return is_prime_lt64(n);
-                }
-                if (n % 2 == 0) {
-                    return 2;
-                }
+                if (n < 64) return is_prime_lt64(n);
+                if (n % 2 == 0) return 2;
                 constexpr uint64_t small_prod = 3ull * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29 * 31 * 37 * 41 * 43 * 47 * 53;
                 uint64_t g = gcd(n, small_prod);
-                if (g != 1) {
-                    return g != n ? g : 0;
-                }
+                if (g != 1) return g != n ? g : 0;
                 using ctx = DynamicMontgomeryReductionContext<uint64_t>;
                 auto _guard = ctx::set_mod(n);
                 using mint = MontgomeryModInt<ctx>;
@@ -636,36 +470,13 @@ namespace GOD_FACTORIZATOR {
                 uint64_t d = (n - 1) >> r;
                 for (uint64_t a : {2, 325, 9375, 28178, 450775, 9780504, 1795265022}) {
                     uint64_t ret = miller_rabin(mint(a), d, r);
-                    if (ret != 1) {
-                        return ret;
-                    }
+                    if (ret != 1) return ret;
                 }
                 return 1;
             }
 
         }  // namespace impl
 
-        /**
-         * \brief Primality test and possibly return a non-trivial factor.
-         * \ingroup num
-         * \see is_prime() Discards the factor and returns a boolean only.
-         *
-         * Always returns 1 if `n` is prime. Otherwise, may return 0 or a non-trivial factor of `n`. As most factorization
-         * algorithm requires primality test first, a factor found in primality test is work saved for factorization.
-         *
-         * In this implementation, after ruling out small prime divisors, Miller-Rabin test is run on a fixed set of \f$k\f$
-         * bases that are known to cover all numbers up to a certain bound, where \f$k=3\f$ covers all 32-bit integers and
-         * \f$k=7\f$ covers all 64-bit integers. The time complexity is thus \f$O(k\log N)\f$.
-         *
-         * In this implementation, the non-trivial factor may come from one of the following:
-         * * 2 if `n` is even.
-         * * GCD of `n` and product of small odd primes.
-         * * [Finding factors in Miller-Rabin test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Variants_for_finding_factors).
-         *
-         * \tparam T An unsigned integer type.
-         * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
-         * this implementation.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         T prime_or_factor(T n) {
             if (n < (1 << 30)) {
@@ -675,15 +486,6 @@ namespace GOD_FACTORIZATOR {
             }
         }
 
-        /**
-         * \brief Primality test.
-         * \ingroup num
-         * \see prime_or_factor() Implementation details.
-         *
-         * \tparam T An unsigned integer type.
-         * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
-         * this implementation.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         bool is_prime(T n) {
             return prime_or_factor(n) == 1;
@@ -708,12 +510,10 @@ namespace GOD_FACTORIZATOR {
                     while (n % 2 == 0) {
                         n /= 2;
                         int r = k % 8;
-                        if (r == 3 || r == 5)
-                            t = -t;
+                        if (r == 3 || r == 5) t = -t;
                     }
                     std::swap(n, k);
-                    if (n % 4 == 3 && k % 4 == 3)
-                        t = -t;
+                    if (n % 4 == 3 && k % 4 == 3) t = -t;
                     n %= k;
                 }
                 return k == 1 ? t : 0;
@@ -760,7 +560,7 @@ namespace GOD_FACTORIZATOR {
                 }
                 Point mul(const Point &p, unsigned long long k) const {
                     Point p0 = p, p1 = dbl(p);
-                    for (int b = port::bit_width(k) - 2; b >= 0; b--) {
+                    for (int b = port::bit_width(k) - 2; b >= 0; --b) {
                         Point tmp = add(p1, p0, p);
                         if ((k >> b) & 1) {
                             p1 = dbl(p1);
@@ -779,7 +579,7 @@ namespace GOD_FACTORIZATOR {
             std::vector<unsigned long long> ecm_blocks(int smooth_bound) {
                 std::vector<bool> sieve(smooth_bound + 1, true);
                 std::vector<unsigned long long> blocks{1};
-                for (int p = 2; p <= smooth_bound; p++) {
+                for (int p = 2; p <= smooth_bound; ++p) {
                     if (sieve[p]) {
                         int pw = p;
                         while (pw <= smooth_bound) {
@@ -856,14 +656,10 @@ namespace GOD_FACTORIZATOR {
 
             template<typename T>
             T ecm(T n) {
-                for (int k = 2; k < port::bit_width(n); k++) {
+                for (int k = 2; k < port::bit_width(n); ++k) {
                     T r = roundl(powl(n, 1.0l / k)), pw = r;
-                    for (int i = 1; i < k; i++) {
-                        pw *= r;
-                    }
-                    if (pw == n) {
-                        return r;
-                    }
+                    for (int i = 1; i < k; ++i) pw *= r;
+                    if (pw == n) return r;
                 }
                 using ctx = DynamicMontgomeryReductionContext<T>;
                 auto _guard = ctx::set_mod(n);
@@ -871,7 +667,7 @@ namespace GOD_FACTORIZATOR {
                 return ecm_modint<mint>();
             }
 
-// https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
+            // https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
             template<typename ModInt, typename T = typename ModInt::int_type>
             T pollard_rho_modint() {
                 const T n = ModInt::mod();
@@ -885,18 +681,14 @@ namespace GOD_FACTORIZATOR {
                     g = 1;
                     do {
                         x = y;
-                        for (T i = 0; i < r; i++) {
-                            y = y * y + c;
-                        }
+                        for (T i = 0; i < r; ++i) y = y * y + c;
                         ys = y;
-                        for (T i = 0; i < r; i++) {
+                        for (T i = 0; i < r; ++i) {
                             y = y * y + c;
                             q *= y - x;
                             if ((i + 1) % m == 0) {
                                 g = gcd(q.val(), n);
-                                if (g != 1) {
-                                    break;
-                                }
+                                if (g != 1) break;
                                 ys = y;
                             }
                         }
@@ -947,25 +739,9 @@ namespace GOD_FACTORIZATOR {
 
         }  // namespace impl
 
-        /**
-         * \brief Integer factorization.
-         * \ingroup num
-         *
-         * Returns primes factors with multiplicity in ascending order.
-         *
-         * After ruling out primes (and possibly finding a non-trivial factor) with prime_or_factor(), it runs
-         * [Brent's improved version of Pollard's rho algorithm](https://maths-people.anu.edu.au/~brent/pub/pub051.html).
-         * Time complexity is \f$O(N^{1/4})\f$ expected.
-         *
-         * \tparam T An unsigned integer type.
-         * \param n Integer no larger than \f$2^{62}-1\f$, the largest modulus allowed by MontgomeryModInt, which is used in
-         * this implementation.
-         */
         template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
         std::vector<T> factorize(T n) {
-            if (n <= 1) {
-                return {};
-            }
+            if (n <= 1) return {};
             int twos = port::countr_zero(n);
             impl::FactorizationResult<T> result;
             result.prime_factors.insert(result.prime_factors.end(), twos, 2);
@@ -982,8 +758,23 @@ namespace GOD_FACTORIZATOR {
 
     }  // namespace cplib
 
+    //n = p_1 ^ k_1 * p_2 ^ k_2 *... Returns vector of pairs {p_i, k_i}
+    //Factorizes numbers up to 2^62-1 ultra fast
+    //Complexity: O(n ^ {1 / 4}) expected
     template<typename T, std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
-    std::vector<T> factorize(T n) {
-        return cplib::factorize(n);
+    std::vector<array<T, 2>> factorize(T n) {
+        auto fc = cplib::factorize(n);
+        vector<array<T, 2>> res;
+        T pr = 0, c = 0;
+        for (auto p : ans) {
+            if (pr == p) ++c;
+            else {
+                if (c) res.push_back({pr, c});
+                c = 1;
+            }
+            pr = p;
+        }
+        if (c) res.push_back({pr, c});
+        return res;
     }
 };

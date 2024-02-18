@@ -45,9 +45,9 @@ namespace pollardRho {
         return x + y;
     }
 
-    uniform_int_distribution<uint64_t> gen(0, ULLONG_MAX);
-    mt19937 rng(1);
-    uint64_t pollard(const uint64_t n, uint64_t seed = gen(rng)) {
+    uint64_t pollard(const uint64_t n) {
+        static uniform_int_distribution<uint64_t> gen(0, ULLONG_MAX);
+        static mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
         if (n == 1) return 1;
         if (MillerRabin::is_prime(n)) return n;
         const uint64_t K = (gen(rng) << 1) | 1;
@@ -55,11 +55,11 @@ namespace pollardRho {
             return (x * x + K) % n;
         };
         const uint64_t IT = 2e5, C = 64;
-        uint64_t x = seed, y = seed, dvs = 1;
-        for (int q = 0; dvs == 1 || dvs == n; ++q) {
-            if (q == IT / C) return -1;
+        uint64_t x = gen(rng), y = x, dvs = 1;
+        for (uint64_t iter = 0; dvs == 1 || dvs == n; ++iter) {
+            if (iter == IT / C) return -1;
             uint64_t p = 1, sx = x, sy = y;
-            for (int i = 0; i < C; ++i) {
+            for (uint64_t i = 0; i < C; ++i) {
                 x = func(x);
                 y = func(func(y));
                 uint64_t d = x > y ? x - y : y - x;
@@ -90,14 +90,27 @@ namespace pollardRho {
         }
     }
 
-    vector<uint64_t> factorize(uint64_t x) {
+    //n = p_1 ^ k_1 * p_2 ^ k_2 *... Returns vector of pairs {p_i, k_i}
+    //O(n ^ {1 / 4})
+    vector<array<uint64_t, 2>> factorize(uint64_t n) {
         vector<uint64_t> ans;
         for (uint64_t i : {2, 3, 5, 7, 11, 13, 17, 19}) {
-            while (x % i == 0) ans.push_back(i), x /= i;
+            while (n % i == 0) ans.push_back(i), n /= i;
         }
-        go(x, ans);
+        go(n, ans);
         sort(ans.begin(), ans.end());
-        return ans;
+        vector<array<uint64_t, 2>> res;
+        uint64_t pr = 0, c = 0;
+        for (auto p : ans) {
+            if (pr == p) ++c;
+            else {
+                if (c) res.push_back({pr, c});
+                c = 1;
+            }
+            pr = p;
+        }
+        if (c) res.push_back({pr, c});
+        return res;
     }
 };
 //Usage: pollardRho::factorize(x)
