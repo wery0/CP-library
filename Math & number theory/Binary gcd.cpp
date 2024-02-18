@@ -1,7 +1,7 @@
 //1.5+ times faster, than __gcd.
 template<typename T>
-T gcdll(T x, T y) {
-    static_assert(is_integral_v<T>);
+T binary_gcd(T x, T y) {
+    static_assert(is_integral_v<T> && is_signed_v<T>);
     if (!x || !y) return x ^ y;
     int shx = __builtin_ctzll(x), shy = __builtin_ctzll(y);
     int sh = min(shx, shy);
