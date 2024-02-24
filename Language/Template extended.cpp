@@ -1,6 +1,6 @@
 template<typename I> auto array_cnt(I f, I l) {umap<typename iterator_traits<I>::value_type, int> mp; while (f != l) ++mp[*f], ++f; return mp;}
 template<typename I> auto subset_sum(I f, I l) {int a = l - f; vec<typename iterator_traits<I>::value_type> o(1 << a); for (int q = 1; q < (1 << a); ++q) {const int i = __builtin_ctz(q); o[q] = *(f + i) + o[q ^ (1 << i)];} return o;}
-template<typename I> vec<pii> get_segs_of_eq_elems(I first, I last) {using T = typename iterator_traits<I>::value_type; vec<pii> ans; if (first == last) return ans; int l = 0; T prev = *first; int r = 1; for (auto cit = next(first); cit != last; ++cit, ++r) {if (*cit != prev) {ans.pb({l, r - 1}); l = r;} prev = *cit;} ans.pb({l, r - 1}); return ans;}
+template<typename I> vec<pii> get_segs_of_eq_elems(I first, I last, function<bool(const typename iterator_traits<I>::value_type&, const typename iterator_traits<I>::value_type&)> cmp = [](const auto& l, const auto& r) {return l == r;}) {using T = typename iterator_traits<I>::value_type; vec<pii> ans; if (first == last) return ans; int l = 0, r = 1; T prev = *first; for (auto cit = next(first); cit != last; ++cit, ++r) {if (!cmp(*cit, prev)) {ans.emplace_back(l, r - 1); l = r;} prev = *cit;} ans.emplace_back(l, r - 1); return ans;}
 template<typename I> int LCP(I f1, I l1, I f2, I l2) {for (int o = 0; ; ++f1, ++f2, ++o) if (f1 == l1 || f2 == l2 || *f1 != *f2) return o; return -1;}
 template<typename I> int min_period(I f, I l) {int a = l - f; vec<int> m(a); for (int q = 1; q < a; ++q) {for (int w = m[q - 1]; w && !m[q]; w = m[w - 1]) {if (*(f + q) == *(f + w)) m[q] = w + 1;} m[q] += !m[q] && *(f + q) == *f;} int p = a - m.back(); return a % p ? a : p;}
 template<typename I> bool is_palindrome(I f, I l) {for (--l; f < l; ++f, --l) if (*f != *l) return 0; return 1;}
@@ -16,9 +16,6 @@ str from_base_10_to_base_b(ll x, ll b) {str t; if (x == 0) t = "0"; for (; x; x 
 #define vvs vec<vec<str>>
 const int dx[] = { -1, 0, 1, 0, -1, 1, 1, -1};
 const int dy[] = {0, 1, 0, -1, 1, 1, -1, -1};
-template<typename T_arr> int LCP(T_arr m1, T_arr m2) {return LCP(all(m1), all(m2));}
-template<typename T_arr> T_arr subset_sum(T_arr m) {return subset_sum(all(m));}
-template<typename T_arr> vec<pii> get_segs_of_eq_elems(T_arr m) {return get_segs_of_eq_elems(all(m));}
 template<typename T> int sum_of_digits(T val) {int o = 0; for (; val; val /= 10) o += val % 10; return o;}
 template<typename T> struct static_sum_query {vec<T> m; static_sum_query() = default; template<typename I>static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) {*it = *(it - 1) + *f;}} template<typename T_arr> static_sum_query(T_arr& m) {(*this) = static_sum_query(all(m));} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
 template<typename T> vec<pair<T, int>> zip_with_positions(vec<T> &m) {int a = m.size(); vec<pair<T, int>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q], q}; return ans;}
@@ -29,9 +26,6 @@ template<typename T> vec<vec<int>> get_cycles_of_perm(vec<T> &m, int permutation
 int find_closing_bracket(str &s, int i) {char op = s[i], cl = op == '(' ? ')' : op == '{' ? '}' : op == '[' ? ']' : op == '<' ? '>' : '@'; assert(cl != '@'); int dep = 1; for (int q = i + 1; q < s.size(); ++q) {dep += s[q] == op ? 1 : s[q] == cl ? -1 : 0; if (dep == 0) return q;} return -1;}
 template<typename T> vec<pair<T, T>> vv_to_vp(vec<vec<T>> &m) {int a = m.size(); vec<pair<T, T>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q][0], m[q][1]}; return ans;}
 template<const int k, typename T> vec<array<T, k>> vv_to_varr(vec<vec<T>> &m) {int a = m.size(); vec<array<T, k>> ans(a); for (int q = 0; q < a; ++q) for (int w = 0; w < k; ++w) ans[q][w] = m[q][w]; return ans;}
-template<typename T_arr> int min_period(T_arr m) {return min_period(all(m));}
-template<typename T_arr> bool is_palindrome(T_arr m) {return is_palindrome(all(m));}
-template<typename T_arr> T_arr reverse(T_arr x) {reverse(all(x)); return x;}
 str from_base_10_to_base_b(str x, ll b) {return from_base_10_to_base_b(stoll(x), b);}
 ll from_base_b_to_base_10(str x, ll b) {ll o = 0, pw = 1; for (int q = x.size() - 1; q >= 0; --q, pw *= b) o += (x[q] - '0') * pw; return o;}
 str from_base_a_to_base_b(str x, ll a, ll b) {ll x10 = from_base_b_to_base_10(x, a); return from_base_10_to_base_b(x10, b);}
@@ -47,17 +41,13 @@ complex<ll> str_to_cmpl_ll(str t) {int ps = t.find('+'), sgn = 1; if (ps == stri
 int time_to_minutes(int h, int m) {return h * 60 + m;}
 int time_to_minutes(str s) {int ps = s.find(':'); assert(ps != string::npos); return time_to_minutes(stoi(s.substr(0, ps)), stoi(s.substr(ps + 1)));}
 str minutes_to_time(int m, bool h0 = true, bool m0 = true) {int h = m / 60; m %= 60; str o; if (h0) o += (h < 10 ? "0" : ""); o += to_string(h); o += ':'; if (m0) o += (m < 10 ? "0" : ""); o += to_string(m); return o;}
-ll lcm(ll x, ll y) {return x / __gcd(x, y) * y;}
 bool is_vowel_lowercase(char c) {return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';}
 bool is_consonant_lowercase(char c) {return !is_vowel_lowercase(c);}
-uint leq_pow2(const uint x) {return 1u << __lg(x);}
 ull leq_pow2ll(const ull x) {return 1ull << __lg(x);}
-uint geq_pow2(const uint x) {return x & (x - 1) ? 2u << __lg(x) : x;}
 ull geq_pow2ll(const ull x) {return x & (x - 1) ? 2ull << __lg(x) : x;}
 ll sqd(const pll p1, const pll p2) {return (p1.F - p2.F) * (p1.F - p2.F) + (p1.S - p2.S) * (p1.S - p2.S);}
 ll sqd(const ll x1, const ll y1, const ll x2, const ll y2) {return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);}
 template<typename T> int sign(T x) {return x < 0 ? -1 : x > 0 ? 1 : 0;}
-template<typename T_arr> auto array_cnt(T_arr m) {return array_cnt(all(m));}
 template<typename I> bool is_subsequence(I f_pattern, I l_pattern, I f_text, I l_text) {for (; f_text != l_text && f_pattern != l_pattern; ++f_text) if (*f_text == *f_pattern) ++f_pattern; return f_pattern == l_pattern;}
 vec<ll> get_divisors(ll x) {vec<ll> ans1, ans2; for (ll q = 1; q * q <= x; ++q) {if (x % q == 0) {ans1.pb(q); ans2.pb(x / q);}} if (ans1.back() == ans2.back()) ans1.pop_back(); reverse(all(ans2)); for (ll i : ans2) ans1.pb(i); return ans1;}
 bool is_prime(ll c) {if (c < 2) return 0; if (c == 2 || c == 3) return 1; if (c % 2 == 0 || c % 3 == 0) return 0; const ll gr = sqrtl(c) + 1; for (ll q = 6; q <= gr; q += 6) {if (c % (q - 1) == 0) return 0; if (c % (q + 1) == 0) return 0;} return 1;}
