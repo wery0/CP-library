@@ -34,8 +34,8 @@ public:
         return pow(MOD - 2);
     }
 
-    template<typename I, typename L, const int M> friend Mint<I, L, M> pow(const Mint<I, L, M>& m, LONG pw) {return m.pow(pw);}
-    template<typename I, typename L, const int M> friend Mint<I, L, M> inv(const Mint<I, L, M>& m) {return m.inv();}
+    friend Mint pow(const Mint& m, LONG pw) {return m.pow(pw);}
+    friend Mint inv(const Mint& m) {return m.inv();}
 
     Mint operator+(const Mint& rhs) const {return val + rhs.val >= MOD ? val + rhs.val - MOD : val + rhs.val;}
     Mint operator-(const Mint& rhs) const {return val < rhs.val ? MOD - rhs.val + val : val - rhs.val;}

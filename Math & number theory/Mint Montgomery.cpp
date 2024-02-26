@@ -59,8 +59,8 @@ public:
         return mint{u};
     }
 
-    template<typename I, typename L, const int M> friend MontgomeryMint<I, L, M> pow(const MontgomeryMint<I, L, M>& m, LONG pw) {return m.pow(pw);}
-    template<typename I, typename L, const int M> friend MontgomeryMint<I, L, M> inv(const MontgomeryMint<I, L, M>& m) {return m.inv();}
+    friend MontgomeryMint pow(const MontgomeryMint& m, LONG pw) {return m.pow(pw);}
+    friend MontgomeryMint inv(const MontgomeryMint& m) {return m.inv();}
 
     constexpr mint& operator+=(const mint& rhs) {if (INT(a += rhs.a - 2 * mod) < 0) a += 2 * mod; return *this;}
     constexpr mint& operator-=(const mint& rhs) {if (INT(a -= rhs.a) < 0) a += 2 * mod; return *this;}
