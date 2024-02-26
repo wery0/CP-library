@@ -19,7 +19,7 @@ class MontgomeryMint {
         return r;
     }
 
-    static constexpr uint32_t reduce(const uint64_t& b) {
+    static constexpr UINT reduce(const ULONG& b) {
         return (b >> sh) + mod - ((ULONG(UINT(UINT(b) * r)) * mod) >> sh);
     }
 
