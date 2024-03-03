@@ -180,9 +180,9 @@ class treap {
     void get_keys_on_subsegment(Node* n, size_t l, size_t& len, vector<K>& res) {
         if (!n || !len) return;
         push(n);
-        if (l < gsz(n->l)) get_keys_on_subsegment(n->l, l, len, res);
+        if (l < gsz(n->l) && len) get_keys_on_subsegment(n->l, l, len, res);
         if (l <= gsz(n->l) && len) res.push_back(n->key), --len;
-        if (l > gsz(n->l) + 1) get_keys_on_subsegment(n->r, l - gsz(n->l) - 1, len, res);
+        if (len) get_keys_on_subsegment(n->r, l > gsz(n->l) ? l - gsz(n->l) - 1 : 0, len, res);
     }
 
     K kth_elem(Node* n, size_t k) {
