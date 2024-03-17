@@ -1,7 +1,8 @@
-//Both array must be sorted
-//O(log(k)) comparator calls
-template<typename T>
-T kth_ordered_statistic_of_two_sorted_arrays(const vector<T>& m1, const vector<T>& m2, int k) {
+//Returns sort(m1.append(m2))[k]
+//Both arrays must be non-decreasingy sorted
+//O(log(k)) array element accessing
+template<typename T_arr>
+auto kth_ordered_statistic_of_two_sorted_arrays(const T_arr& m1, const T_arr& m2, int k) {
     auto cmp = [&](int u, int i, int j) {
         if (u) swap(i, j);
         int res = m1[i] < m2[j];
