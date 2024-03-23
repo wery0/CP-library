@@ -315,8 +315,9 @@ public:
 
     template<typename I> void insert_array_at_pos(size_t pos, I first, I last) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(first, last)), rg);}
     template<typename T> void insert_array_at_pos(size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(il.begin(), il.end())), rg);}
-    void insert_key_at_pos(size_t pos, K key) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key)), rg);}
-    void insert_key(K key) {root = insert_node(root, new Node(key));}
+    void insert(K key) {root = insert_node(root, new Node(key));}
+    void insert_at_pos(size_t pos, K key) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key)), rg);}
+    void insert_back(K key) {insert_at_pos(size(), key);}
 
     void update_key_at_pos(size_t pos, K new_key) {update_key_at_pos(root, pos, new_key);}
 
@@ -324,11 +325,12 @@ public:
     void erase_one_key_occurrence(K key) {root = erase_one_key_occurrence(root, key);}
     void erase_all_key_occurrences(K key) {root = erase_all_key_occurrences(root, key);}
     void erase_seg(size_t l, size_t len) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, len); root = merge(lf, rg);}
+    void erase_back() {erase_pos(size() - 1);}
 
     K extract_pos(size_t pos) {erase_pos(pos); return last_erased_key;}
 
     K operator[](size_t pos) {return kth_elem(root, pos);}
-    
+
     bool contains(K key) {Node* n = root; while (n) {push(n); if (key == n->key) return true; n = key < n->key ? n->l : n->r;} return false;}
     size_t get_leftest_pos_of_key(K key) {Node* n = root; size_t pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
 
@@ -345,8 +347,8 @@ public:
 
     //If no such pos exists, these functions will return size()
     size_t get_pos_of_leftest_key_leq(K key) {return pos_of_leftest_key_leq(root, key);}
-    size_t get_pos_of_closest_from_left_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
-    size_t get_pos_of_closest_from_right_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
+    size_t get_pos_of_closest_from_left_key_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
+    size_t get_pos_of_closest_from_right_key_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
 
     size_t get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
     size_t get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}

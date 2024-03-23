@@ -344,9 +344,10 @@ public:
 
     template<typename I> void insert_array_at_pos(size_t pos, I first, I last) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(first, last)), rg);}
     template<typename T> void insert_array_at_pos(size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(il.begin(), il.end())), rg);}
-    void insert_key_at_pos(size_t pos, K key, V val = UNDEF) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key, val)), rg);}
-    void insert_key(K key, V val = UNDEF) {root = insert_node(root, new Node(key, val));}
-    
+    void insert(K key, V val = UNDEF) {root = insert_node(root, new Node(key, val));}
+    void insert_at_pos(size_t pos, K key, V val = UNDEF) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key, val)), rg);}
+    void insert_back(K key, V val = UNDEF) {insert_at_pos(size(), key, val);}
+
     void update_key_at_pos(size_t pos, K new_key) {update_key_at_pos(root, pos, new_key);}
     void update_val_at_pos(size_t pos, V new_val) {update_val_at_pos(root, pos, new_val);}
 
@@ -354,6 +355,7 @@ public:
     void erase_one_key_occurrence(K key) {root = erase_one_key_occurrence(root, key);}
     void erase_all_key_occurrences(K key) {root = erase_all_key_occurrences(root, key);}
     void erase_seg(size_t l, size_t len) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, len); root = merge(lf, rg);}
+    void erase_back() {erase_pos(size() - 1);}
 
     K extract_pos_get_key(size_t pos) {erase_pos(pos); return last_erased_key;}
     V extract_pos_get_val(size_t pos) {erase_pos(pos); return last_erased_val;}
@@ -375,14 +377,14 @@ public:
     K pref_sumkey(size_t p) {Node* n = root; K sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmk(n->l) + n->key; if (gsz(n->l) < p) sm += gsmk(n->l) + n->key, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
     K seg_sumkey_fast(size_t l, size_t r) {return pref_sumkey(r) - (l ? pref_sumkey(l - 1) : 0);}
     K seg_sumkey_slow(size_t l, size_t r) {auto [lf, tmp] = split_size(root, l); auto [mid, rg] = split_size(tmp, r - l + 1); K ans = gsmk(mid); root = merge(merge(lf, mid), rg); return ans;}
-    
+
     V pref_sumval(size_t p) {Node* n = root; V sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmv(n->l) + n->val; if (gsz(n->l) < p) sm += gsmv(n->l) + n->val, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
     V seg_sumval(size_t l, size_t r) {return pref_sumval(r) - (l ? pref_sumval(l - 1) : 0);}
 
     //If no such pos exists, these functions will return size()
     size_t get_pos_of_leftest_key_leq(K key) {return pos_of_leftest_key_leq(root, key);}
-    size_t get_pos_of_closest_from_left_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
-    size_t get_pos_of_closest_from_right_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
+    size_t get_pos_of_closest_from_left_key_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
+    size_t get_pos_of_closest_from_right_key_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
 
     size_t get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
     size_t get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
