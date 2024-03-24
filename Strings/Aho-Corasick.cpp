@@ -38,7 +38,7 @@ class aho_corasick {
     int cnt_different_strings = 0;
     bool is_prepared = false;
 
-    inline bool has(Node* n, int chr) {
+    inline bool has(Node* n, int chr) const {
         if constexpr(storage == ARRAY) return n->m[chr];
         else return n->m.count(chr);
     }
