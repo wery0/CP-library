@@ -174,7 +174,7 @@ public:
     }
 
     //Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
-    //O(log(n)) with FC, O(log(n)^2) without
+    //O(log(n)^2)
     C rect_sum(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = C;
         auto merge = [](const A& x, const A& y) { return x + y; };
@@ -183,7 +183,7 @@ public:
     }
 
     //Point (x, y) must already exist!
-    //O(log(n)) with FC, O(log(n)^2) without
+    //O(log(n)^2)
     void point_add(T x, T y, T val, bool use_fractional_cascading = true) {
         assert(is_prepared);
         auto it = lower_bound(points.begin(), points.end(), pt{x, y, -1});
