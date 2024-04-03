@@ -174,7 +174,7 @@ public:
     }
 
     //Counts sum of weights of points in rectangle [x1, x2] x [y1, y2]
-    //O(log(n)^2)
+    //O(log(n)) with FC, O(log(n)^2) without
     C rect_sum(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = C;
         auto merge = [](const A& x, const A& y) { return x + y; };
