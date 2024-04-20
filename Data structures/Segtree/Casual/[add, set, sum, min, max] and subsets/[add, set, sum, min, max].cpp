@@ -2,40 +2,41 @@ template<typename T>
 class segtree {
 
     static constexpr T INF = numeric_limits<T>::max();
-    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
-    vector<T> ps_set, ps_add;
+    vector<T> ps;
+    vector<char> is_set;
 
     int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
     }
 
     void apply_set(int v, T val) {
+        ps[v] = val;
+        is_set[v] = 1;
         sm[v] = val * gsz(v);
         mn[v] = val;
         mx[v] = val;
-        ps_set[v] = val;
-        ps_add[v] = 0;
     }
 
     void apply_add(int v, T val) {
-        (ps_set[v] != NO_PUSH_SET ? ps_set : ps_add)[v] += val;
+        ps[v] += val;
         sm[v] += val * gsz(v);
         mn[v] += val;
         mx[v] += val;
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO_PUSH_SET) {
-            apply_set(v << 1, ps_set[v]);
-            apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO_PUSH_SET;
-        } else if (ps_add[v] != 0) {
-            apply_add(v << 1, ps_add[v]);
-            apply_add(v << 1 | 1, ps_add[v]);
-            ps_add[v] = 0;
+        if (is_set[v]) {
+            apply_set(v << 1, ps[v]);
+            apply_set(v << 1 | 1, ps[v]);
+            ps[v] = 0;
+            is_set[v] = 0;
+        } else if (ps[v]) {
+            apply_add(v << 1, ps[v]);
+            apply_add(v << 1 | 1, ps[v]);
+            ps[v] = 0;
         }
     }
 
@@ -102,19 +103,16 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_set.resize(U * 2, NO_PUSH_SET);
-        ps_add.resize(U * 2, 0);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            sm[U + i] = val;
-            mn[U + i] = val;
-            mx[U + i] = val;
-        }
+        ps.resize(U * 2);
+        is_set.resize(U * 2);
+        copy(first, last, sm.begin() + U);
+        copy(first, last, mn.begin() + U);
+        copy(first, last, mx.begin() + U);
         for (size_t i = U; --i;) upd(i);
     }
 
@@ -130,18 +128,13 @@ public:
 
     T operator[](size_t pos) {
         size_t l = 0, r = U - 1, v = 1;
-        size_t res = 0;
+        T res = 0;
         while (l != r) {
-            if (ps_set[v] != NO_PUSH_SET) return res + ps_set[v];
-            res += ps_add[v];
+            if (is_set[v]) return res + ps[v];
+            res += ps[v];
             size_t md = (l + r) >> 1;
-            if (pos <= md) {
-                r = md;
-                v = v << 1;
-            } else {
-                l = md + 1;
-                v = v << 1 | 1;
-            }
+            if (pos <= md) r = md, v = v << 1;
+            else l = md + 1, v = v << 1 | 1;
         }
         return res + sm[v];
     }

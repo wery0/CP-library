@@ -2,11 +2,11 @@ template<typename T>
 class segtree {
 
     static constexpr T INF = numeric_limits<T>::max();
-    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
     vector<T> ps_set;
+    vector<char> is_set;
 
     int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
@@ -17,13 +17,14 @@ class segtree {
         mn[v] = val;
         mx[v] = val;
         ps_set[v] = val;
+        is_set[v] = 1;
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO_PUSH_SET) {
+        if (is_set[v]) {
             apply_set(v << 1, ps_set[v]);
             apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO_PUSH_SET;
+            is_set[v] = 0;
         }
     }
 
@@ -77,18 +78,16 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_set.resize(U * 2, NO_PUSH_SET);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            sm[U + i] = val;
-            mn[U + i] = val;
-            mx[U + i] = val;
-        }
+        ps_set.resize(U * 2);
+        is_set.resize(U * 2);
+        copy(first, last, sm.begin() + U);
+        copy(first, last, mn.begin() + U);
+        copy(first, last, mx.begin() + U);
         for (size_t i = U; --i;) upd(i);
     }
 
@@ -105,15 +104,10 @@ public:
     T operator[](size_t pos) {
         size_t l = 0, r = U - 1, v = 1;
         while (l != r) {
-            if (ps_set[v] != NO_PUSH_SET) return ps_set[v];
+            if (is_set[v]) return ps_set[v];
             size_t md = (l + r) >> 1;
-            if (pos <= md) {
-                r = md;
-                v = v << 1;
-            } else {
-                l = md + 1;
-                v = v << 1 | 1;
-            }
+            if (pos <= md) r = md, v = v << 1;
+            else l = md + 1, v = v << 1 | 1;
         }
         return sm[v];
     }

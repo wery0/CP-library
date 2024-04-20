@@ -2,12 +2,12 @@ template<typename T>
 class segtree_on_points {
 
     static constexpr T INF = numeric_limits<T>::max();
-    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //Change, if need
 
     size_t n, U;
     vector<array<T, 2>> seg_gr;
     vector<T> sm, mn, mx;
-    vector<T> ps_add, ps_set;
+    vector<T> ps;
+    vector<char> is_set;
 
     T gsz(int v) {
         return seg_gr[v][1] - seg_gr[v][0] + 1;
@@ -17,26 +17,27 @@ class segtree_on_points {
         sm[v] = val * gsz(v);
         mn[v] = val;
         mx[v] = val;
-        ps_set[v] = val;
-        ps_add[v] = 0;
+        ps[v] = val;
+        is_set[v] = 1;
     }
 
     void apply_add(int v, T val) {
-        (ps_set[v] != NO_PUSH_SET ? ps_set : ps_add)[v] += val;
+        ps[v] += val;
         sm[v] += val * gsz(v);
         mn[v] += val;
         mx[v] += val;
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO_PUSH_SET) {
-            apply_set(v << 1, ps_set[v]);
-            apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO_PUSH_SET;
-        } else if (ps_add[v] != 0) {
-            apply_add(v << 1, ps_add[v]);
-            apply_add(v << 1 | 1, ps_add[v]);
-            ps_add[v] = 0;
+        if (is_set[v]) {
+            apply_set(v << 1, ps[v]);
+            apply_set(v << 1 | 1, ps[v]);
+            ps[v] = 0;
+            is_set[v] = 0;
+        } else if (ps[v]) {
+            apply_add(v << 1, ps[v]);
+            apply_add(v << 1 | 1, ps[v]);
+            ps[v] = 0;
         }
     }
 
@@ -127,8 +128,8 @@ public:
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
-        ps_add.resize(U * 2);
-        ps_set.resize(U * 2, NO_PUSH_SET);
+        ps.resize(U * 2);
+        is_set.resize(U * 2);
         for (size_t i = 0; i < n; ++i) {
             sm[U + i] = 0;
             mx[U + i] = 0;

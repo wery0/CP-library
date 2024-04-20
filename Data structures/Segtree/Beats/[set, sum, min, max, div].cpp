@@ -2,11 +2,11 @@ template<typename T>
 class segtree {
 
     static constexpr T INF = numeric_limits<T>::max();
-    static constexpr T NO_PUSH_SET = INF - sqrt(INF);   //change, if need
 
     size_t n, U;
     vector<T> sm, mn, mx;
     vector<T> ps_set;
+    vector<char> is_set;
 
     int gsz(int v) {
         return 1 << (__lg(U) - __lg(v));
@@ -17,13 +17,14 @@ class segtree {
         mn[v] = val;
         mx[v] = val;
         ps_set[v] = val;
+        is_set[v] = 1;
     }
 
     void push(size_t v) {
-        if (ps_set[v] != NO_PUSH_SET) {
+        if (is_set[v]) {
             apply_set(v << 1, ps_set[v]);
             apply_set(v << 1 | 1, ps_set[v]);
-            ps_set[v] = NO_PUSH_SET;
+            is_set[v] = 0;
         }
     }
 
@@ -35,9 +36,7 @@ class segtree {
 
     T seg_max(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return -INF;
-        if (ql <= l && r <= qr) {
-            return mx[v];
-        }
+        if (ql <= l && r <= qr) return mx[v];
         push(v);
         size_t md = (l + r) >> 1;
         return max(seg_max(ql, qr, l, md, v << 1),
@@ -46,9 +45,7 @@ class segtree {
 
     T seg_min(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return INF;
-        if (ql <= l && r <= qr) {
-            return mn[v];
-        }
+        if (ql <= l && r <= qr) return mn[v];
         push(v);
         size_t md = (l + r) >> 1;
         return min(seg_min(ql, qr, l, md, v << 1),
@@ -57,9 +54,7 @@ class segtree {
 
     T seg_sum(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
         if (qr < l || r < ql) return 0;
-        if (ql <= l && r <= qr) {
-            return sm[v];
-        }
+        if (ql <= l && r <= qr) return sm[v];
         push(v);
         size_t md = (l + r) >> 1;
         return seg_sum(ql, qr, l, md, v << 1) +
@@ -96,14 +91,14 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         sm.resize(U * 2);
         mn.resize(U * 2, INF);
         mx.resize(U * 2, -INF);
         ps_set.resize(U * 2, NO_PUSH_SET);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
+        for (size_t i = 0; i < n; ++i, ++first) {
+            const T val = *first;
             sm[U + i] = val;
             mn[U + i] = val;
             mx[U + i] = val;
@@ -126,13 +121,8 @@ public:
         while (l != r) {
             push(v);
             size_t md = (l + r) >> 1;
-            if (pos <= md) {
-                r = md;
-                v = v << 1;
-            } else {
-                l = md + 1;
-                v = v << 1 | 1;
-            }
+            if (pos <= md) r = md, v = v << 1;
+            else l = md + 1, v = v << 1 | 1;
         }
         return sm[v];
     }
