@@ -70,7 +70,7 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         pows.resize(n + 1, 1);
         smpows.resize(n + 1, 1);
@@ -81,10 +81,7 @@ public:
         }
         hs.resize(U * 2);
         ps_set.resize(U * 2, NO_PUSH_SET);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            hs[U + i] = big_prod_mod(val, pows[i]);
-        }
+        for (size_t i = 0; i < n; ++i, ++first) hs[U + i] = big_prod_mod(*first, pows[i]);
         for (size_t i = U; --i;) upd(i);
     }
 

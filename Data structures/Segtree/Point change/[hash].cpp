@@ -22,14 +22,13 @@ public:
     segtree_point_upd() = default;
 
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first) {
+    segtree_point_upd(I first, I last): n(std::distance(first, last)) {
         if (!n) return;
         pows.resize(n + 1, 1);
         for (size_t i = 1; i < n + 1; ++i) pows[i] = big_prod_mod(pows[i - 1], P);
         hs.resize(n * 2);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            hs[n + i] = big_prod_mod(val, pows[i]);
+        for (size_t i = 0; i < n; ++i, ++first) {
+            hs[n + i] = big_prod_mod(*first, pows[i]);
         }
         for (size_t i = n; --i;) upd(i);
     }

@@ -55,15 +55,12 @@ public:
     segtree() = default;
 
     template<typename I>
-    segtree(I first, I last): n(last - first), U(n & (n - 1) ? 2 << __lg(n) : n) {
+    segtree(I first, I last): n(std::distance(first, last)), U(n & (n - 1) ? 2 << __lg(n) : n) {
         if (!n) return;
         sm.resize(U * 2);
         psa.resize(U * 2, 1);
         psb.resize(U * 2);
-        for (size_t i = 0; i < n; ++i) {
-            const T val = *(first + i);
-            sm[U + i] = val;
-        }
+        copy(first, last, sm.begin() + U);
         for (size_t i = U; --i;) upd(i);
     }
 
@@ -82,13 +79,8 @@ public:
         while (l != r) {
             push(v);
             size_t md = (l + r) >> 1;
-            if (pos <= md) {
-                r = md;
-                v = v << 1;
-            } else {
-                l = md + 1;
-                v = v << 1 | 1;
-            }
+            if (pos <= md) r = md, v = v << 1;
+            else l = md + 1, v = v << 1 | 1;
         }
         return sm[v];
     }

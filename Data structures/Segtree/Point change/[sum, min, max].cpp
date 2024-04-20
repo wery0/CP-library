@@ -20,13 +20,13 @@ public:
     segtree_point_upd() = default;
 
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first) {
+    segtree_point_upd(I first, I last): n(std::distance(first, last)) {
         if (!n) return;
         sm.resize(n * 2);
         mn.resize(n * 2);
         mx.resize(n * 2);
-        for (size_t i = 0; i < n; ++i) {
-            init_node_by_value(n + i, *(first + i));
+        for (size_t i = 0; i < n; ++i, ++first) {
+            init_node_by_value(n + i, *first);
         }
         for (size_t i = n; --i;) upd(i);
     }

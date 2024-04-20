@@ -64,11 +64,11 @@ class segtree_point_upd {
 public:
     segtree_point_upd() = default;
     template<typename I>
-    segtree_point_upd(I first, I last): n(last - first) {
+    segtree_point_upd(I first, I last): n(std::distance(first, last)) {
         if (!n) return;
         m.resize(n * 2);
-        for (size_t i = 0; i < n; ++i) {
-        	init_tag_by_value(m[n + i], *(first + i));
+        for (size_t i = 0; i < n; ++i, ++first) {
+        	init_tag_by_value(m[n + i], *first);
         }
         for (size_t i = n; --i;) {
             const tag& l = m[i << 1], &r = m[i << 1 | 1];
@@ -102,4 +102,3 @@ public:
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };
-//Bottom-up segtree, supports only point updates
