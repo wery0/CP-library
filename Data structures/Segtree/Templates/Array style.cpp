@@ -82,13 +82,8 @@ public:
     //     while (l != r) {
     //         push(v);
     //         size_t md = l + (r - l) >> 1;
-    //         if (pos <= md) {
-    //             r = md;
-    //             v = v << 1;
-    //         } else {
-    //             l = md + 1;
-    //             v = v << 1 | 1;
-    //         }
+    //         if (pos <= md) r = md, v = v << 1;
+    //         else l = md + 1, v = v << 1 | 1;
     //     }
     //     return sm[v];
     // }
