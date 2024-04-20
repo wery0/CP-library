@@ -1,6 +1,5 @@
 template<typename T>
 class knapsack_weights_only {
-    static_assert(is_unsigned_v<T>);
 
     struct item {T weight; size_t id;};
 
@@ -64,6 +63,7 @@ public:
         const size_t n = last - first;
         items.resize(n);
         weights_sum = accumulate(first, last, (T)0);
+        assert(all_of(first, last, [](const auto& i) {return i >= 0;}));
         for (size_t i = 0; i < n; ++i, ++first) {
             items[i].weight = *first;
             items[i].id = i;
@@ -79,6 +79,7 @@ public:
     void clear() {items.clear(); weights_sum = 0;}
 
     void insert(T weight, size_t id = numeric_limits<size_t>::max()) {
+        assert(weight >= 0);
         if (id == numeric_limits<size_t>::max()) id = items.size();
         items.emplace_back(weight, id); weights_sum += weight;
     }
