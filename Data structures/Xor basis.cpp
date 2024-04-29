@@ -51,11 +51,13 @@ public:
         return res;
     }
 
-    //O((lhs.r + rhs.r) ^ 2)
+    //O((lhs.r + rhs.r) * rhs.r)
     void merge_with(const xor_basis& rhs) {
         for (T b : rhs) insert(b);
     }
+
     //Zassenhaus algorithm
+    //O((lhs.r + rhs.r) ^ 2)
     template<typename H>
     void intersect_with(const xor_basis& rhs) {
         static_assert(sizeof(H) * 8 >= N * 2);
