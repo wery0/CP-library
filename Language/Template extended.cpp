@@ -30,6 +30,7 @@ str from_base_10_to_base_b(str x, ll b) {return from_base_10_to_base_b(stoll(x),
 ll from_base_b_to_base_10(str x, ll b) {ll o = 0, pw = 1; for (int q = x.size() - 1; q >= 0; --q, pw *= b) o += (x[q] - '0') * pw; return o;}
 str from_base_a_to_base_b(str x, ll a, ll b) {ll x10 = from_base_b_to_base_10(x, a); return from_base_10_to_base_b(x10, b);}
 template<typename T> T binpow(T x, T k) {if (k < 0) return 0; T o = 1; for (; k; k >>= 1) {if (k & 1) o = o * x; x = x * x;} return o;}
+template<typename T> T binpow_mod(T x, T k, T mod) {if (k < 0) return 0; T o = 1; for (; k; k >>= 1) {if (k & 1) o = o * x % mod; x = x * x % mod;} return o;}
 template<typename T> T ar_prog_sum_fcl(T first, T cnt, T last) {return (first + last) * cnt / 2;}
 template<typename T> T ar_prog_sum_fdc(T first, T diff, T cnt) {return (first * 2 + diff * (cnt - 1)) * cnt / 2;}
 template<typename T> T ar_prog_sum_fdl(T first, T diff, T last) {return (first + last) * ((last - first) / diff + 1) / 2;}
