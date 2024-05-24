@@ -50,6 +50,7 @@ ll sqd(const pll p1, const pll p2) {return (p1.F - p2.F) * (p1.F - p2.F) + (p1.S
 ll sqd(const ll x1, const ll y1, const ll x2, const ll y2) {return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);}
 template<typename T> int sign(T x) {return x < 0 ? -1 : x > 0 ? 1 : 0;}
 template<typename I> bool is_subsequence(I f_pattern, I l_pattern, I f_text, I l_text) {for (; f_text != l_text && f_pattern != l_pattern; ++f_text) if (*f_text == *f_pattern) ++f_pattern; return f_pattern == l_pattern;}
+template<typename T> auto C = []() {const size_t N = 67; array<array<T, N>, N> C{0}; C[0][0] = 1; for (size_t i = 1; i < N; ++i) {C[i][0] = 1; for (size_t j = 1; j <= i; ++j) {C[i][j] = C[i - 1][j - 1] + C[i - 1][j];}} return C;}();
 vec<ll> get_divisors(ll x) {vec<ll> ans1, ans2; for (ll q = 1; q * q <= x; ++q) {if (x % q == 0) {ans1.pb(q); ans2.pb(x / q);}} if (ans1.back() == ans2.back()) ans1.pop_back(); reverse(all(ans2)); for (ll i : ans2) ans1.pb(i); return ans1;}
 bool is_prime(ll c) {if (c < 2) return 0; if (c == 2 || c == 3) return 1; if (c % 2 == 0 || c % 3 == 0) return 0; const ll gr = sqrtl(c) + 1; for (ll q = 6; q <= gr; q += 6) {if (c % (q - 1) == 0) return 0; if (c % (q + 1) == 0) return 0;} return 1;}
 vec<str> split(str &s, char c, bool ignore_empty = false) {vec<str> o; str u; for (int q = 0; q < s.size(); q++) {if (s[q] == c) {if (!u.empty() || !ignore_empty) o.pb(u); u.clear();} else u += s[q];} if (!u.empty() || !ignore_empty) o.pb(u); return o;}
