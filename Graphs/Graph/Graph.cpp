@@ -55,6 +55,7 @@ public:
 
     void prepare() {if (V == -1) {int mxn = -1; for (const auto& [v, e] : acc_edge) mxn = max({mxn, v, e.to}); V = mxn + 1;} E = acc_edge.size(); store.resize(E); vector<int> deg_cnt(V + 1); for (const auto& p : acc_edge) ++deg_cnt[p.first + 1]; partial_sum(deg_cnt.begin(), deg_cnt.end(), deg_cnt.begin()); fir = deg_cnt; for (const auto& [x, y] : acc_edge) store[deg_cnt[x]++] = y; acc_edge.clear(); acc_edge.shrink_to_fit(); is_prepared = 1;}
     void add_edge(int x, Edge e, bool is_directed) {if (V != -1) assert(0 <= x && x < V), assert(is_directed || (0 <= e.to && e.to < V)); acc_edge.emplace_back(x, e); if (!is_directed) {swap(x, e.to); acc_edge.emplace_back(x, e);}}
+    void clear() {E = 0; store.clear(); fir.clear(); acc_edge.clear(); is_prepared = 0;}
 
     edge_range operator[](int v) {assert(is_prepared); return {store.begin() + fir[v], store.begin() + fir[v + 1]};}
     graph<edge<void>> get_complement_graph() {assert(is_simple()); graph<edge<void>> res(V, V * (V - 1) - E); for (int v = 0; v < V; ++v) {int l = fir[v], r = fir[v + 1]; sort(store.begin() + l, store.begin() + r); for (int h = 0; h < v; ++h) if (l == r || h < store[l].to) res.add_edge(v, h, 1); else ++l; for (int h = v + 1; h < V; ++h) if (l == r || h < store[l].to) res.add_edge(v, h, 1); else ++l;} res.prepare(); return res;}
