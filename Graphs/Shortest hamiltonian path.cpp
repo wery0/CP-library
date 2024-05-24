@@ -1,9 +1,9 @@
-//Calculates shortest hamiltonian path in graph with adjacency matrix m
+//Calculates shortest lexicographically minimal hamiltonian path in graph with adjacency matrix m
 //Returns {length_of_shortest_path, path_itself} if it exists, or {NO, {}} otherwise
 //Edge i -> j absence should be marked as m[i][j] == NO
 //<O(2^n * n^2), O(2^n * n)>
 template<typename T>
-pair<T, vector<size_t>> shortest_hamiltonian_path(vector<vector<T>> m, const T NO = -1) {
+pair<T, vector<int>> shortest_lex_min_hamiltonian_path(vector<vector<T>> m, const T NO = -1) {
     static_assert(is_signed_v<T>);
     static constexpr T INF = numeric_limits<T>::max();
     const size_t n = m.size();
@@ -13,10 +13,10 @@ pair<T, vector<size_t>> shortest_hamiltonian_path(vector<vector<T>> m, const T N
     vector<size_t> has_edge_mask(n);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = 0; j < n; ++j) {
-            has_edge_mask[i] |= (m[i][j] != NO ? 1 : 0) << j; 
+            has_edge_mask[i] |= size_t(m[i][j] != NO ? 1 : 0) << j; 
         }
     }
-    vector<vector<T>> dp(all, vector<T>(n));
+    vector dp(all, vector<T>(n));
     for (size_t mask = 1; mask < all; ++mask) {
         if (!(mask & (mask - 1))) continue;
         for (size_t cm = mask; cm; cm &= cm - 1) {
@@ -32,7 +32,7 @@ pair<T, vector<size_t>> shortest_hamiltonian_path(vector<vector<T>> m, const T N
     }
     auto it = min_element(dp[all - 1].begin(), dp[all - 1].end());
     if (*it == INF) return {NO, {}};
-    vector<size_t> ans(n);
+    vector<int> ans(n);
     for (size_t mask = all - 1, first = it - dp[all - 1].begin(), i = 0; i < n; ++i) {
         ans[i] = first;
         mask ^= 1 << first;
