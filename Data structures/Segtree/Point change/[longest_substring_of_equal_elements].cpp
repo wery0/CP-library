@@ -85,6 +85,7 @@ public:
         }
     }
 
+    //tag.mxd = length of LSoEE
     tag seg_longest_substring_of_equal_elements(size_t l, size_t r) const {
         l += n, r += n;
         tag lt = neutral_tag;
