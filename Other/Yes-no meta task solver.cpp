@@ -1,13 +1,15 @@
-//This can solve the following meta-task: given a YES/NO problem and the judge gives you verdict to each testcase.
+//These programs can solve the following meta-task: given a YES/NO problem and judge gives you the verdict for each testcase. Solve the problem.
 /*
 How to use:
-0). Write code that reads data and puts it into `data` variable.
-0). Write the second program which parses output from judging system.
-1). Send the first program to get the answer for each testcase. Put them into test_answers variable as binary string.
+1). Write a code that reads input and puts it into `data` variable.
+2). Write the second program which parses output from judging system.
+3). Send the first program to get answers for each testcase. Put them into `test_answers` variable as binary string.
 while not accepted
     1). Send the first program.
-    2). Run the second program with the output from the judge. Put it's output into 88th line.
+    2). Run the second program with the output from the judge. Put it's output into 90th line.
 */
+
+//First program
 #include "bits/stdc++.h"
 using namespace std;
 
