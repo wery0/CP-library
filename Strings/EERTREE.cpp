@@ -1,5 +1,4 @@
-//All adding characters must be in range [Lchar, Lchar + ALPHABET)
-template<const char Lchar = 'a', const int ALPHABET = 26>
+template<const int APLHABET, const int FIRST_CHAR>
 class EERTREE {
     
     struct Node {
@@ -37,9 +36,9 @@ public:
     EERTREE() {r0->sl = r1->sl = r1;}
 
     void add_char(char c) {
-        assert(Lchar <= c && c < Lchar + ALPHABET);
+        assert(FIRST_CHAR <= c && c < FIRST_CHAR + ALPHABET);
         t += c;
-        c -= 'a';
+        c -= FIRST_CHAR;
         lst = go(lst);
         if (!lst->m[c]) {
             ++vertex_count;

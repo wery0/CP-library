@@ -1,8 +1,5 @@
+template<const int APLHABET, const int FIRST_CHAR>
 class suffix_automaton {
-
-    //Change, if need
-    static constexpr int ALPHABET = 26;
-    static constexpr int FIRST_CHAR = 'a';
 
     struct Node {
         Node* m[ALPHABET] = {0};

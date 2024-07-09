@@ -1,10 +1,6 @@
 enum STORAGE {ARRAY, MAP, UNORDERED_MAP};
-template<const bool are_strings_distinct, STORAGE storage = ARRAY>
+template<const int APLHABET, const int FIRST_CHAR, const bool are_strings_distinct, STORAGE storage = ARRAY>
 class aho_corasick {
-
-    //Change, if need
-    static constexpr int ALPHABET = 26;
-    static constexpr int FIRST_CHAR = 'a';
 
     struct Node;
     using K = conditional_t<are_strings_distinct, int, vector<int>>;
@@ -18,7 +14,7 @@ class aho_corasick {
         M m = {};
 
         Node() {
-            if (storage == ARRAY) {
+            if constexpr(storage == ARRAY) {
                 memset(m, 0, sizeof(Node*) * ALPHABET);
             }
         }
@@ -132,3 +128,4 @@ public:
         return ans;
     }
 };
+//Example of initialization: aho_corasick<26, 'a', true, UNORDERED_MAP> ac;
