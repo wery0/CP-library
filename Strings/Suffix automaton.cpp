@@ -1,4 +1,4 @@
-template<const int APLHABET, const int FIRST_CHAR>
+template<const int ALPHABET, const int FIRST_CHAR>
 class suffix_automaton {
 
     struct Node {

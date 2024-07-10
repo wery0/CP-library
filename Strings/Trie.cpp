@@ -1,5 +1,5 @@
 enum STORAGE {ARRAY, MAP, UNORDERED_MAP};
-template<const int APLHABET, const int FIRST_CHAR, const bool are_strings_distinct, STORAGE storage = ARRAY>
+template<const int ALPHABET, const int FIRST_CHAR, const bool are_strings_distinct, STORAGE storage = ARRAY>
 class trie {
 
     struct Node;
