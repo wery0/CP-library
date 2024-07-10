@@ -81,6 +81,7 @@ public:
 
     void add_string(const string& s) {
         assert(!is_prepared);
+        assert(s.size());
         Node* n = root;
         for (int chr : s) {
             chr -= FIRST_CHAR;
@@ -93,7 +94,7 @@ public:
             assert(n->who_ends == -1 && "Strings should be different!");
             n->who_ends = cnt_added_strings++;
         } else {
-            n->who_ends.push_back(cnt_added_strings++);         
+            n->who_ends.push_back(cnt_added_strings++);
         }
     }
 
@@ -101,20 +102,20 @@ public:
         build_suf_links();
     }
 
-    //For every added string returns a vector with all occurences in s.
+    //For every added string returns a vector with all occurences (positions where it starts) in s.
     /*
         Example:
         s = "abacaba"
         "a" -> {0, 2, 4, 6}
         "aba" -> {0, 4}
     */
-    //O(|s| + #occurences)
-    vector<vector<int>> get_all_occurences(const string& s) {
+    //<O(|text| + #occurences), O(#occurences)>)
+    vector<vector<int>> get_for_each_string_where_it_starts_in_text(const string& text) {
         assert(is_prepared);
         Node* n = root;
         vector<vector<int>> ans(cnt_added_strings);
-        for (int i = 0; i < s.size(); ++i) {
-            n = go(n, s[i] - FIRST_CHAR);
+        for (size_t i = 0; i < text.size(); ++i) {
+            n = go(n, text[i] - FIRST_CHAR);
             for (Node* e = n; e->parent; e = e->compressed_suf_link) {
                 if constexpr(are_strings_distinct) {
                     if (e->who_ends != -1) ans[e->who_ends].push_back(i + 1 - e->dep);
@@ -124,6 +125,88 @@ public:
                     }
                 }
             }
+        }
+        return ans;
+    }
+
+    struct occurrences_iterable {
+        Node* n;
+
+        class occurrences_iterator {
+            Node* n;
+            int i = 0;
+
+            void move() {
+                if constexpr(are_strings_distinct) {
+                    while (n && n->who_ends == -1) n = n->compressed_suf_link == n ? n->parent : n->compressed_suf_link;
+                } else {
+                    while (n && i == n->who_ends.size()) {
+                        i = 0;
+                        n = n->compressed_suf_link == n ? n->parent : n->compressed_suf_link;
+                    }
+                }
+            }
+
+        public:
+            occurrences_iterator(Node* n): n(n) {
+                move();
+            };
+
+            occurrences_iterator& operator++() {
+                if constexpr(are_strings_distinct) {
+                    n = n->compressed_suf_link;
+                } else {
+                    ++i;
+                    assert(n && i <= n->who_ends.size());
+                }
+                move();
+                return *this;
+            }
+
+            int operator*() {
+                if constexpr(are_strings_distinct) return n->who_ends;
+                else return n->who_ends[i];
+            }
+
+            bool operator==(const occurrences_iterator& rhs) const {
+                if constexpr(are_strings_distinct) return n == rhs.n;
+                else return n == rhs.n && i == rhs.i;
+            }
+        };
+
+        occurrences_iterable() = default;
+        occurrences_iterable(Node* n): n(n) {};
+
+        auto begin() {return occurrences_iterator(n);}
+        auto begin() const {return occurrences_iterator(n);}
+        auto end() {return occurrences_iterator(nullptr);}
+        auto end() const {return occurrences_iterator(nullptr);}
+    };
+
+    //Returns a vector of iterable objects, ith of which iterates through all strings that end in position i.
+    /*
+        Example:
+        .add_string("a");
+        .add_string("aba");
+        .prepare();
+        .get_who_ends_in_each_position_of_text("abacaba") == 
+        [
+            [0],
+            [],
+            [1, 0],
+            [],
+            [0],
+            [],
+            [1, 0]
+        ]
+    */
+    //<O(|text|), O(|text|)>)
+    vector<occurrences_iterable> get_who_ends_in_each_position_of_text(const string& text) {
+        vector<occurrences_iterable> ans(text.size());
+        Node* n = root;
+        for (size_t i = 0; i < text.size(); ++i) {
+            n = go(n, text[i] - FIRST_CHAR);
+            ans[i] = occurrences_iterable(n);
         }
         return ans;
     }
