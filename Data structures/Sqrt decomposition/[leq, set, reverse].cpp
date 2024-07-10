@@ -1,3 +1,6 @@
+//https://codeforces.com/group/n8PnRC2wrr/contest/271555/problem/A
+//https://ejudge.algocode.ru/cgi-bin/new-client?SID=bde9f1b076e6cedf&action=139&prob_id=1
+//https://basecamp.eolymp.com/ru/problems/2961
 template<typename T>
 class seg_set_leq_rev {
     #define duration(a) chrono::duration_cast<chrono::nanoseconds>(a).count()
