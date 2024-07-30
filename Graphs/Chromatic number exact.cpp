@@ -28,10 +28,9 @@ public:
     pair<int, vector<int>> calc_chromatic_number_and_coloring(const double TL = 0) const {
         auto start_time = time_stamp();
         int best = n + 1, die = 0;
-        vector<int> best_col;
+        vector<int> col(n), best_col;
         function<void(int, int)> go = [&](int mx, int eso) {
             static uint8_t cnt = 0;
-            static vector<int> col(n);
             if (die || mx >= best) return;
             die |= !++cnt && TL > 0 && duration_milli(time_stamp() - start_time) / 1e3 > TL;
             if (eso == 0) {
