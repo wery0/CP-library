@@ -7,14 +7,14 @@ public:
     fenwick() = default;
     fenwick(int n): n(n + 1), fen(n + 1) {}
     template<typename I>
-    fenwick(I first, I last): n(last - first + 1), fen(n) {
+    fenwick(I first, I last): n(std::distance(first, last) + 1), fen(n) {
         auto it = first;
         for (int i = 1; i < n; ++i, ++it) {
             seg_add(i - 1, i - 1, *it);
         }
     }
     template<typename T_arr>
-    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr >>::type* = 0) {
+    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
         (*this) = fenwick(m.begin(), m.end());
     }
 
