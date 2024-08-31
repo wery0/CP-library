@@ -1,21 +1,22 @@
 template<typename T>
-class fenwick {
+class fenwick_seg_add {
     int n;
     vector<T> fen;
 
 public:
-    fenwick() = default;
-    fenwick(int n): n(n + 1), fen(n + 1) {}
+    fenwick_seg_add() = default;
+    fenwick_seg_add(int n): n(n + 1), fen(n + 1) {}
     template<typename I>
-    fenwick(I first, I last): n(std::distance(first, last) + 1), fen(n) {
-        auto it = first;
-        for (int i = 1; i < n; ++i, ++it) {
-            seg_add(i - 1, i - 1, *it);
+    fenwick_seg_add(I first, I last, bool init_with_pref_sums = false): n(std::distance(first, last) + 1), fen(n) {
+        auto it = last;
+        T sm = accumulate(first, last, T(0));
+        for (int i = n - 1; i; --i, sm -= *it) {
+            --it;
+            T x = init_with_pref_sums ? sm : *it;
+            fen[i] += x;
+            fen[i - 1] -= x;
+            fen[i - (i & -i)] += fen[i];
         }
-    }
-    template<typename T_arr>
-    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
-        (*this) = fenwick(m.begin(), m.end());
     }
 
     void clear() {
