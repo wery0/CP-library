@@ -1,24 +1,20 @@
 template<typename T>
-class fenwick {
+class fenwick_seg_sum {
     int n;
     T sum_all = 0;
     vector<T> fen;
 
 public:
-    fenwick() = default;
-    fenwick(int n): n(n + 1), fen(n + 1) {}
+    fenwick_seg_sum() = default;
+    fenwick_seg_sum(int n): n(n + 1), fen(n + 1) {}
     template<typename I>
-    fenwick(I first, I last): n(std::distance(first, last) + 1), fen(n), sum_all(accumulate(first, last, T(0))) {
+    fenwick_seg_sum(I first, I last): n(std::distance(first, last) + 1), fen(n), sum_all(accumulate(first, last, T(0))) {
         auto it = first;
         for (int i = 1; i < n; ++i, ++it) {
             fen[i] += *it;
             const int nw = i + (i & -i);
             if (nw < n) fen[nw] += fen[i];
         }
-    }
-    template<typename T_arr>
-    fenwick(const T_arr& m, typename enable_if<!is_integral_v<T_arr>>::type* = 0) {
-        (*this) = fenwick(m.begin(), m.end());
     }
 
     void clear() {
