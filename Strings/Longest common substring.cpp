@@ -32,9 +32,9 @@ array<size_t, 3> find_longest_common_substring(const T_arr1& s1, const T_arr2& s
         lcp[p - 1] = d;
     }
     size_t ps1 = 0, ps2 = s1.size() + 1, mxd = 0;
-    for (int q = 1; q + 1 < s.size(); ++q) {
-        if ((sa[q] < s1.size()) != (sa[q + 1] < s1.size()) && lcp[q] > mxd) {
-            mxd = lcp[q], ps1 = sa[q], ps2 = sa[q + 1];
+    for (size_t i = 1; i + 1 < s.size(); ++i) {
+        if ((sa[i] < s1.size()) != (sa[i + 1] < s1.size()) && lcp[i] > mxd) {
+            mxd = lcp[i], ps1 = sa[i], ps2 = sa[i + 1];
         }
     }
     if (ps1 > ps2) swap(ps1, ps2);
