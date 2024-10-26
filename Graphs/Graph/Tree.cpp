@@ -85,7 +85,7 @@ public:
         //wdep.resize(V);
         is_prepared = true;
         reroot(root_number);
-        assert(sz[root_number] == V - 1 && "Graph is not a tree!");
+        assert(sz[root_number] == V && "Graph is not a tree!");
     }
 
     vector<int> pr;
