@@ -1,6 +1,6 @@
 template<typename K, typename V>
 class treap {
-    static const V UNDEF = 0;
+    static constexpr V UNDEF = V();
     struct Node {
         Node* l = 0;
         Node* r = 0;
