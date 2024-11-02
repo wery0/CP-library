@@ -3,7 +3,7 @@ T simpson_integration(const T l, const T r, const T EPS, auto f) {
     auto approx = [](T l, T r, T fl, T fmd, T fr) {
         return (fl + 4 * fmd + fr) * (r - l);
     };
-    auto go = [](auto&& go, T s, T fl, T fr, T fmd, T l, T r) {
+    auto go = [&](auto&& go, T s, T fl, T fr, T fmd, T l, T r) {
         T md = (l + r) / 2;
         T flm = f((l + md) / 2);
         T frm = f((md + r) / 2);
