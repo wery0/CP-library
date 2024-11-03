@@ -24,6 +24,7 @@ void sort_points_by_atan2(vector<pt<T>>& m) {
 //Specialization for pair
 template<typename T>
 void sort_points_by_atan2(vector<pair<T, T>>& m) {
+    const T eps = is_integral_v<T> ? 0 : EPS;
     auto part = [&](const pair<T, T>& p) -> int {
         return p.second < -eps ? 0 : abs(p.second) <= eps && p.first >= -eps ? 1 : 2;
     };
