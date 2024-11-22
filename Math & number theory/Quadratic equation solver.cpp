@@ -2,7 +2,7 @@
 template<typename T>
 vector<T> solve_quadratic_equation(T a, T b, T c, T eps = 1e-12) {
     static_assert(is_floating_point_v<T>);
-    ld D = b * b - 4 * a * c;
+    T D = b * b - 4 * a * c;
     if (D < -eps) return {};
     if (D < eps) return {-b / (a * 2)};
     D = sqrtl(D);
