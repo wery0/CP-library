@@ -97,7 +97,7 @@ public:
     //vector<int64_t> wdep;
 
     tree() = default;
-    tree(int V): V(V) {g = graph(V, (V - 1) * 2);}
+    tree(int V): V(V) {assert(V > 0); g = graph(V, (V - 1) * 2);}
 
     void add_edge(int x, Edge e) {assert(!is_prepared); g.add_edge(x, e, 0);}
     void reroot(int new_root) {assert(is_prepared); if (root != new_root) ifs(root = new_root);}
