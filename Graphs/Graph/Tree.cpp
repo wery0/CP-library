@@ -61,7 +61,17 @@ class tree {
         pr[v] = p;
         sz[v] = 1;
         dep[v] = p == -1 ? 0 : dep[p] + 1;
-        jump[v] = p == -1 ? v : dep[pr[v]] + dep[jump[jump[pr[v]]]] == dep[jump[pr[v]]] * 2 ? jump[jump[pr[v]]] : pr[v];
+        if (dep[v] == 0) {
+            jump[v] = v;
+        } else if (dep[pr[v]] + dep[jump[jump[pr[v]]]] == dep[jump[pr[v]]] * 2) {
+            jump[v] = jump[jump[pr[v]]];
+            if (val.size() == V) {
+                if (pr[v] != root) merge_val(jump_val[v], jump_val[pr[v]]);
+                if (jump[pr[v]] != pr[v]) merge_val(jump_val[v], jump_val[jump[pr[v]]]);
+            }
+        } else {
+            jump[v] = pr[v];
+        }
         for (const auto& e : g[v]) {
             if (e.to == p) continue;
             //wdep[e.to] = wdep[v] + e.data;
@@ -78,6 +88,7 @@ public:
         assert(g.E == (V - 1) * 2);
         pr.resize(V);
         jump.resize(V);
+        if (val.size() == V) jump_val = val;
         dep.resize(V);
         sz.resize(V);
         tin.resize(V);
@@ -95,6 +106,34 @@ public:
     vector<int> tin, tout;
     int root = -1;
     //vector<int64_t> wdep;
+
+    using U = int;
+    vector<U> val;
+    vector<U> jump_val;
+    static constexpr auto merge_val = [](U& l, const U r) {l = min(l, r);};
+    U NEUTRAL = numeric_limits<U>::max();
+    U path_query(int x, int y, bool is_vertex_query = true) {
+        assert(val.size() == V && jump_val.size() == V);
+        // if (tin[x] > tin[y]) swap(x, y);
+        U res = NEUTRAL;
+        auto vertical_path_query = [&](int v, int k) {
+            while (k) {
+                int jump_len = dep[v] - dep[jump[v]];
+                if (jump_len <= k) {
+                    merge_val(res, jump_val[v]);
+                    v = jump[v], k -= jump_len;
+                } else {
+                    merge_val(res, val[v]);
+                    v = pr[v], --k;
+                }
+            }
+        };
+        int lc = calc_lca(x, y);
+        vertical_path_query(x, dep[x] - dep[lc]);
+        vertical_path_query(y, dep[y] - dep[lc]);
+        if (is_vertex_query) merge_val(res, val[lc]);
+        return res;
+    }
 
     tree() = default;
     tree(int V): V(V) {assert(V > 0); g = graph(V, (V - 1) * 2);}
