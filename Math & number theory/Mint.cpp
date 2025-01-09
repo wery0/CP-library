@@ -40,13 +40,13 @@ public:
     Mint operator+(const Mint& rhs) const {return val + rhs.val >= MOD ? val + rhs.val - MOD : val + rhs.val;}
     Mint operator-(const Mint& rhs) const {return val < rhs.val ? MOD - rhs.val + val : val - rhs.val;}
     Mint operator*(const Mint& rhs) const {return (LONG)1 * val * rhs.val % MOD;}
-    Mint operator/(const Mint& rhs) const {return (LONG)1 * val * inv(rhs).val % MOD;}
+    Mint operator/(const Mint& rhs) const {return (LONG)1 * val * rhs.inv().val % MOD;}
     Mint operator-() const {return val ? MOD - val : val;}
 
     void operator+=(const Mint& rhs) {val += rhs.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint& rhs) {val -= rhs.val; val += val < 0 ? MOD : 0;}
     void operator*=(const Mint& rhs) {val = (LONG)1 * val * rhs.val % MOD;}
-    void operator/=(const Mint& rhs) {val = (LONG)1 * val * inv(rhs).val % MOD;}
+    void operator/=(const Mint& rhs) {val = (LONG)1 * val * rhs.inv().val % MOD;}
 
     Mint& operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
     Mint operator++(int) {Mint res = *this; ++*this; return res;}
