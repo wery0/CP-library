@@ -9,8 +9,6 @@
 #define vec vector
 #define pb push_back
 #define pll pair<ll, ll>
-#define pdd pair<ld, ld>
-#define pii pair<int, int>
 #define all(m) m.begin(), m.end()
 #define rall(m) m.rbegin(), m.rend()
 #define uid uniform_int_distribution
@@ -23,8 +21,6 @@ using namespace std;
 using str = string;
 using ll = long long;
 using ld = long double;
-using uint = unsigned int;
-using ull = unsigned long long;
 mt19937 rnd(timeStamp().time_since_epoch().count());
 mt19937_64 rndll(timeStamp().time_since_epoch().count());
 template<typename T, typename U> bool chmin(T& a, const U& b) {return (T)b < a ? a = b, 1 : 0;}
