@@ -11,18 +11,14 @@ str from_base_10_to_base_b(ll x, ll b) {str t; if (x == 0) t = "0"; for (; x; x 
 #define vvi vec<vec<int>>
 #define vvvi vec<vec<vec<int>>>
 #define vvl vec<vec<ll>>
-#define vpi vec<pii>
-#define vpl vec<pll>
-#define vs vec<str>
-#define vvs vec<vec<str>>
 const int dx[] = { -1, 0, 1, 0, -1, 1, 1, -1};
 const int dy[] = {0, 1, 0, -1, 1, 1, -1, -1};
 template<typename T> int sum_of_digits(T val) {int o = 0; for (; val; val /= 10) o += val % 10; return o;}
 template<typename T> struct static_sum_query {vec<T> m; static_sum_query() = default; template<typename I>static_sum_query(I f, I l) {m.resize(l - f + 1); for (auto it = m.begin() + 1; f != l; ++f, ++it) {*it = *(it - 1) + *f;}} template<typename T_arr> static_sum_query(T_arr& m) {(*this) = static_sum_query(all(m));} inline T query(const int l, const int r) const {return m[r + 1] - m[l];}};
 template<typename T> vec<pair<T, int>> zip_with_positions(vec<T> &m) {int a = m.size(); vec<pair<T, int>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q], q}; return ans;}
 template<typename T> str join(vec<T> &m, str c) {str o; if constexpr(is_same<str, T>::value) {for (const T &s : m) o += s + c;} else {for (const T &s : m) o += to_string(s) + c;} if (o.size()) o.erase(o.end() - c.size(), o.end()); return o;}
-vec<pii> get_reflection_points_in_rect(int a, int b, int x, int y) {assert(0 <= x && x < a); assert(0 <= y && y < b); vec<pii> res = {{x, y}}; if (x != a - x - 1) res.pb({a - x - 1, y}); if (y != a - y - 1) res.pb({x, a - y - 1}); if (x != a - x - 1 && y != a - y - 1) res.pb({a - x - 1, a - y - 1}); return res;}
-vec<pii> get_rotation_points_in_square(int a, int x, int y) {assert(0 <= x && x < a); assert(0 <= y && y < a); vec<pii> res = {{x, y}}; if (a % 2 == 1 && x == a / 2 && y == a / 2) return res; res.pb({a - y - 1, x}); res.pb({a - x - 1, a - y - 1}); res.pb({y, a - x - 1}); return res;}
+vec<pll> get_reflection_points_in_rect(int a, int b, int x, int y) {assert(0 <= x && x < a); assert(0 <= y && y < b); vec<pll> res = {{x, y}}; if (x != a - x - 1) res.pb({a - x - 1, y}); if (y != a - y - 1) res.pb({x, a - y - 1}); if (x != a - x - 1 && y != a - y - 1) res.pb({a - x - 1, a - y - 1}); return res;}
+vec<pll> get_rotation_points_in_square(int a, int x, int y) {assert(0 <= x && x < a); assert(0 <= y && y < a); vec<pll> res = {{x, y}}; if (a % 2 == 1 && x == a / 2 && y == a / 2) return res; res.pb({a - y - 1, x}); res.pb({a - x - 1, a - y - 1}); res.pb({y, a - x - 1}); return res;}
 template<typename T> vec<vec<int>> get_cycles_of_perm(vec<T> &m, int permutation_indexation) {int a = m.size(); vec<vec<int>> ans; vec<bool> us(a); for (int q = 0; q < a; ++q) {if (us[q]) continue; vec<int> tyt; for (int w = q; !us[w]; w = m[w] - permutation_indexation) {tyt.pb(w); us[w] = 1;} ans.pb(tyt);} return ans;}
 int find_closing_bracket(str &s, int i) {char op = s[i], cl = op == '(' ? ')' : op == '{' ? '}' : op == '[' ? ']' : op == '<' ? '>' : '@'; assert(cl != '@'); int dep = 1; for (int q = i + 1; q < s.size(); ++q) {dep += s[q] == op ? 1 : s[q] == cl ? -1 : 0; if (dep == 0) return q;} return -1;}
 template<typename T> vec<pair<T, T>> vv_to_vp(vec<vec<T>> &m) {int a = m.size(); vec<pair<T, T>> ans(a); for (int q = 0; q < a; ++q) ans[q] = {m[q][0], m[q][1]}; return ans;}
@@ -45,8 +41,8 @@ int time_to_minutes(str s) {int ps = s.find(':'); assert(ps != string::npos); re
 str minutes_to_time(int m, bool h0 = true, bool m0 = true) {int h = m / 60; m %= 60; str o; if (h0) o += (h < 10 ? "0" : ""); o += to_string(h); o += ':'; if (m0) o += (m < 10 ? "0" : ""); o += to_string(m); return o;}
 bool is_vowel_lowercase(char c) {return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';}
 bool is_consonant_lowercase(char c) {return !is_vowel_lowercase(c);}
-ull leq_pow2ll(const ull x) {return 1ull << __lg(x);}
-ull geq_pow2ll(const ull x) {return x & (x - 1) ? 2ull << __lg(x) : x;}
+template<typename T> leq_pow2ll(const T x) {return T(1) << __lg(x);}
+template<typename T> geq_pow2ll(const T x) {return x & (x - 1) ? T(2) << __lg(x) : x;}
 ll sqd(const pll p1, const pll p2) {return (p1.F - p2.F) * (p1.F - p2.F) + (p1.S - p2.S) * (p1.S - p2.S);}
 ll sqd(const ll x1, const ll y1, const ll x2, const ll y2) {return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);}
 template<typename T> int sign(T x) {return x < 0 ? -1 : x > 0 ? 1 : 0;}
