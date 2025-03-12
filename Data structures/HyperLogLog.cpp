@@ -74,7 +74,7 @@ public:
         }
     }
 
-    //O(cnt.size() == 64 - p) for first way, O(m.size() == M == 2 ^ p) for second way
+    //O(cnt.size() == 64 - p) for the first way, O(m.size() == M == 2 ^ p) for the second way
     size_t estimate_distinct() const {
         long double sum = 0;
         for (size_t i = 0; i < cnt.size(); ++i) sum += (long double)(cnt[i]) / (uint64_t(1) << i);

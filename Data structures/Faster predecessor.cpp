@@ -70,6 +70,6 @@ public:
     uint32_t inverse_lower_bound(uint32_t x) const {return left_go(x, 1);}
     uint32_t inverse_upper_bound(uint32_t x) const {return left_go(x, 0);}
 };
-//Supports std::set operations in O(1) on random queries / dense arrays, O(log_64(N)) in worst case (sparce array).
+//Supports std::set operations in O(1) on random queries / dense arrays, O(log_64(N)) in worst case (sparse array).
 //Count operation works in O(1) always.
 //Memory usage: at most 2.02 * MAXN bits.
