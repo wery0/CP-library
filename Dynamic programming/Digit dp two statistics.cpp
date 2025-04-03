@@ -16,6 +16,8 @@ T count_good_numbers_in_range_two_statistics(string l, string r) {
             const int _ = digit < num[0] ? 0 : digit == num[0] ? 1 : 2;
             const int s1 = f1(?, digit);
             const int s2 = f2(?, digit);
+            if (s1 < 0 || s1 >= MAX_STATISTIC1) continue;
+            if (s2 < 0 || s2 >= MAX_STATISTIC2) continue;
             dp[0][s1][s2][_] += 1;
         }
         for (int i = 0; i + 1 < n; ++i) {

@@ -13,6 +13,7 @@ T count_good_numbers_in_range_one_statistic(string l, string r) {
         for (int digit = 1; digit <= gr; ++digit) {
             const int _ = digit < num[0] ? 0 : digit == num[0] ? 1 : 2;
             const int s = f(?, digit);
+            if (s < 0 || s >= MAX_STATISTIC) continue;
             dp[0][s][_] += 1;
         }
         for (int i = 0; i + 1 < n; ++i) {
