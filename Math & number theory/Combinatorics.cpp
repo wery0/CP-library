@@ -61,9 +61,9 @@ struct comb {
     comb() = default;
     comb(size_t N): N(N), fc(N, 1), ifc(N, 1) {
         assert(N > 1);
-        for (int i = 1; i < N; ++i) fc[i] = fc[i - 1] * i;
+        for (size_t i = 1; i < N; ++i) fc[i] = fc[i - 1] * i;
         ifc[N - 1] = inv(fc[N - 1]);
-        for (int i = N - 2; i; --i) ifc[i] = ifc[i + 1] * (i + 1);
+        for (size_t i = N - 2; i; --i) ifc[i] = ifc[i + 1] * (i + 1);
     }
 
     T binpow(T x, int64_t k) {
