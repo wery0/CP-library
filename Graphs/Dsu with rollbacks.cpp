@@ -1,8 +1,15 @@
-struct dsu_w_rollbacks {
+class dsu_w_rollbacks {
     int n;
     vector<int> pr;
     vector<pair<int, int>> store;
 
+    void rollback() {
+        auto [px, prpx] = store.back(); store.pop_back();
+        pr[pr[px]] -= prpx;
+        pr[px] = -1;
+    }
+
+public:
     dsu_w_rollbacks() = default;
     dsu_w_rollbacks(int n): n(n), pr(n, -1) {}
 
@@ -14,7 +21,7 @@ struct dsu_w_rollbacks {
     int get_component_size(int x) const {return -pr[find(x)];}
     int find(int x) const {return pr[x] < 0 ? x : find(pr[x]);}
     int get_cur_version() const {return store.size();}
-    bool is_in_same_component(int x, int y) const {return find(x) == find(y);}
+    bool are_in_same_component(int x, int y) const {return find(x) == find(y);}
     bool unite(int x, int y) {
         int px = find(x);
         int py = find(y);
@@ -24,12 +31,6 @@ struct dsu_w_rollbacks {
         pr[py] += pr[px];
         pr[px] = py;
         return true;
-    }
-
-    void rollback() {
-        auto [px, prpx] = store.back(); store.pop_back();
-        pr[pr[px]] -= prpx;
-        pr[px] = -1;
     }
 
     void revert_to_version(int version) {

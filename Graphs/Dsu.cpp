@@ -16,7 +16,7 @@ struct dsu {
 
     int get_component_size(int x) {return -pr[find(x)];}
     int find(int x) {return pr[x] < 0 ? x : pr[x] = find(pr[x]);}
-    bool is_in_same_component(int x, int y) {return find(x) == find(y);}
+    bool are_in_same_component(int x, int y) {return find(x) == find(y);}
     bool unite(int x, int y) {
         int px = find(x);
         int py = find(y);
