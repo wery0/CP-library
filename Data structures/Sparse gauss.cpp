@@ -138,7 +138,7 @@ public:
 
     //Returns {# of solutions (2 if inf), one of solutions itself if exists}
     tuple<int, vector<T>> solve_SLA() {
-        static const tuple<int, vector<T>> NO_SOLUTION = {0, {}, {}};
+        static const tuple<int, vector<T>> NO_SOLUTION = {0, {}};
         size_t rows = u.size(), cols = n;
         assert(rows);
         segtree_point_upd srow(rows);

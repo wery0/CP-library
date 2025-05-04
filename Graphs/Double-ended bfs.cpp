@@ -133,8 +133,9 @@ int main() {
                 auto dr = r.second.calc_distance_from(m[0]);
                 return dl < dr;
             };
-            nth_element(states_to_explore.begin(), states_to_explore.begin() + 1, states_to_explore.end(), cmp);
-            states_to_explore.resize(1);
+            int cnt = min<int>(states_to_explore.size(), gen(rnd) < 0.5 ? 1 : 2);
+            nth_element(states_to_explore.begin(), states_to_explore.begin() + cnt, states_to_explore.end(), cmp);
+            states_to_explore.resize(cnt);
         }
         for (auto [action, next_state] : states_to_explore) {
             auto& [nm, npa] = us[next_state];

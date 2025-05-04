@@ -420,6 +420,27 @@ namespace Generator {
         return ans;
     }
 
+    //Generates all O(n) pythagorean triplets with hypothenuse <= n
+    //O(n)
+    template<typename T>
+    vector<array<T, 3>> gen__all_pythagorean_triplets(T n) {
+        vector<array<T, 3>> o;
+        for (T q = 1; q * q <= n; ++q) {
+            for (T w = q + 1; q * q + w * w <= n; ++w) {
+                if (__gcd(q, w) != 1 || q % 2 && w % 2) continue;
+                T a = w * w - q * q;
+                T b = 2 * q * w;
+                T c = q * q + w * w;
+                if (a > b) swap(a, b);
+                o.push_back({a, b, c});
+                for (T k = 2; k * c <= n; ++k) {
+                    o.push_back({k * a, k * b, k * c});
+                }
+            }
+        }
+        return o;
+    }
+
     template<typename T_arr>
     auto gen_element_from(T_arr& m) {
         assert(!m.empty());
