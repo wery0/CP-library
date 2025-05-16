@@ -1,9 +1,10 @@
 template<typename K, const int LG>
-struct hash_set_open_addressing {
+class hashset_open_addressing {
 
-    const int N = 1 << LG;
+    const size_t N = 1 << LG;
+    size_t size_ = 0;
     vector<K> store = vector<K>(N);
-    vector<bool> is_occupied = vector<bool>(N);
+    vector<char> is_occupied = vector<char>(N);
 
     constexpr inline void next_pos(int& pos) const {
         pos = pos < N - 1 ? pos + 1 : 0;
@@ -19,7 +20,16 @@ struct hash_set_open_addressing {
         }
     }
 
+public:
+    hashset_open_addressing() = default;
+
+    bool empty() const {return size_ == 0;}
+    size_t size() const {return size_;}
+    size_t capacity() const {return N;}
+    size_t count(const K& key) const {return contains(key);}
+
     void clear() {
+        size_ = 0;
         fill(is_occupied.begin(), is_occupied.end(), false);
     }
 
@@ -38,6 +48,7 @@ struct hash_set_open_addressing {
             if (store[pos] == key) return;
             next_pos(pos);
         }
+        ++size_;
         store[pos] = key;
         is_occupied[pos] = true;
     }
