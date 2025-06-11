@@ -1,4 +1,4 @@
-//Divides the array into the minimum number of good subsegments
+//Divides an array into the minimum number of good subsegments
 //Returns borders of subsegments, if partition exist
 //Complexity: at most O(n ^ 2) is_good() calls 
 template <typename T_arr>

@@ -43,7 +43,7 @@ public:
     //If is_lattice == false returns length of union of all segments
     T size() const {return sz;}
 
-    //Returns list of segments of minimal size, which union equals to the union of containing segments
+    //Returns list of segments of minimal size, union of which equals to the union of containing segments
     //{[1, 2], [2, 3], [5, 8], [7, 10], [12, 13], [14, 15]} -> {[1, 3], [5, 10], [12, 15]} if is_lattice == true
     //{[1, 2], [2, 3], [5, 8], [7, 10], [12, 13], [14, 15]} -> {[1, 3], [5, 10], [12, 13], [14, 15]} if is_lattice == false
     vector<pair<T, T>> get_segmentation() const {

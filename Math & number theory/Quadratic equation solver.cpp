@@ -1,4 +1,4 @@
-//Solves ax^2 + bx + c = 0
+//Finds all real solutions of equation ax^2 + bx + c = 0
 template<typename T>
 vector<T> solve_quadratic_equation(T a, T b, T c, T eps = 1e-12) {
     static_assert(is_floating_point_v<T>);

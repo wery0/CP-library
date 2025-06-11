@@ -34,7 +34,7 @@ vector<T> mul_convolution(vector<T> arr1, vector<T> arr2, const T mod) {
         for (size_t i = 1; i < n; ++i) res[lg[i]] = arr[i];
         return res;
     };
-    auto a12 = sum_convolution<ll>(transform(arr1), transform(arr2), mod);
+    auto a12 = sum_convolution<T>(transform(arr1), transform(arr2), mod);
     for (size_t i = 0; i < n - 1; ++i) {
         a12[i] += a12[i + n - 1];
         a12[i] -= a12[i] < mod ? 0 : mod;
