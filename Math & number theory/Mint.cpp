@@ -42,6 +42,7 @@ public:
     Mint operator*(const Mint& rhs) const {return (LONG)1 * val * rhs.val % MOD;}
     Mint operator/(const Mint& rhs) const {return (LONG)1 * val * rhs.inv().val % MOD;}
     Mint operator-() const {return val ? MOD - val : val;}
+    template<typename T> friend Mint operator*(T lhs, const Mint& rhs) {return rhs * lhs;}
 
     void operator+=(const Mint& rhs) {val += rhs.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint& rhs) {val -= rhs.val; val += val < 0 ? MOD : 0;}

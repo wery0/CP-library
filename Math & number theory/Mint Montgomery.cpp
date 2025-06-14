@@ -72,6 +72,7 @@ public:
     constexpr mint operator*(const mint& rhs) const {return mint(*this) *= rhs;}
     constexpr mint operator/(const mint& rhs) const {return mint(*this) /= rhs;}
     constexpr mint operator-() const {return mint() - mint(*this);}
+    template<typename T> friend mint operator*(T lhs, const mint& rhs) {return rhs * lhs;}
 
     static constexpr mint ONE = mint(1);
     mint& operator++() {*this += ONE; return *this;}
