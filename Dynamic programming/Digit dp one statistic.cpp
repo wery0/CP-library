@@ -6,36 +6,40 @@ T count_good_numbers_in_range_one_statistic(string l, string r) {
         const int MAX_STATISTIC = ?;
         auto f = [](int statistic, int digit) {return ?;};
         const size_t n = num.size();
-        const int gr = num.size() == 1 ? stoi(num) : 9;
         for (auto& c : num) c -= '0';
         //dp[i][s][k] = # good numbers of length exactly i, with statistic s, and relation to num is k.
-        vector dp(n, vector(MAX_STATISTIC, array<T, 3>{0, 0, 0}));
-        for (int digit = 1; digit <= gr; ++digit) {
+        vector dp(2, vector(MAX_STATISTIC, array<T, 3>{0, 0, 0}));
+        for (int digit = 1, gr = num.size() == 1 ? num[0] : 9; digit <= gr; ++digit) {
             const int _ = digit < num[0] ? 0 : digit == num[0] ? 1 : 2;
             const int s = f(?, digit);
             if (s < 0 || s >= MAX_STATISTIC) continue;
             dp[0][s][_] += 1;
         }
+        T o = 0;
         for (int i = 0; i + 1 < n; ++i) {
+            const int I = i & 1;
+            const int G = i + 1 < n ? 3 : lst ? 2 : 1;
+            for (int s = 0; s < ?; ++s1) {
+                for (int _ = 0; _ < G; ++_) {
+                    o += dp[I][s][_];
+                }
+            }
+            if (i + 1 == n) break;
             for (int s = 0; s < MAX_STATISTIC; ++s) {
                 for (int u = 0; u < 3; ++u) {
-                    if (dp[i][s][u] == 0) continue;
+                    dp[I ^ 1][s][u] = 0;
+                }
+            }
+            for (int s = 0; s < MAX_STATISTIC; ++s) {
+                for (int u = 0; u < 3; ++u) {
+                    if (dp[I][s][u] == 0) continue;
                     for (int digit = 0; digit < 10; ++digit) {
                         const int _ = digit < num[i + 1] ? 0 : digit == num[i + 1] ? 1 : 2;
                         const int ns = f(s, digit);
                         if (digit < 0 || digit > 9) continue;
                         if (ns < 0 || ns >= MAX_STATISTIC) continue;
-                        dp[i + 1][ns][u == 1 ? _ : u] += dp[i][s][u];
+                        dp[I ^ 1][ns][u == 1 ? _ : u] += dp[I][s][u];
                     }
-                }
-            }
-        }
-        T o = 0;
-        for (int i = 0; i < n; ++i) {
-            const int G = i + 1 < n ? 3 : lst ? 2 : 1;
-            for (int s = 0; s < MAX_STATISTIC; ++s) {
-                for (int j = 0; j < G; ++j) {
-                    o += dp[i][s][j];
                 }
             }
         }
