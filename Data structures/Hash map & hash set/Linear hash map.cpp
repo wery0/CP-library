@@ -19,6 +19,7 @@ public:
     void reserve(size_t n) {store.reserve(n);}
     size_t size() const {return store.size();}
     size_t empty() const {return store.empty();}
+    void clear() {store.clear();}
     size_t count(K key) const {for (auto& [k, v] : store) if (k == key) return 1; return 0;}
     V& operator[](K key) {for (auto& [k, v] : store) if (k == key) return v; store.emplace_back(key, V()); return store.back().second;}
     void insert(K key, V value) {for (auto& [k, v] : store) if (k == key) {v = value; return;}store.emplace_back(key, value);}
