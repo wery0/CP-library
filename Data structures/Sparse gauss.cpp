@@ -7,6 +7,7 @@
     https://codeforces.com/contest/2055/problem/C
     https://judge.yosupo.jp/problem/sparse_matrix_det
     https://codeforces.com/contest/1844/problem/G (smart approach with 57 SLEs)
+    https://atcoder.jp/contests/abc412/tasks/abc412_f
   L:
     https://codeforces.com/contest/1844/problem/G (straightforward approach)
 */
