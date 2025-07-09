@@ -117,40 +117,37 @@ namespace hamil {
         }
     }
 
-    // mx_ch : max number of adding/replacing. Default is (n + 100) * (n + 50)
-    // n : number of vertices
-    // eg: vector<pair<int, int>> storing all the edges
-    // Returns a vector<int> consists of all indices of vertices on the path. Returns empty list if failed to find one.
-    // This version finds some random hamiltonian path.
+    // Returns a vector of all indices of vertices on the path if it was found, otherwise returns {}.
     // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
     // If you need cycle - enumerate the edge, remove it, and read previous line.
-    vector<int> work(const size_t n, vector<pair<int, int>> eg, int64_t mx_ch = -1) {
+    vector<int> try_find_hamiltonian_path(const size_t n, vector<pair<int, int>> edges, int64_t mx_ch = -1) {
         if (n == 1) return {0};
-        if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50);    //default
+        if (mx_ch == -1) mx_ch = (n + 100) * (n + 50);
         static mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
         LCT::init(n);
         used.resize(n + 1);
         caneg.clear();
         for (size_t i = 1; i <= n; ++i) used[i].clear();
-        vector<vector<int>> edges(n + 1);
-        for (auto& [x, y] : eg) {
+        vector<vector<int>> g(n + 1);
+        for (auto& [x, y] : edges) {
+            assert(0 <= x && x < n);
+            assert(0 <= y && y < n);
             ++x, ++y;
-            edges[x].push_back(y);
-            edges[y].push_back(x);
+            g[x].push_back(y);
+            g[y].push_back(x);
         }
         for (int i = 1; i <= n; ++i) caneg.insert(i);
-        int tot = 0;
-        while (mx_ch >= 0) {
-            vector<pair<int, int>> eg;
+        for (int tot = 0; mx_ch > 0; ) {
+            vector<pair<int, int>> edges;
             for (auto v : caneg) {
-                for (auto s : edges[v]) {
-                    eg.emplace_back(v, s);
+                for (auto s : g[v]) {
+                    edges.emplace_back(v, s);
                 }
             }
-            shuffle(eg.begin(), eg.end(), rng);
-            if (eg.size() == 0) break;
-            for (auto [x, y] : eg) {
-                mx_ch--;
+            shuffle(edges.begin(), edges.end(), rng);
+            if (edges.empty()) break;
+            for (auto [x, y] : edges) {
+                --mx_ch;
                 if (used[x].size() < used[y].size()) swap(x, y);
                 if (used[y].size() >= 2 || (rng() & 1) || LCT::fdr(x) == LCT::fdr(y)) continue;
                 if (used[x].size() < 2 && used[y].size() < 2) ++tot;

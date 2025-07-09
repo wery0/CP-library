@@ -92,21 +92,19 @@ namespace hamil {
         }
     }
 
-    // mx_ch : max number of adding/replacing. Default is (n + 100) * (n + 50)
-    // n : number of vertices
-    // eg: vector<pair<int, int>> storing all the DIRECTED edges
-    // Returns a vector consisting of all indices of vertices on the path. Returns an empty vector if failed to find one.
-    // This version finds some random hamiltonian path.
+    // Returns a vector of all indices of vertices on the path if it was found, otherwise returns {}.
     // If you want path with fixed first and last vertex, you can modify graph by adding 2 vertexes and 2 edges.
     // If you need cycle - enumerate the edge, remove it, and read previous line.
-    vector<int> work(const size_t n, vector<pair<int, int>> eg, int64_t mx_ch = -1) {
+    vector<int> try_find_hamiltonian_path(const size_t n, vector<pair<int, int>> edges, int64_t mx_ch = -1) {
         if (n == 1) return {0};
-        if (mx_ch == -1) mx_ch = 1ll * (n + 100) * (n + 50);    //default
+        if (mx_ch == -1) mx_ch = (n + 100) * (n + 50);
         static mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
         LCT::init(n);
         vector<int> out(n + 1), in(n + 1);
         vector<vector<int>> from(n + 1), to(n + 1);
-        for (auto [x, y] : eg) {
+        for (auto [x, y] : edges) {
+            assert(0 <= x && x < n);
+            assert(0 <= y && y < n);
             ++x, ++y;
             from[x].push_back(y);
             to[y].push_back(x);
@@ -116,15 +114,14 @@ namespace hamil {
             canin.insert(i);
             canout.insert(i);
         }
-        int tot = 0;
-        while (mx_ch >= 0) {
-            vector<pair<int, int>> eg;
-            for (auto v : canout) for (auto s : from[v]) if (in[s]) eg.emplace_back(v, s);
-            for (auto v : canin) for (auto s : to[v]) eg.emplace_back(s, v);
-            shuffle(eg.begin(), eg.end(), rng);
-            if (eg.empty()) break;
-            for (auto [x, y] : eg) {
-                mx_ch--;
+        for (int tot = 0; mx_ch > 0; ) {
+            edges.clear();
+            for (auto v : canout) for (auto s : from[v]) if (in[s]) edges.emplace_back(v, s);
+            for (auto v : canin) for (auto s : to[v]) edges.emplace_back(s, v);
+            shuffle(edges.begin(), edges.end(), rng);
+            if (edges.empty()) break;
+            for (auto [x, y] : edges) {
+                --mx_ch;
                 if (in[y] && out[x]) continue;
                 if (LCT::fdr(x) == LCT::fdr(y)) continue;
                 if ((in[y] || out[x]) && (rng() & 1)) continue;
