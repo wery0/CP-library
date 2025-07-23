@@ -42,7 +42,7 @@ public:
     segtree() = default;
 
     template<typename U>
-    segtree(const vector<U>& m) {
+    segtree(const vector<U>& m): n(m.size()) {
         auto build = [&](auto&& build, Node*& n, int l, int r) -> void {
             if (l > r) return;
             n = new Node();
@@ -55,16 +55,16 @@ public:
             build(build, n->r, md + 1, r);
             upd(n);
         };
-        n = m.size();
-        vector<pair<int, int>> wwas(n);
+        vector<pair<int, T>> wwas(n);
         for (size_t i = 0; i < n; ++i) wwas[i].second = m[i];
+        vector<int> nm(n);
         {
-            vector<T> n = m;
-            sort(n.begin(), n.end());
-            n.erase(unique(n.begin(), n.end()), n.end());
-            for (const T& c : m) c = lower_bound(n.begin(), n.end(), c) - n.begin();
+            vector<T> cm = m;
+            sort(cm.begin(), cm.end());
+            cm.erase(unique(cm.begin(), cm.end()), cm.end());
+            for (int i = 0; i < n; ++i) nm[i] = lower_bound(cm.begin(), cm.end(), m[i]) - cm.begin();
         }
-        for (size_t i = 0; i < n; ++i) wwas[i].first = m[i];
+        for (size_t i = 0; i < n; ++i) wwas[i].first = nm[i];
         sort(wwas.begin(), wwas.end());
         wwas.erase(unique(wwas.begin(), wwas.end()), wwas.end());
         was.reserve(wwas.size());
@@ -72,7 +72,7 @@ public:
         build(build, root, 0, n - 1);
         store.push_back(root);
         for (size_t i = 0; i < n; ++i) {
-            store.push_back(point_add(m[i], 0, n - 1, store[i], 1));
+            store.push_back(point_add(nm[i], 0, n - 1, store[i], 1));
         }
     }
 
