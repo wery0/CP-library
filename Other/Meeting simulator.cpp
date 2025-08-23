@@ -2,10 +2,11 @@
 Simulates arrangement of meetings in rooms.
 Each meeting is defined by [start_time, duration].
 Each meeting will be arranged in the room with the smallest number among free rooms
-at the moment max(start_time, (when the first free room appears)) and will lasts duration time units.
+at the moment max(start_time, (when the first free room appears)) and will last duration time units.
 This function for every meeting calculates its starting time and room, where it will be.
 ALL start_time SHOULD BE DIFFERENT FOR UNIQUE ANSWER!
 */
+//https://leetcode.com/problems/meeting-rooms-iii/
 template<typename T>
 vector<pair<T, T>> meeting_simulator(T rooms, vector<pair<T, T>> meetings) {
     //rooms = min(rooms, (T)meetings.size());           //<- uncomment if it may help
@@ -35,4 +36,3 @@ vector<pair<T, T>> meeting_simulator(T rooms, vector<pair<T, T>> meetings) {
     }
     return when_where;
 }
-//Can test here: https://leetcode.com/problems/meeting-rooms-iii/

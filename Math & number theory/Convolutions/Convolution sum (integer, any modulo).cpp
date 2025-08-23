@@ -14,7 +14,7 @@ vector<T> sum_convolution_arbitrary_mod(vector<T>& arr1, vector<T>& arr2, const 
     }
     vector<vector<T>> p(sz);
     for (size_t i = 0; i < sz; ++i) {
-        p[i] = sum_convolution(arr1, arr2, mods[i]);
+        p[i] = sum_convolution_mod(arr1, arr2, mods[i]);
     }
     const size_t n = p[0].size();
     vector<T> res(n);

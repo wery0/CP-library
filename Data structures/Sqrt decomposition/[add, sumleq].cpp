@@ -25,7 +25,7 @@ class seg_add_sumleq {
 
 public:
     seg_add_sumleq() = default;
-    seg_add_sumleq(vector<K>& keys, vector<V>& values): N(keys.size()), B(sqrt(N * __lg(N))), nB((N + B - 1) / B), st(nB + 1, N), si(N), psk(nB), keys(keys), values(values), smsv(N), bk(B * 2) {
+    seg_add_sumleq(vector<K>& keys, vector<V>& values): N(keys.size()), B(sqrt(N * __lg(N)) + 1), nB((N + B - 1) / B), st(nB + 1, N), si(N), psk(nB), keys(keys), values(values), smsv(N), bk(B * 2) {
         assert(keys.size() == values.size());
         for (int i = 0; i < nB; ++i) st[i] = i * B;
         iota(si.begin(), si.end(), 0);
