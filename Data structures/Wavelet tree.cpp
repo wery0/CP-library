@@ -83,6 +83,34 @@ class wavelet_tree {
         return {cnt, sum};
     }
 
+    pair<T, C> seg_kth_ordered_statistics_(int ql, int qr, int k) {
+        assert(ql <= qr && qr < n);
+        assert(k <= qr - ql);
+        int l = 0, r = n - 1;
+        T vl = mne, vr = mxe;
+        C sum = 0;
+        for (int layer = 0; vl < vr; ++layer) {
+            T vm = vl + (vr - vl) / 2;
+            int c0 = bvs[layer].seg0(l, r);
+            int cq0 = bvs[layer].seg0(ql, qr);
+            int cq1 = qr - ql + 1 - cq0;
+            if (k < cq0) {
+                ql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0);
+                qr = ql + cq0 - 1;
+                r = l + c0 - 1;
+                vr = vm;
+            } else {
+                k -= cq0;
+                if constexpr (use_sum) sum += get_sum(layer, ql, qr);
+                ql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0);
+                qr = ql + cq1 - 1;
+                l = l + c0;
+                vl = vm + 1;
+            }
+        }
+        return {do_compress ? keys[vl] : vl, sum};
+    }
+
 public:
     wavelet_tree() = default;
     //use_sum == false, do_compress == false -> <O(nlog(C)), O(nlog(C)) bits>
@@ -132,37 +160,13 @@ public:
     }
 
     //O(log(# distinct)) if do_compress == true, O(log(mxe - mne)) otherwise
-    T seg_kth_ordered_statistics(int ql, int qr, int k) {
-        assert(ql <= qr && qr < n);
-        assert(k <= qr - ql);
-        int l = 0, r = n - 1;
-        T vl = mne, vr = mxe;
-        for (int layer = 0; vl < vr; ++layer) {
-            T vm = vl + (vr - vl) / 2;
-            int c0 = bvs[layer].seg0(l, r);
-            int cq0 = bvs[layer].seg0(ql, qr);
-            int cq1 = qr - ql + 1 - cq0;
-            if (k < cq0) {
-                ql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0);
-                qr = ql + cq0 - 1;
-                r = l + c0 - 1;
-                vr = vm;
-            } else {
-                k -= cq0;
-                ql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0);
-                qr = ql + cq1 - 1;
-                l = l + c0;
-                vl = vm + 1;
-            }
-        }
-        return do_compress ? keys[vl] : vl;
-    }
-
-    //O(log(# distinct)) if do_compress == true, O(log(mxe - mne)) otherwise
     int seg_count_leq(int l, int r, T x) {return seg_count_and_sum_leq_(l, r, x).first;}
     C seg_sum_leq(int l, int r, T x) {return seg_count_and_sum_leq_(l, r, x).second;}
     pair<int, C> seg_count_and_sum_leq(int l, int r, T x) {return seg_count_and_sum_leq_(l, r, x);}
-    int seg_count_seg(int l, int r, T x) {return seg_count_and_sum_seg_(l, r, x).first;}
-    C seg_sum_seg(int l, int r, T x) {return seg_count_and_sum_seg_(l, r, x).second;}
-    pair<int, C> seg_count_and_sum_seg(int l, int r, T x) {return seg_count_and_sum_seg_(l, r, x);}
+    int seg_count_seg(int l, int r, T x, T y) {return seg_count_and_sum_seg_(l, r, x, y).first;}
+    C seg_sum_seg(int l, int r, T x, T y) {return seg_count_and_sum_seg_(l, r, x, y).second;}
+    pair<int, C> seg_count_and_sum_seg(int l, int r, T x, T y) {return seg_count_and_sum_seg_(l, r, x, y);}
+    T seg_kth_ordered_statistics(int l, int r, int k) {return seg_kth_ordered_statistics_(l, r, k).first;}
+    C seg_kth_ordered_statistics_sum(int l, int r, int k) {return seg_kth_ordered_statistics_(l, r, k).second;}
+    pair<T, C> seg_kth_ordered_statistics_and_sum(int l, int r, int k) {return seg_kth_ordered_statistics_(l, r, k);}
 };
