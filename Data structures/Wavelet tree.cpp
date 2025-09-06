@@ -26,7 +26,7 @@ class wavelet_tree {
             if (vl == vr) {
                 if (vl <= x) {
                     cnt += qr - ql + 1;
-                    sum += get_sum(layer, ql, qr);
+                    if constexpr (use_sum) sum += get_sum(layer, ql, qr);
                 }
                 break;
             }
@@ -67,7 +67,7 @@ class wavelet_tree {
             if (vr < x || y < vl || ql > qr || l > r) return;
             if (x <= vl && vr <= y) {
                 cnt += qr - ql + 1;
-                sum += get_sum(layer, ql, qr);
+                if constexpr (use_sum) sum += get_sum(layer, ql, qr);
                 return;
             }
             T vm = vl + (vr - vl) / 2;
