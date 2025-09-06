@@ -56,6 +56,16 @@ public:
         ar.pop_back();
     }
 
+    T front() const {
+        assert(size());
+        return vl.empty() ? vr[0] : vl.back();
+    }
+
+    T back() const {
+        assert(size());
+        return vr.empty() ? vl[0] : vr.back();
+    }
+
     T query() const {
         assert(size());
         if (vl.empty() || vr.empty()) return (vl.empty() ? ar : al).back();
