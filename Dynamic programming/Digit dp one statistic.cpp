@@ -16,10 +16,10 @@ T count_good_numbers_in_range_one_statistic(string l, string r) {
             dp[0][s][_] += 1;
         }
         T o = 0;
-        for (int i = 0; i + 1 < n; ++i) {
+        for (int i = 0; i < n; ++i) {
             const int I = i & 1;
             const int G = i + 1 < n ? 3 : lst ? 2 : 1;
-            for (int s = 0; s < ?; ++s1) {
+            for (int s = 0; s < ?; ++s) {
                 for (int _ = 0; _ < G; ++_) {
                     o += dp[I][s][_];
                 }

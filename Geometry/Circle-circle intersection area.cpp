@@ -1,15 +1,15 @@
 template<typename T>
-T circle_circle_intersection(circle<T> c1, circle<T> c2) {
-    auto GERON = [&](T a, T b, T c) -> T{
+T circle_circle_intersection_area(circle<T> c1, circle<T> c2) {
+    auto GERON = [&](T a, T b, T c) -> T {
         T p = (a + b + c) / 2;
         return sqrtl(p * (p - a) * (p - b) * (p - c));
     };
-    auto FU = [&](T r, T d) -> T{
+    auto FU = [&](T r, T d) -> T {
         return r * r * acos(d / r) - d * sqrtl(r * r - d * d);
     };
-    if (c1.r > c2.r) swap(c1, c2);
     T d = dist(c1.p, c2.p);
     if (d >= c1.r + c2.r) return 0;
+    if (c1.r > c2.r) swap(c1, c2);
     if (c1.r + d <= c2.r) return PI * c1.r * c1.r;
     T A = sqrtl(4 * d * d * c2.r * c2.r - powl(d * d - c1.r * c1.r + c2.r * c2.r, 2)) / d;
     if (c2.r <= d) {

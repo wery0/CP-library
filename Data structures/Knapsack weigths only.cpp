@@ -135,7 +135,7 @@ public:
         return false;
     }
 
-    //Returns vector<pair<weight, id>> s. t. accumulate(all(weight)) == sum
+    //Returns pair<vector of weights, vector of ids> s. t. sum of all weights == sum
     //With 3k trick: O(min(N, sqrt(weights_sum)) * MAX_SUM / W) time and memory
     //Without trick: O(N * MAX_SUM / W) time and memory
     template<const T MAX_SUM>
