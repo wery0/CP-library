@@ -3,13 +3,14 @@ template<typename T>
 T count_good_numbers_in_range_one_statistic(string l, string r) {
     //Returns # good numbers in range [1, num]
     auto calc_pref = [&](string num, bool lst) -> T {
+        const int BASE = 10;
         const int MAX_STATISTIC = ?;
         auto f = [](int statistic, int digit) {return ?;};
         const size_t n = num.size();
         for (auto& c : num) c -= '0';
         //dp[i][s][k] = # good numbers of length exactly i, with statistic s, and relation to num is k.
         vector dp(2, vector(MAX_STATISTIC, array<T, 3>{0, 0, 0}));
-        for (int digit = 1, gr = num.size() == 1 ? num[0] : 9; digit <= gr; ++digit) {
+        for (int digit = 1, gr = num.size() == 1 ? num[0] : BASE - 1; digit <= gr; ++digit) {
             const int _ = digit < num[0] ? 0 : digit == num[0] ? 1 : 2;
             const int s = f(?, digit);
             if (s < 0 || s >= MAX_STATISTIC) continue;
@@ -33,10 +34,9 @@ T count_good_numbers_in_range_one_statistic(string l, string r) {
             for (int s = 0; s < MAX_STATISTIC; ++s) {
                 for (int u = 0; u < 3; ++u) {
                     if (dp[I][s][u] == 0) continue;
-                    for (int digit = 0; digit < 10; ++digit) {
+                    for (int digit = 0; digit < BASE; ++digit) {
                         const int _ = digit < num[i + 1] ? 0 : digit == num[i + 1] ? 1 : 2;
                         const int ns = f(s, digit);
-                        if (digit < 0 || digit > 9) continue;
                         if (ns < 0 || ns >= MAX_STATISTIC) continue;
                         dp[I ^ 1][ns][u == 1 ? _ : u] += dp[I][s][u];
                     }
