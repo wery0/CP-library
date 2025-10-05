@@ -1,7 +1,7 @@
 template<typename T>
 class mex_multiset {
     vector<int> mn;
-    T N, U;
+    T N = 0, U = 0;
     size_t sm = 0;
 
     void point_add(int pos, int val) {
@@ -13,8 +13,8 @@ class mex_multiset {
     }
 
 public:
-    mex_maintain() = default;
-    mex_maintain(T N): N(N), U(N & (N - 1) ? 2 << __lg(N) : N) {
+    mex_multiset() = default;
+    mex_multiset(T N): N(N), U(N & (N - 1) ? 2 << __lg(N) : N) {
         assert(N >= 0);
         mn.resize(U * 2);
     }

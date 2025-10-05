@@ -1,6 +1,6 @@
-
 //For a given sequence of numbers finds coefficients of shortest linear recurrence that generates it
 //O(n * recurrence_length) <= O(n ^ 2)
+//Example: f({1, 10, 100, 123, 353, 899}) = {1, 2, 3}, i. e. a_n = a_{n - 1} * 1 + a_{n - 2} * 2 + a_{n - 3} * 3
 template<typename T>
 vector<T> berlekamp_massey(const vector<T>& a) {
 	const size_t n = a.size();

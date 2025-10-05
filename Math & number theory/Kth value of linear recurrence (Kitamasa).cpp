@@ -1,7 +1,7 @@
 //a[i] = i < n ? a[i] : sum(c[j] * a[i - 1 - j])
 //Calculates a[k] in O(O(mul) * log(k)) where O(mul) is O(n ^ 2) in this implementation, could be optimized to O(nlog(n)) with fft
 template<typename T>
-T kth_value_of_recurrence_relation_smart(const vector<T>& a, const vector<T>& c, int64_t k) {
+T kth_value_of_recurrence_relation_kitamasa(const vector<T>& a, const vector<T>& c, int64_t k) {
     const size_t n = c.size();
     assert(k >= 0);
     assert(a.size() >= n && n > 0);

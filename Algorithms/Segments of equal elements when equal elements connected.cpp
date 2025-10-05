@@ -1,6 +1,6 @@
 //Splits segment [L, R] into segments with equal values [l, r, val] and returns them as vector
 //Constraint: equal values are connected, i. e. for every two equal values, all the values in between them should be the same as these values
-//O(log(R - L)) time, O(sum(log(r - l + 1))) <= R - L + 1 calls of f will be made
+//O(# f() calls) time = O(sum(log(r - l + 1))) <= R - L + 1
 template<typename T>
 auto get_segs_of_eq_elements_when_eq_connected(T L, T R, const auto& f) {
     using V = decltype(f(L));
