@@ -33,9 +33,9 @@ class hashset_open_addressing {
     static constexpr uint64_t kek = 11995408973635179863ull;
     constexpr inline size_t hsh(const K& key) const {
         if constexpr(is_integral_v<K>) {
-            return key & (capacity_ - 1);
+            // return key & (capacity_ - 1);
             // return key % capacity_;
-            // return ((key * kek) >> 32) & (capacity_ - 1);
+            return ((key * kek) >> 32) & (capacity_ - 1);
             // return ((key * kek) >> 32) % capacity_;
         } else {
             return hash<K>{}(key) % capacity_;
