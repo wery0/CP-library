@@ -23,6 +23,7 @@
     Victims:
     https://codeforces.com/contest/2035/problem/E
     https://imcs.dvfu.ru/cats/static/problem_text-cpid-7515571.html?sid=56OyI1rk3u5bTN0ECZsfs7VX5Slnhj
+    https://techarena-hse25.mrc.msk.ru/team.cgi?SID=c189a82fe26dd886&action=144 problem G (The First Contest 2025 HRU HSE)
 */
 template <typename T>
 T integral_keksearch_argmin(auto f, T L, T R, size_t N = 100, double step = 0.5, size_t block_size = 1, size_t block_eval_mode = 0) {
