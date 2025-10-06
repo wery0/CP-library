@@ -49,7 +49,10 @@ class treap {
         if (!n) return;
     }
     void push(Node* n) {
-        if (!n) return;
+        // if (!n || !n->?) return;
+        // apply_push(n->l, n->?);
+        // apply_push(n->r, n->?);
+        // n->? = 0;
     }
 
     void upd(Node* n) {
@@ -63,6 +66,15 @@ class treap {
         n->smv = gsmv(n->l) + n->val + gsmv(n->r);
 
         n->sz = gsz(n->l) + 1 + gsz(n->r);
+    }
+
+    void _bump(Node*& n) {
+        //Slower, but less memory
+        Node* l = n->l, *r = n->r;
+        delete n; n = merge(l, r);
+
+        //Faster, but more memory
+        //n = merge(n->l, n->r);
     }
 
     Node* merge(Node* l, Node* r) {
@@ -108,103 +120,47 @@ class treap {
     }
 
     template<typename I>
-    Node* build(I f_key, I l_key) {
+    Node* _build(I f_key, I l_key) {
         if (f_key >= l_key) return 0;
         I md = f_key + (l_key - f_key) / 2;
         Node* n = new Node(*md);
-        n->l = build(f_key, md);
-        n->r = build(md + 1, l_key);
+        n->l = _build(f_key, md);
+        n->r = _build(md + 1, l_key);
         upd(n);
         return n;
     }
 
     template<typename I1, typename I2>
-    Node* build(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {
+    Node* _build(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {
         if (f_key >= l_key) return 0;
         I1 md1 = f_key + (l_key - f_key) / 2;
         I2 md2 = f_val + (l_val - f_val) / 2;
         Node* n = new Node(*md1, *md2);
-        n->l = build(f_key, md1, f_val, md2);
-        n->r = build(md1 + 1, l_key, md2 + 1, l_val);
+        n->l = _build(f_key, md1, f_val, md2);
+        n->r = _build(md1 + 1, l_key, md2 + 1, l_val);
         upd(n);
         return n;
     }
 
-    void update_key_at_pos(Node* n, size_t pos, K new_key) {
+    void _delete_subtree(Node* n) {if (!n) return; push(n); _delete_subtree(n->l); _delete_subtree(n->r); delete n;}
+
+    void _update_key_at_pos(Node* n, size_t pos, K new_key) {
         push(n);
         if (pos == gsz(n->l)) {n->key = new_key; upd(n); return;}
-        if (pos < gsz(n->l)) update_key_at_pos(n->l, pos, new_key);
-        else update_key_at_pos(n->r, pos - gsz(n->l) - 1, new_key);
+        if (pos < gsz(n->l)) _update_key_at_pos(n->l, pos, new_key);
+        else _update_key_at_pos(n->r, pos - gsz(n->l) - 1, new_key);
         upd(n);
     }
 
-    void update_val_at_pos(Node* n, size_t pos, V new_val) {
+    void _update_val_at_pos(Node* n, size_t pos, V new_val) {
         push(n);
         if (pos == gsz(n->l)) {n->val = new_val; upd(n); return;}
-        if (pos < gsz(n->l)) update_val_at_pos(n->l, pos, new_val);
-        else update_val_at_pos(n->r, pos - gsz(n->l) - 1, new_val);
+        if (pos < gsz(n->l)) _update_val_at_pos(n->l, pos, new_val);
+        else _update_val_at_pos(n->r, pos - gsz(n->l) - 1, new_val);
         upd(n);
     }
 
-    Node* insert_node(Node* n, Node* nw) {
-        push(n);
-        if (!n || nw->y > n->y) {
-            auto [lf, rg] = split_key(n, nw->key);
-            nw->l = lf;
-            nw->r = rg;
-            upd(nw);
-            return nw;
-        }
-        if (nw->key < n->key) n->l = insert_node(n->l, nw);
-        else n->r = insert_node(n->r, nw);
-        upd(n);
-        return n;
-    }
-
-    Node* erase_pos(Node* n, size_t pos) {
-        push(n);
-        if (gsz(n->l) == pos) {
-            last_erased_key = n->key;
-            last_erased_val = n->val;
-            Node* l = n->l, *r = n->r;
-            delete n;
-            return merge(l, r);
-        }
-        if (pos < gsz(n->l)) n->l = erase_pos(n->l, pos);
-        else n->r = erase_pos(n->r, pos - gsz(n->l) - 1);
-        upd(n);
-        return n;
-    }
-
-    Node* erase_one_key_occurrence(Node* n, K key) {
-        if (!n) return 0;
-        push(n);
-        if (n->key == key) {
-            Node* l = n->l, *r = n->r;
-            delete n;
-            return merge(l, r);
-        }
-        if (key < n->key) n->l = erase_one_key_occurrence(n->l, key);
-        else n->r = erase_one_key_occurrence(n->r, key);
-        upd(n);
-        return n;
-    }
-
-    Node* erase_all_key_occurrences(Node* n, K key) {
-        if (!n) return 0;
-        push(n);
-        if (n->key == key) {
-            Node* l = erase_all_key_occurrences(n->l, key), *r = erase_all_key_occurrences(n->r, key);
-            delete n;
-            return merge(l, r);
-        }
-        if (key < n->key) n->l = erase_all_key_occurrences(n->l, key);
-        else n->r = erase_all_key_occurrences(n->r, key);
-        upd(n);
-        return n;
-    }
-
-    pair<K, V> kth_elem(Node* n, size_t k) {
+    pair<K, V> _kth_elem(Node* n, size_t k) {
         assert(0 <= k && k < gsz(n));
         while (n) {
             push(n);
@@ -217,15 +173,15 @@ class treap {
         return {K(), V()};
     }
 
-    void get_keys_on_subsegment(Node* n, size_t l, size_t& len, vector<K>& res) {
+    void _get_keys_from_seg(Node* n, size_t l, size_t& len, vector<K>& res) {
         if (!n || !len) return;
         push(n);
-        if (l < gsz(n->l) && len) get_keys_on_subsegment(n->l, l, len, res);
+        if (l < gsz(n->l) && len) _get_keys_from_seg(n->l, l, len, res);
         if (l <= gsz(n->l) && len) res.push_back(n->key), --len;
-        if (len) get_keys_on_subsegment(n->r, l > gsz(n->l) ? l - gsz(n->l) - 1 : 0, len, res);
+        if (len) _get_keys_from_seg(n->r, l > gsz(n->l) ? l - gsz(n->l) - 1 : 0, len, res);
     }
 
-    size_t pos_of_leftest_good(Node* n, auto has_good, auto is_good) {
+    size_t _pos_of_leftest_good(Node* n, auto has_good, auto is_good) {
         size_t ans = 0;
         while (n) {
             push(n);
@@ -236,7 +192,7 @@ class treap {
         return ans;
     }
 
-    size_t pos_of_rightest_good(Node* n, auto has_good, auto is_good) {
+    size_t _pos_of_rightest_good(Node* n, auto has_good, auto is_good) {
         size_t ans = 0;
         while (n) {
             push(n);
@@ -247,7 +203,7 @@ class treap {
         return ans;
     }
 
-    size_t pos_of_closest_from_right_good(Node* n, size_t pos, auto has_good, auto is_good) {
+    size_t _pos_of_closest_from_right_good(Node* n, size_t pos, auto has_good, auto is_good) {
         size_t szr = gsz(n);
         if (pos >= szr || !has_good(n)) return szr;
         size_t ans = 0, pos_to_ret = szr;
@@ -265,10 +221,10 @@ class treap {
                 n = n->l;
             }
         }
-        return pos_to_ret + (u ? pos_of_leftest_good(u, has_good, is_good) : 0);
+        return pos_to_ret + (u ? _pos_of_leftest_good(u, has_good, is_good) : 0);
     }
 
-    size_t pos_of_closest_from_left_good(Node* n, size_t pos, auto has_good, auto is_good) {
+    size_t _pos_of_closest_from_left_good(Node* n, size_t pos, auto has_good, auto is_good) {
         size_t szr = gsz(n);
         if (!has_good(n)) return szr;
         pos = min(pos, szr - 1);
@@ -290,111 +246,194 @@ class treap {
         }
         if (pos_to_ret == szr) return szr;
         pos_to_ret = szr - 1 - pos_to_ret;
-        return pos_to_ret - (u ? gsz(u) - 1 - pos_of_rightest_good(u, has_good, is_good) : 0);
+        return pos_to_ret - (u ? gsz(u) - 1 - _pos_of_rightest_good(u, has_good, is_good) : 0);
     }
 
-    size_t pos_of_leftest_min_key(Node* n) {
+    size_t _pos_of_leftest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n, 
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
-    size_t pos_of_rightest_min_key(Node* n) {
+    size_t _pos_of_rightest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return pos_of_rightest_good(n, 
+        return _pos_of_rightest_good(n, 
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
-    size_t pos_of_leftest_key_leq(Node* n, K key) {
-        return pos_of_leftest_good(n, 
+    size_t _pos_of_leftest_key_leq(Node* n, K key) {
+        return _pos_of_leftest_good(n, 
             [&](Node* n){return gmnk(n) <= key;},
             [&](Node* n){return n->key <= key;});
     }
 
-    size_t pos_of_closest_from_left_key_leq(Node* n, size_t pos, K key) {
-        return pos_of_closest_from_left_good(n, pos,
+    size_t _pos_of_leftest_val_leq(Node* n, V val) {
+        return _pos_of_leftest_good(n, 
+            [&](Node* n){return gmnv(n) <= val;},
+            [&](Node* n){return n->val <= val;});
+    }
+
+    size_t _pos_of_closest_from_left_key_leq(Node* n, size_t pos, K key) {
+        return _pos_of_closest_from_left_good(n, pos,
             [&](Node* n){return gmnk(n) <= key;},
             [&](Node* n){return n->key <= key;});
     }
 
-    size_t pos_of_closest_from_right_key_leq(Node* n, size_t pos, K key) {
-        return pos_of_closest_from_right_good(n, pos,
+    size_t _pos_of_closest_from_right_key_leq(Node* n, size_t pos, K key) {
+        return _pos_of_closest_from_right_good(n, pos,
             [&](Node* n){return gmnk(n) <= key;},
             [&](Node* n){return n->key <= key;});
     }
 
-    void print_keys(Node* n) {if (!n) return; push(n); print_keys(n->l); cout << n->key << ' '; print_keys(n->r);}
-    void print_vals(Node* n) {if (!n) return; push(n); print_vals(n->l); cout << n->val << ' '; print_vals(n->r);}
+    void _insert(Node*& n, Node* nw) {
+        push(n);
+        if (!n || nw->y > n->y) {
+            auto [lf, rg] = split_key(n, nw->key);
+            nw->l = lf;
+            nw->r = rg;
+            upd(nw);
+            n = nw;
+            return;
+        }
+        if (nw->key < n->key) _insert(n->l, nw);
+        else _insert(n->r, nw);
+        upd(n);
+    }
 
-    void delete_subtree(Node* n) {if (!n) return; push(n); delete_subtree(n->l); delete_subtree(n->r); delete n;}
+    void _erase_pos(Node*& n, size_t pos) {
+        push(n);
+        if (gsz(n->l) == pos) {
+            last_erased_key = n->key;
+            last_erased_val = n->val;
+            _bump(n);
+            return;
+        }
+        (pos < gsz(n->l) ? _erase_pos(n->l, pos) : _erase_pos(n->r, pos - gsz(n->l) - 1));
+        upd(n);
+    }
 
-    void cyclic_shift_left(Node*& n, int shift) {if (shift < 0) cyclic_shift_right(-shift); else {if (gsz(n) == 0) return; if (shift >= gsz(n)) shift %= gsz(n); auto [lf, rg] = split_size(n, shift); n = merge(rg, lf);}}
-    void cyclic_shift_right(Node*& n, int shift) {if (shift < 0) cyclic_shift_left(-shift); else {if (gsz(n) == 0) return; if (shift >= gsz(n)) shift %= gsz(n); auto [lf, rg] = split_size(n, gsz(n) - shift); n = merge(rg, lf);}}
+    void _erase_one_key_occurrence(Node*& n, K key) {
+        if (!n) return;
+        push(n);
+        if (n->key == key) {
+            _bump(n);
+            return;
+        }
+        _erase_one_key_occurrence(key < n->key ? n->l : n->r, key);
+        upd(n);
+    }
 
+    void _erase_all_key_occurrences(Node*& n, K key) {
+        if (!n) return;
+        push(n);
+        if (n->key == key) {
+            _erase_all_key_occurrences(n->l, key);
+            _erase_all_key_occurrences(n->r, key);
+            _bump(n);
+            return;
+        }
+        _erase_all_key_occurrences(key < n->key ? n->l : n->r, key);
+        upd(n);
+    }
+
+    void _erase_seg(Node*& n, size_t l, size_t len) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, len); n = merge(lf, rg);}
+    void _erase_back(Node*& n) {_erase_pos(n, gsz(n) - 1);}
+
+    template<typename I> void _insert_array_at_pos(Node* n, size_t pos, I first, I last) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(first, last)), rg);}
+    template<typename T> void _insert_array_at_pos(Node* n, size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(il.begin(), il.end())), rg);}
+    void _insert_at_pos(Node*& n, size_t pos, K key, V val = UNDEF) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, new Node(key, val)), rg);}
+    void _insert_back(Node*& n, K key, V val = UNDEF) {_insert_at_pos(n, gsz(n), key, val);}
+
+    bool _contains(Node* n, K key) {while (n) {push(n); if (key == n->key) return true; n = key < n->key ? n->l : n->r;} return false;}
+    size_t _get_leftest_pos_of_key(Node* n, K key) {size_t pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
+    V _get_value_by_key(Node* n, K key) {while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return UNDEF;}
+
+    size_t _count_keys_leq(Node* n, K key) {size_t o = 0; while (n) {push(n); if (n->key <= key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    size_t _count_keys_less(Node* n, K key) {size_t o = 0; while (n) {push(n); if (n->key < key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
+    size_t _count_keys_in_seg(Node* n, K l, K r) {return l > r ? 0 : _count_keys_leq(n, r) - _count_keys_less(n, l);}
+    size_t _count_keys_geq(Node* n, K key) {return gsz(n) - _count_keys_less(n, key);}
+    size_t _count_keys_greater(Node* n, K key) {return gsz(n) - _count_keys_leq(n, key);}
+    size_t _count_keys_eq(Node* n, K key) {return _count_keys_leq(n, key) - _count_keys_less(n, key);}
+
+    K _pref_sumkey(Node* n, size_t p) {K sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmk(n->l) + n->key; if (gsz(n->l) < p) sm += gsmk(n->l) + n->key, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
+    K _seg_sumkey_fast(Node* n, size_t l, size_t r) {return _pref_sumkey(n, r) - (l ? _pref_sumkey(n, l - 1) : 0);}
+    K _seg_sumkey_slow(Node* n, size_t l, size_t r) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, r - l + 1); K ans = gsmk(md); n = merge(merge(lf, md), rg); return ans;}
+
+    V _pref_sumval(Node* n, size_t p) {V sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmv(n->l) + n->val; if (gsz(n->l) < p) sm += gsmv(n->l) + n->val, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
+    V _seg_sumval(Node* n, size_t l, size_t r) {return _pref_sumval(n, r) - (l ? _pref_sumval(n, l - 1) : 0);}
+
+    void _cyclic_shift_left(Node*& n, int shift) {if (shift < 0) _cyclic_shift_right(n, -shift); else {if (gsz(n) == 0) return; if (shift >= gsz(n)) shift %= gsz(n); auto [lf, rg] = split_size(n, shift); n = merge(rg, lf);}}
+    void _cyclic_shift_right(Node*& n, int shift) {if (shift < 0) _cyclic_shift_left(n, -shift); else {if (gsz(n) == 0) return; if (shift >= gsz(n)) shift %= gsz(n); auto [lf, rg] = split_size(n, gsz(n) - shift); n = merge(rg, lf);}}
+    void _seg_cyclic_shift_left(Node*& n, size_t l, size_t r, int shift) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, r - l + 1); _cyclic_shift_left(md, shift); n = merge(merge(lf, md), rg);}
+    void _seg_cyclic_shift_right(Node*& n, size_t l, size_t r, int shift) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, r - l + 1); _cyclic_shift_right(md, shift); n = merge(merge(lf, md), rg);}
+
+    void _print_keys(Node* n) {if (!n) return; push(n); _print_keys(n->l); cout << n->key << ' '; _print_keys(n->r);}
+    void _print_vals(Node* n) {if (!n) return; push(n); _print_vals(n->l); cout << n->val << ' '; _print_vals(n->r);}
+    
 public:
     treap() = default;
-    template<typename I> treap(I f_key, I l_key) {root = build(f_key, l_key);}
-    template<typename I1, typename I2> treap(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {assert(l_key - f_key == l_val - f_val); root = build(f_key, l_key, f_val, l_val);}
-    ~treap() {delete_subtree(root);}
+    template<typename I> treap(I f_key, I l_key) {root = _build(f_key, l_key);}
+    template<typename I1, typename I2> treap(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {assert(l_key - f_key == l_val - f_val); root = _build(f_key, l_key, f_val, l_val);}
+    ~treap() {_delete_subtree(root);}
 
     size_t size() const {return gsz(root);}
     bool empty() const {return root == 0;}
 
-    template<typename I> void insert_array_at_pos(size_t pos, I first, I last) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(first, last)), rg);}
-    template<typename T> void insert_array_at_pos(size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, build(il.begin(), il.end())), rg);}
-    void insert(K key, V val = UNDEF) {root = insert_node(root, new Node(key, val));}
-    void insert_at_pos(size_t pos, K key, V val = UNDEF) {auto [lf, rg] = split_size(root, pos); root = merge(merge(lf, new Node(key, val)), rg);}
-    void insert_back(K key, V val = UNDEF) {insert_at_pos(size(), key, val);}
+    template<typename I> void insert_array_at_pos(size_t pos, I first, I last) {_insert_array_at_pos(root, pos, first, last);}
+    template<typename T> void insert_array_at_pos(size_t pos, initializer_list<T> il) {_insert_array_at_pos(root, pos, il);}
+    void insert(K key, V val = UNDEF) {_insert(root, new Node(key, val));}
+    void insert_at_pos(size_t pos, K key, V val = UNDEF) {_insert_at_pos(root, pos, key, val);}
+    void insert_back(K key, V val = UNDEF) {_insert_back(root, key, val);}
 
-    void update_key_at_pos(size_t pos, K new_key) {update_key_at_pos(root, pos, new_key);}
-    void update_val_at_pos(size_t pos, V new_val) {update_val_at_pos(root, pos, new_val);}
+    void update_key_at_pos(size_t pos, K new_key) {_update_key_at_pos(root, pos, new_key);}
+    void update_val_at_pos(size_t pos, V new_val) {_update_val_at_pos(root, pos, new_val);}
 
-    void erase_pos(size_t pos) {root = erase_pos(root, pos);}
-    void erase_one_key_occurrence(K key) {root = erase_one_key_occurrence(root, key);}
-    void erase_all_key_occurrences(K key) {root = erase_all_key_occurrences(root, key);}
-    void erase_seg(size_t l, size_t len) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, len); root = merge(lf, rg);}
-    void erase_back() {erase_pos(size() - 1);}
+    void erase_pos(size_t pos) {_erase_pos(root, pos);}
+    void erase_one_key_occurrence(K key) {_erase_one_key_occurrence(root, key);}
+    void erase_all_key_occurrences(K key) {_erase_all_key_occurrences(root, key);}
+    void erase_seg(size_t l, size_t len) {_erase_seg(root, l, len);}
+    void erase_back() {_erase_pos(root, size() - 1);}
 
     K extract_pos_get_key(size_t pos) {erase_pos(pos); return last_erased_key;}
     V extract_pos_get_val(size_t pos) {erase_pos(pos); return last_erased_val;}
     pair<K, V> extract_pos(size_t pos) {erase_pos(pos); return {last_erased_key, last_erased_val};}
 
-    pair<K, V> operator[](size_t pos) {return kth_elem(root, pos);}
+    bool contains(K key) {return _contains(root, key);}
+    size_t get_leftest_pos_of_key(K key) {return _get_leftest_pos_of_key(root, key);}
+    V get_value_by_key(K key) {return _get_value_by_key(root, key);}
+    pair<K, V> operator[](size_t pos) {return _kth_elem(root, pos);}
 
-    bool contains(K key) {Node* n = root; while (n) {push(n); if (key == n->key) return true; n = key < n->key ? n->l : n->r;} return false;}
-    size_t get_leftest_pos_of_key(K key) {Node* n = root; size_t pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
-    V get_value_by_key(K key) {Node* n = root; while (n) {push(n); if (n->key == key) return n->val; if (key < n->key) n = n->l; else n = n->r;} assert(0); return 0;}
+    size_t count_keys_leq(K key) {return _count_keys_leq(root, key);}
+    size_t count_keys_less(K key) {return _count_keys_less(root, key);}
+    size_t count_keys_in_seg(K l, K r) {return _count_keys_in_seg(root, l, r);}
+    size_t count_keys_geq(K key) {return _count_keys_geq(root, key);}
+    size_t count_keys_greater(K key) {return _count_keys_greater(root, key);}
+    size_t count_keys_eq(K key) {return _count_keys_eq(root, key);}
 
-    size_t count_keys_leq(K key) {Node* n = root; size_t o = 0; while (n) {push(n); if (n->key <= key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
-    size_t count_keys_less(K key) {Node* n = root; size_t o = 0; while (n) {push(n); if (n->key < key) o += gsz(n->l) + 1, n = n->r; else n = n->l;} return o;}
-    size_t count_keys_in_seg(K l, K r) {return l > r ? 0 : count_keys_leq(r) - count_keys_less(l);}
-    size_t count_keys_geq(K key) {return gsz(root) - count_keys_less(key);}
-    size_t count_keys_greater(K key) {return gsz(root) - count_keys_leq(key);}
-    size_t count_keys_eq(K key) {return count_keys_leq(key) - count_keys_less(key);}
+    K pref_sumkey(size_t p) {return _pref_sumkey(root, p);}
+    K seg_sumkey_fast(size_t l, size_t r) {return _seg_sumkey_fast(root, l, r);}
+    K seg_sumkey_slow(size_t l, size_t r) {return _seg_sumkey_slow(root, l, r);}
 
-    K pref_sumkey(size_t p) {Node* n = root; K sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmk(n->l) + n->key; if (gsz(n->l) < p) sm += gsmk(n->l) + n->key, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
-    K seg_sumkey_fast(size_t l, size_t r) {return pref_sumkey(r) - (l ? pref_sumkey(l - 1) : 0);}
-    K seg_sumkey_slow(size_t l, size_t r) {auto [lf, tmp] = split_size(root, l); auto [mid, rg] = split_size(tmp, r - l + 1); K ans = gsmk(mid); root = merge(merge(lf, mid), rg); return ans;}
-
-    V pref_sumval(size_t p) {Node* n = root; V sm = 0; while (n) {push(n); if (gsz(n->l) == p) return sm + gsmv(n->l) + n->val; if (gsz(n->l) < p) sm += gsmv(n->l) + n->val, p -= gsz(n->l) + 1, n = n->r; else n = n->l;} assert(0); return sm;}
-    V seg_sumval(size_t l, size_t r) {return pref_sumval(r) - (l ? pref_sumval(l - 1) : 0);}
+    V pref_sumval(size_t p) {return _pref_sumval(root, p);}
+    V seg_sumval(size_t l, size_t r) {return _seg_sumval(root, l, r);}
 
     //If no such pos exists, these functions will return size()
-    size_t get_pos_of_leftest_key_leq(K key) {return pos_of_leftest_key_leq(root, key);}
-    size_t get_pos_of_closest_from_left_key_leq(size_t pos, K key) {return pos_of_closest_from_left_key_leq(root, pos, key);}
-    size_t get_pos_of_closest_from_right_key_leq(size_t pos, K key) {return pos_of_closest_from_right_key_leq(root, pos, key);}
+    size_t pos_of_leftest_key_leq(K key) {return _pos_of_leftest_key_leq(root, key);}
+    size_t pos_of_leftest_val_leq(V val) {return _pos_of_leftest_val_leq(root, val);}
+    size_t pos_of_closest_from_left_key_leq(size_t pos, K key) {return _pos_of_closest_from_left_key_leq(root, pos, key);}
+    size_t pos_of_closest_from_right_key_leq(size_t pos, K key) {return _pos_of_closest_from_right_key_leq(root, pos, key);}
 
-    size_t get_pos_of_leftest_min_key() {return pos_of_leftest_min_key(root);}
-    size_t get_pos_of_rightest_min_key() {return pos_of_rightest_min_key(root);}
+    size_t pos_of_leftest_min_key() {return _pos_of_leftest_min_key(root);}
+    size_t pos_of_rightest_min_key() {return _pos_of_rightest_min_key(root);}
 
-    void cyclic_shift_left(int shift) {cyclic_shift_left(root, shift);}
-    void cyclic_shift_right(int shift) {cyclic_shift_right(root, shift);}
-    void seg_cyclic_shift_left(size_t l, size_t r, int shift) {auto [lf, tmp] = split_size(root, l); auto [mid, rg] = split_size(tmp, r - l + 1); cyclic_shift_left(mid, shift); root = merge(merge(lf, mid), rg);}
-    void seg_cyclic_shift_right(size_t l, size_t r, int shift) {auto [lf, tmp] = split_size(root, l); auto [mid, rg] = split_size(tmp, r - l + 1); cyclic_shift_right(mid, shift); root = merge(merge(lf, mid), rg);}
+    void cyclic_shift_left(int shift) {_cyclic_shift_left(root, shift);}
+    void cyclic_shift_right(int shift) {_cyclic_shift_right(root, shift);}
+    void seg_cyclic_shift_left(size_t l, size_t r, int shift) {_seg_cyclic_shift_left(root, l, r, shift);}
+    void seg_cyclic_shift_right(size_t l, size_t r, int shift) {_seg_cyclic_shift_right(root, l, r, shift);}
 
-    void print_keys(string end_string = "") {print_keys(root); cout << end_string;}
-    void print_vals(string end_string = "") {print_vals(root); cout << end_string;}
-    vector<K> get_keys_from_seg(size_t l, size_t len) {vector<K> res; get_keys_on_subsegment(root, l, len, res); return res;}
+    void print_keys(string end_string = "") {_print_keys(root); cout << end_string;}
+    void print_vals(string end_string = "") {_print_vals(root); cout << end_string;}
+    vector<K> get_keys_from_seg(size_t l, size_t len) {vector<K> res; _get_keys_from_seg(root, l, len, res); return res;}
 };
