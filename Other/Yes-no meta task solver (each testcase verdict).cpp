@@ -1,17 +1,21 @@
-//These programs can solve the following meta-task: given a YES/NO problem and judge gives you the verdict for each testcase. Solve the problem.
+//These programs solves the following meta-task: given a YES/NO problem and judge gives you the verdict for each testcase. Solve the problem.
 /*
 How to use:
-1). Write a code that reads input and puts it into `data` variable.
-2). Write the second program which parses output from judging system.
-3). Send the first program to get answers for each testcase. Put them into `test_answers` variable as binary string.
+1). Change YES and NO variables to corresponding values if needed.
+2). Write a code that reads input and puts it into `data` variable.
+3). Write the second program which parses output from judging system.
+4). Send the first program to get answers for each testcase. Put them into `test_answers` variable as binary string.
 while not accepted
     1). Send the first program.
-    2). Run the second program with the output from the judge. Put it's output into 90th line.
+    2). Run the second program with the output from the judge. Put it's output to 120th line.
 */
 
 //First program
 #include "bits/stdc++.h"
 using namespace std;
+
+const string YES = "YES";
+const string NO = "NO";
 
 template<typename T>
 T calc_hash(const vector<T>& data, array<T, 2> params) {
@@ -62,10 +66,36 @@ void solve(string test_answers, vector<array<T, 2>> params, vector<string> judge
     }
     auto it = find(masks.begin(), masks.end(), test_mask);
     assert(it != masks.end() && "Something went wrong!");
-    cout << (test_answers[it - masks.begin()] == '1' ? "YES" : "NO");
+    cout << (test_answers[it - masks.begin()] == '1' ? YES : NO);
+}
+
+void calc_expected_number_of_submissions(int tests, int samples) {
+    function<int(int)> f = [&](int n) {
+        if (n <= 1) return 0;
+        static uniform_int_distribution<int> gen(0, 1);
+        static mt19937 rnd(1);
+        int c1 = 0;
+        for (int i = 0; i < n; ++i) c1 += gen(rnd);
+        return max(f(c1), f(n - c1)) + 1;
+    };
+    vector<int> m(samples);
+    for (int& i : m) i = f(tests) + 2;
+    sort(m.begin(), m.end());
+    vector<double> thr = {0.0001, 0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999};
+    for (int l = 0, i = 0; l < samples; ++l) {
+        int r = l;
+        while (r + 1 < samples && m[r + 1] == m[l]) ++r;
+        double prob = double(r + 1) / samples;
+        if (i < thr.size() && prob >= thr[i]) {
+            ++i;
+            cout << m[r] << " submissions give you ~" << prob * 100 << "% chance to get AC for " << tests << " tests\n";
+        }
+        l = r;
+    }
 }
 
 int main() {
+    //calc_expected_number_of_submissions(?, 1000); return 0;          //Uncomment this line to estimate needed number of submissions to get AC
     using T = uint64_t;
     vector<T> data;
     {
@@ -75,7 +105,7 @@ int main() {
     //First stage, get test_answers
     string test_answers = "";
     if (test_answers.empty()) {
-        cout << "YES";
+        cout << YES;
         return 0;
     }
 
@@ -102,7 +132,7 @@ int main() {
         params.pop_back();
         solve(test_answers, params, judge_answers, data);
     } else {
-        cout << (is_yes(data, params.back()) ? "YES" : "NO");
+        cout << (is_yes(data, params.back()) ? YES : NO);
     }
 }
 
