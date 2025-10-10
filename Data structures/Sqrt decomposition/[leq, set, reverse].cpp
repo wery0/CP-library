@@ -2,7 +2,7 @@
 //https://ejudge.algocode.ru/cgi-bin/new-client?SID=bde9f1b076e6cedf&action=139&prob_id=1
 //https://basecamp.eolymp.com/ru/problems/2961
 template<typename T>
-class seg_set_leq_rev {
+class sqrt_seg_set_leq_rev {
     #define duration(a) chrono::duration_cast<chrono::nanoseconds>(a).count()
 
     struct block {
@@ -200,14 +200,14 @@ class seg_set_leq_rev {
     }
 
 public:
-    seg_set_leq_rev() = default;
+    sqrt_seg_set_leq_rev() = default;
     template<typename I>
-    seg_set_leq_rev(I first, I last): N(std::distance(first, last)), m(new T[N]), sm(new uint32_t[N]), buf(new T[N]), st(new uint32_t[N + 1]), h(new block[N]) {
+    sqrt_seg_set_leq_rev(I first, I last): N(std::distance(first, last)), m(new T[N]), sm(new uint32_t[N]), buf(new T[N]), st(new uint32_t[N + 1]), h(new block[N]) {
         if constexpr(sizeof(T) <= 4) flex = new uint64_t[N];
         copy(first, last, m);
         rebuild(calc_B(1));
     }
-    ~seg_set_leq_rev() {
+    ~sqrt_seg_set_leq_rev() {
         delete[] m, delete[] buf, delete[] sm, delete[] st, delete[] h, delete[] flex;
     }
 

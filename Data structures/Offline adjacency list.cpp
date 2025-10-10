@@ -24,6 +24,8 @@ public:
         acc.reserve(entries);
     }
 
+    size_t size() const {return n;}
+
     void clear() {
         store.clear();
         fill(fir.begin(), fir.end(), 0);

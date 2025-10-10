@@ -42,9 +42,8 @@ public:
         auto remR = [&](int idx) -> void {
 
         };
-        int cl = 0, cr = -1;
         vector<T> ans(qarr.size());
-        for (const auto& [ql, qr, qn] : qarr) {
+        for (int cl = 0, cr = -1; const auto& [ql, qr, qn] : qarr) {
             while (cr < qr) addR(++cr);
             while (cl > ql) addL(--cl);
             while (cr > qr) remR(cr--);
