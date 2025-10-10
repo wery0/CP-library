@@ -1,11 +1,10 @@
 class MO_on_tree {
 
     size_t N;
-    size_t BLOCK_SIZE;
     vector<int> tin, tout, eul, pr, dep, jump;
 
     struct query {
-        int l, r, n, lc;
+        int l, r, n, lc; int64_t sv;
         //Add needed params
     };
 
@@ -32,9 +31,24 @@ class MO_on_tree {
         return pr[x];
     }
 
+    uint64_t hilbertorder(uint64_t x, uint64_t y) {
+        const uint64_t logn = __lg(max(x, y) * 2 + 1) | 1;
+        const uint64_t maxn = (1ull << logn) - 1;
+        uint64_t res = 0;
+        for (uint64_t s = 1ull << (logn - 1); s; s >>= 1) {
+            bool rx = x & s, ry = y & s;
+            res = (res << 2) | (rx ? ry ? 2 : 1 : ry ? 3 : 0);
+            if (!rx) {
+                if (ry) x ^= maxn, y ^= maxn;
+                swap(x, y);
+            }
+        }
+        return res;
+    }
+
 public:
     MO_on_tree() = default;
-    MO_on_tree(vector<pair<int, int>> edges): N(edges.size() + 1), BLOCK_SIZE(sqrt(N) * 2), tin(N), tout(N), eul(N * 2), pr(N), dep(N), jump(N) {
+    MO_on_tree(vector<pair<int, int>> edges): N(edges.size() + 1), tin(N), tout(N), eul(N * 2), pr(N), dep(N), jump(N) {
         vector l(N, vector<int>());
         for (auto [x, y] : edges) {
             assert(0 <= x && x < N);
@@ -75,12 +89,11 @@ public:
 
     template<typename T>
     vector<T> process_queries() {
-        sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {
-            int bl1 = q1.l / BLOCK_SIZE;
-            int bl2 = q2.l / BLOCK_SIZE;
-            if (bl1 != bl2) return bl1 < bl2;
-            return bl1 & 1 ? q1.r > q2.r : q1.r < q2.r;
-        });
+        for (auto& q : qarr) {
+            q.sv = hilbertorder(q.l, q.r);
+            //int bl = q.l / BLOCK_SIZE; q.sv = int64_t(bl) * N * 2 + (bl & 1 ? -q.r : q.r);
+        }
+        sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {return q1.sv < q2.sv;});
         vector<char> cnt(N);
         auto add = [&](int idx) -> void {
 
@@ -92,7 +105,7 @@ public:
             ((cnt[eul[idx]] ^= 1) ? add(idx) : rem(idx));
         };
         vector<T> ans(qarr.size());
-        for (int cl = 0, cr = -1; const auto& [ql, qr, qn, lc, L, R] : qarr) {
+        for (int cl = 0, cr = -1; const auto& [ql, qr, qn, lc, sv] : qarr) {
             while (cr < qr) flip(++cr);
             while (cl > ql) flip(--cl);
             while (cr > qr) flip(cr--);
