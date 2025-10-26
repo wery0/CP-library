@@ -22,8 +22,8 @@ class functional_graph {
 
     pair<size_t, T> move_in_cyc(size_t v, int64_t k) {
         assert(oncyc[v]);
-        auto [full_cycles, rem_in_cyc] = lldiv(k, len_of_cyc[v]);
-        int res_vertex = cycs[num_cyc[v]][(pos_in_cyc[v] + rem_in_cyc) % len_of_cyc[v]];
+        auto [full_cycles, rem_in_cyc] = lldiv(k, cycs[num_cyc[v]].size());
+        int res_vertex = cycs[num_cyc[v]][(pos_in_cyc[v] + rem_in_cyc) % cycs[num_cyc[v]].size()];
         T res_sum = sm_of_cyc[v] * full_cycles + seg_sum(num_cyc[v], pos_in_cyc[v], pos_in_cyc[res_vertex]);
         return {res_vertex, res_sum};
     }
@@ -43,11 +43,12 @@ class functional_graph {
         dst_to_cyc.resize(V, -1);
         sm_to_cyc.resize(V, -1);
         sm_of_cyc.resize(V, -1);
-        len_of_cyc.resize(V, -1);
         num_cyc.resize(V, -1);
         pos_in_cyc.resize(V, -1);
         root_of_tree.resize(V, -1);
         depth_in_tree.resize(V, -1);
+        tin.resize(V, -1);
+        tout.resize(V, -1);
         inv.resize(V);
         for (size_t v = 0; v < V; ++v) {
             if (next[v] != -1) {
@@ -81,12 +82,9 @@ class functional_graph {
                         if (x == v) break;
                     }
                     reverse(cyc.begin(), cyc.end());
-                    for (size_t i = 0; i < cyc.size(); ++i) {
-                        pos_in_cyc[cyc[i]] = i;
-                    }
-                    for (auto x : cyc) {
+                    for (size_t i = 0; auto x : cyc) {
+                        pos_in_cyc[x] = i++;
                         sm_of_cyc[x] = smc;
-                        len_of_cyc[x] = cyc.size();
                         num_cyc[x] = cycs.size();
                     }
                     cycs.push_back(cyc);
@@ -135,23 +133,25 @@ class functional_graph {
             }
         }
         auto dfs = [&](auto&& dfs, int v, int r = -1) -> void {
+            static int tt = 0;
             if (r == -1) r = v;
             root_of_tree[v] = r;
             depth_in_tree[v] = v == r ? 0 : depth_in_tree[next[v]] + 1;
             jump_sum[v] = val[v];
+            tin[v] = tt++;
             if (depth_in_tree[v] == 0) {
                 jump[v] = v;
             } else if (depth_in_tree[next[v]] + depth_in_tree[jump[jump[next[v]]]] == depth_in_tree[jump[next[v]]] * 2) {
                 jump[v] = jump[jump[next[v]]];
                 if (next[v] != root_of_tree[v]) jump_sum[v] += jump_sum[next[v]];
                 if (jump[next[v]] != next[v]) jump_sum[v] += jump_sum[jump[next[v]]];
-
             } else {
                 jump[v] = next[v];
             }
             for (int h : inv[v]) {
                 dfs(dfs, h, r);
             }
+            tout[v] = tt;
         };
         for (size_t v = 0; v < V; ++v) {
             if (dst_to_end[v] == 0) {
@@ -185,21 +185,40 @@ public:
     vector<T> sm_to_cyc;
     vector<T> sm_of_cyc;
     vector<T> jump_sum;
-    vector<int> len_of_cyc;
     vector<int> num_cyc;
     vector<int> pos_in_cyc;
     vector<int> jump;
     vector<int> root_of_tree;
     vector<int> depth_in_tree;
+    vector<int> tin;
+    vector<int> tout;
     vector<vector<int>> inv;
     vector<vector<int>> cycs;
     vector<vector<T>> pref_sums_cycs;
 
     functional_graph() = default;
 
-    functional_graph(vector<int> next, vector<T> val): V(next.size()), next(next), val(val) {
+    //Set nxt[v] = -1 if there is no outgoing edge from vertex v
+    //O(20n) memory, be careful. Remove some unnecessary vectors if needed.
+    functional_graph(vector<int> nxt, vector<T> edge_val = {}): V(nxt.size()), next(nxt), val(edge_val) {
+        if (val.empty()) val.resize(V);
         assert(next.size() == val.size());
         init();
+    }
+
+    //Returns number of steps to reach y for the first time starting from x or -1 if it is impossible
+    //O(1)
+    int steps_to_reach(size_t x, size_t y) {
+        if (!oncyc[y]) {
+            if (oncyc[x]) return -1;
+            return tin[y] <= tin[x] && tout[x] <= tout[y] ? depth_in_tree[x] - depth_in_tree[y] : -1;
+        }
+        if (!oncyc[x] && first_on_cyc[x] == -1) return -1;
+        int res = 0;
+        if (!oncyc[x]) res = dst_to_cyc[x], x = first_on_cyc[x];
+        if (num_cyc[x] != num_cyc[y]) return -1;
+        int px = pos_in_cyc[x], py = pos_in_cyc[y];
+        return res + (px <= py ? py - px : cycs[num_cyc[x]].size() + py - px);
     }
 
     //Returns next[next[...next[v]]] (k times) and sum of vals of all vertexes in the path
