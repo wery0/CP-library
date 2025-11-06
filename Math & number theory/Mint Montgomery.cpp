@@ -40,7 +40,8 @@ public:
     constexpr UINT get_val() const {UINT ret = reduce(a); return ret < mod ? ret : ret - mod;}
     static constexpr UINT get_mod() {return mod;}
 
-    constexpr mint pow(ULONG pw) const {
+    constexpr mint pow(LONG pw) const {
+        assert(pw >= 0);
         mint o(1);
         for (mint x(*this); pw; pw >>= 1) {
             if (pw & 1) o *= x;

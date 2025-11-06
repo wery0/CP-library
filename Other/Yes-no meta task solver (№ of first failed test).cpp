@@ -1,4 +1,4 @@
-//This programs solves the following meta-task: given a YES/NO problem and judge gives you the № of first failed testcase. Solve the problem.
+//This program solves a following meta-task: given a YES/NO problem and judge gives you the № of first failed testcase. Solve the problem.
 /*
 How to use:
 1). Change YES and NO variables to corresponding values if needed.

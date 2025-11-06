@@ -1,4 +1,4 @@
-//These programs solves the following meta-task: given a YES/NO problem and judge gives you the verdict for each testcase. Solve the problem.
+//These programs solve a following meta-task: given a YES/NO problem and judge gives you the verdict for each testcase. Solve the problem.
 /*
 How to use:
 1). Change YES and NO variables to corresponding values if needed.

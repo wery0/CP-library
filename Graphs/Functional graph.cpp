@@ -200,7 +200,7 @@ public:
 
     //Set nxt[v] = -1 if there is no outgoing edge from vertex v
     //O(20n) memory, be careful. Remove some unnecessary vectors if needed.
-    functional_graph(vector<int> nxt, vector<T> edge_val = {}): V(nxt.size()), next(nxt), val(edge_val) {
+    functional_graph(vector<int> nxt, vector<T> vertex_val = {}): V(nxt.size()), next(nxt), val(vertex_val) {
         if (val.empty()) val.resize(V);
         assert(next.size() == val.size());
         init();

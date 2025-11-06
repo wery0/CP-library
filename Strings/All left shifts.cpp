@@ -6,15 +6,14 @@
 */
 //O(n)
 template<typename T_arr>
-vector<int> find_all_left_shifts(T_arr arr1, T_arr arr2) {
+vector<int> find_all_left_shifts(const T_arr& arr1, T_arr arr2) {
     const size_t n = arr1.size(); assert(arr2.size() == n);
-    arr2.push_back(0);
     arr2.insert(arr2.end(), arr1.begin(), arr1.end());
     arr2.insert(arr2.end(), arr1.begin(), arr1.end());
-    vector<int> zf(arr2.size()), ans;
-    for (int i = 1, l = 0, r = 0, len = arr2.size(); i < len; ++i) {
+    vector<int> zf(n * 3), ans;
+    for (int i = 1, l = 0, r = 0; i < n * 2; ++i) {
         zf[i] = max(0, min(r - i, zf[i - l]));
-        while (i + zf[i] < len && zf[i] != n && zf[i] + i != n && arr2[zf[i]] == arr2[zf[i] + i]) {
+        while (zf[i] + i < n * 3 && arr2[zf[i]] == arr2[zf[i] + i]) {
             ++zf[i];
         }
         if (i + zf[i] > r) {
@@ -23,7 +22,7 @@ vector<int> find_all_left_shifts(T_arr arr1, T_arr arr2) {
         }
     }
     for (size_t i = 0; i < n; ++i) {
-        if (zf[n + 1 + i] == n) ans.push_back(i);
+        if (zf[n + i] >= n) ans.push_back(i);
     }
     return ans;
 }

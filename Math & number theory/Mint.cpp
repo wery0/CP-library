@@ -22,6 +22,7 @@ public:
     static constexpr INT get_mod() {return MOD;}
 
     Mint pow(LONG pw) const {
+        assert(pw >= 0);
         LONG o = 1;
         for (LONG x = val; pw; pw >>= 1) {
             if (pw & 1) o = o * x % MOD;

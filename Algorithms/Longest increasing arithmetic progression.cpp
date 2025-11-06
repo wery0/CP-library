@@ -49,7 +49,7 @@ struct longest_increasing_arithmetic_progression {
         }
     };
 
-    //Returns positions of elements of  longest increasing(!) arithmetic progression
+    //Returns positions of elements of longest increasing(!) arithmetic progression
     //https://acm.timus.ru/problem.aspx?space=1&num=1395
     //O(n ^ 3), but very optimized
     hash_map_open_addressing<T, int, 17> mp; //change, if need
