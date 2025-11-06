@@ -1,4 +1,3 @@
-
 //Maps (x, y) -> position in hilbert curve
 //O(log(max(x, y)))
 template<typename T = uint64_t>

@@ -38,6 +38,7 @@ public:
 
     template<typename T>
     vector<T> process_queries() {
+        const size_t BLOCK_SIZE = min<size_t>(N / sqrt(qarr.size() + 1) + 1, N);
         for (auto& q : qarr) {
             q.sv = hilbertorder(q.l, q.r);
             //int bl = q.l / BLOCK_SIZE; q.sv = int64_t(bl) * N * 2 + (bl & 1 ? -q.r : q.r);

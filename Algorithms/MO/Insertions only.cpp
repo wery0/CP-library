@@ -3,10 +3,9 @@
 class MO_insertions {
 
     size_t N;
-    size_t BLOCK_SIZE;
 
     struct query {
-        int l, r, n;
+        int l, r, n; int64_t sv;
         //Add needed params
     };
 
@@ -14,7 +13,7 @@ class MO_insertions {
 
 public:
     MO_insertions() = default;
-    MO_insertions(size_t N): N(N), BLOCK_SIZE(sqrt(N)) {}
+    MO_insertions(size_t N): N(N) {}
 
     void clear() {qarr.clear();}
     void reserve(size_t Q) {qarr.reserve(Q);}
@@ -26,11 +25,9 @@ public:
 
     template<typename T>
     vector<T> process_queries() {
-        sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {
-            int bl1 = q1.l / BLOCK_SIZE;
-            int bl2 = q2.l / BLOCK_SIZE;
-            return bl1 != bl2 ? bl1 < bl2 : q1.r < q2.r;
-        });
+        const size_t BLOCK_SIZE = min<size_t>(N / sqrt(qarr.size() + 1) + 1, N);
+        for (auto& q : qarr) q.sv = int64_t(q.l / BLOCK_SIZE) * N + q.r;
+        sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {return q1.sv < q2.sv;});
         T qans = 0;
         auto addL = [&](int idx) -> void {
 
@@ -47,7 +44,7 @@ public:
             while (rg + 1 < qarr.size() && qarr[rg + 1].l / BLOCK_SIZE == qarr[i].l / BLOCK_SIZE) ++rg;
             int br = (qarr[i].l / BLOCK_SIZE + 1) * BLOCK_SIZE - 1, rr = br;
             for (; i <= rg; ++i) {
-                const auto& [ql, qr, qn] = qarr[i];
+                const auto& [ql, qr, qn, sv] = qarr[i];
                 if (qr <= br) {
                     for (int i = ql; i <= qr; ++i) addR(i);
                     ans[qn] = qans;
