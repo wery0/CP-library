@@ -1,32 +1,39 @@
 //Use for constant modulo that is unknown in compile time. Up to x5 speed up.
+template<typename T = uint64_t, typename H = __uint128_t>
 class fast_mod {
-    uint64_t m, b;
+    static constexpr int szT = sizeof(T) * 8;
+    static constexpr int szH = sizeof(H) * 8;
+    static_assert(is_unsigned_v<T>);
+    static_assert(is_unsigned_v<H> || is_same_v<H, __uint128_t>);
+    static_assert(szH == szT * 2);
+
+    T m, b;
 
 public:
     fast_mod() = default;
-    fast_mod(uint64_t m): m(m), b(-1ULL / m) {assert(m);}
+    fast_mod(T m): m(m), b(T(-1) / m) {assert(m);}
 
     // x / m + (0 or 1)
-    uint64_t quot(uint64_t x) {return (__uint128_t(b) * x) >> 64;}
+    T quot(T x) {return (H(b) * x) >> szT;}
 
     // x / m
-    uint64_t honest_quot(uint64_t x) {uint64_t q = (__uint128_t(b) * x) >> 64; return x - q * m < m ? q : q + 1;}
+    T honest_quot(T x) {T q = (H(b) * x) >> szT; return x - q * m < m ? q : q + 1;}
 
     // x % m + (0 or m)
-    uint64_t rem(uint64_t x) {return x - uint64_t((__uint128_t(b) * x) >> 64) * m;}
+    T rem(T x) {return x - T((H(b) * x) >> szT) * m;}
 
     // x % m
-    uint64_t honest_rem(uint64_t x) {x -= uint64_t((__uint128_t(b) * x) >> 64) * m; return x < m ? x : x - m;}
+    T honest_rem(T x) {x -= T((H(b) * x) >> szT) * m; return x < m ? x : x - m;}
 
     // {x / m + (0 or 1), x % m + (0 or m)}
-    pair<uint64_t, uint64_t> quot_rem(uint64_t x) {  
-        uint64_t q = (__uint128_t(b) * x) >> 64;
+    pair<T, T> quot_rem(T x) {  
+        T q = (H(b) * x) >> szT;
         return {q, x - q * m};
     }
 
     // {x / m, x % m}
-    pair<uint64_t, uint64_t> honest_quot_rem(uint64_t x) {  
-        uint64_t q = (__uint128_t(b) * x) >> 64;
+    pair<T, T> honest_quot_rem(T x) {  
+        T q = (H(b) * x) >> szT;
         q += x - q * m < m ? 0 : 1;
         return {q, x - q * m};
     }
