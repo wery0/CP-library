@@ -12,7 +12,7 @@ T count_primes(const T N) {
     iota(smalls.begin(), smalls.end(), 0);
     for (int i = 0; i < s; i++) roughs[i] = 2 * i + 1;
     for (int i = 0; i < s; i++) larges[i] = (N / (2 * i + 1) - 1) / 2;
-    const auto divide = [](T n, T d) -> int {return n>>53 ? (long double)(n) / d : double(n) / d;};
+    const auto divide = [](T n, T d) -> int {return n >> 53 ? (long double)(n) / d : double(n) / d;};
     const auto half = [](int n) -> int {return (n - 1) >> 1;};
     int pc = 0;
     for (int p = 3; p <= v; p += 2) if (!skip[p]) {

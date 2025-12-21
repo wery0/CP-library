@@ -3,8 +3,7 @@
 template<typename T>
 T sum_kth_powers_matrix(T n, size_t k) {
     static constexpr size_t MX = 10;
-    assert(n > 0);
-    assert(k <= MX);
+    assert(n > 0 && k <= MX);
     static constexpr array<array<T, MX + 1>, MX + 1> C = {array<T, MX + 1>
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -26,7 +25,7 @@ T sum_kth_powers_matrix(T n, size_t k) {
 
 //Counts sum{i ^ k | 1 <= i <= n}
 template<typename T>
-T sum_kth_powers_explicit(T n, int k) {
+T sum_kth_powers_explicit(T n, size_t k) {
     assert(n > 0 && k <= 10);
     if (k == 0) return n;
     if (k == 1) return n * (n + 1) / 2;

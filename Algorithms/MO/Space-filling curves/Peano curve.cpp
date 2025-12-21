@@ -27,7 +27,6 @@ T peano_encode(array<T, K> p) {
 }
 
 //Maps position in K-dimensional peano curve -> K-dimensional point
-//Position can be up to pow(3, ceil(log_3(max coordinat + 1))) ^ K
 //<O(K * log(max coordinat)), O(K)>
 template<typename T = uint64_t, const size_t K>
 array<T, K> peano_decode(T pos) {
