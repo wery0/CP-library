@@ -9,19 +9,21 @@ class MO {
 
     vector<query> qarr;
 
-    uint64_t hilbertorder(uint64_t x, uint64_t y) {
-        const uint64_t logn = __lg(max(x, y) * 2 + 1) | 1;
-        const uint64_t maxn = (1ull << logn) - 1;
-        uint64_t res = 0;
-        for (uint64_t s = 1ull << (logn - 1); s; s >>= 1) {
+    template<typename T>
+    T hilbert_encode(T x, T y) {
+        static_assert(is_unsigned_v<T>);
+        const T logn = __lg(max(x, y) * 2 + 1) | 1;
+        const T maxn = (T(1) << logn) - 1;
+        T p = 0;
+        for (T s = T(1) << (logn - 1); s; s >>= 1) {
             bool rx = x & s, ry = y & s;
-            res = (res << 2) | (rx ? ry ? 2 : 1 : ry ? 3 : 0);
+            p = (p << 2) | (rx ? ry ? 2 : 1 : ry ? 3 : 0);
             if (!rx) {
                 if (ry) x ^= maxn, y ^= maxn;
                 swap(x, y);
             }
         }
-        return res;
+        return p;
     }
 
 public:
@@ -40,7 +42,7 @@ public:
     vector<T> process_queries() {
         const size_t BLOCK_SIZE = min<size_t>(N / sqrt(qarr.size() + 1) + 1, N);
         for (auto& q : qarr) {
-            q.sv = hilbertorder(q.l, q.r);
+            q.sv = hilbert_encode<uint64_t>(q.l, q.r);
             //int bl = q.l / BLOCK_SIZE; q.sv = int64_t(bl) * N * 2 + (bl & 1 ? -q.r : q.r);
         }
         sort(qarr.begin(), qarr.end(), [&](const query& q1, const query& q2) {return q1.sv < q2.sv;});
