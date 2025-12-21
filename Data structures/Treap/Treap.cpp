@@ -17,6 +17,24 @@ class treap {
         V mxv;
         V smv;
 
+        Node(const Node* rhs) {
+            assert(rhs);
+            l = rhs->l ? new Node(rhs->l) : 0;
+            r = rhs->r ? new Node(rhs->r) : 0;
+            y = rhs->y;
+            sz = rhs->sz;
+
+            key = rhs->key;
+            mnk = rhs->mnk;
+            mxk = rhs->mxk;
+            smk = rhs->smk;
+
+            val = rhs->val;
+            mnv = rhs->mnv;
+            mxv = rhs->mxv;
+            smv = rhs->smv;
+        }
+
         Node(K k, V v = UNDEF): y(rnd()), sz(1) {
             key = k;
             mnk = k;
@@ -75,6 +93,12 @@ class treap {
 
         //Faster, but more memory
         //n = merge(n->l, n->r);
+    }
+
+    void _copy_from(const treap& rhs) {
+        root = rhs.root ? new Node(rhs.root) : 0;
+        last_erased_key = rhs.last_erased_key;
+        last_erased_val = rhs.last_erased_val;
     }
 
     Node* merge(Node* l, Node* r) {
@@ -376,6 +400,8 @@ public:
     treap() = default;
     template<typename I> treap(I f_key, I l_key) {root = _build(f_key, l_key);}
     template<typename I1, typename I2> treap(I1 f_key, I1 l_key, I2 f_val, I2 l_val) {assert(l_key - f_key == l_val - f_val); root = _build(f_key, l_key, f_val, l_val);}
+    treap(const treap& rhs) {_copy_from(rhs);}
+    treap& operator=(const treap& rhs) {_delete_subtree(root); _copy_from(rhs); return *this;}
     ~treap() {_delete_subtree(root);}
 
     size_t size() const {return gsz(root);}
