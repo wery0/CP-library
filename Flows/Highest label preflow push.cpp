@@ -1,15 +1,17 @@
+/*
+Highest label preflow push (HLPP) algorithm for finding max flow
+Complexity: At most O(V^2sqrt(E)), fast on practice
+*/
 template<typename T_flow>
 class HLPP {
     static constexpr T_flow INF = numeric_limits<T_flow>::max();
     struct edge {
         int to;
-        T_flow f = 0, cap;
-
-        edge() = default;
-        edge(int to, T_flow cap): to(to), cap(cap) {}
+        T_flow flow, cap;
+        edge(int to, T_flow flow, T_flow cap): to(to), flow(flow), cap(cap) {}
     };
 
-    int V, ss, tt;
+    int V, source, sink;
     int mxh = 0, work = 0;
     vector<edge> store;
     vector<vector<int>> adj;
@@ -33,14 +35,14 @@ class HLPP {
         fill(h.begin(), h.end(), V);
         fill(cnt.begin(), cnt.end(), 0);
         for (int i = 0; i < min(mxh, V); ++i) lst[i].clear(), gap[i].clear();
-        h[tt] = 0;
-        queue<int> q({tt});
+        h[sink] = 0;
+        queue<int> q({sink});
         while (!q.empty()) {
             int v = q.front();
             q.pop();
             for (int i : adj[v]) {
                 auto& e = store[i];
-                if (h[e.to] == V && store[i ^ 1].cap - store[i ^ 1].f > 0) {
+                if (h[e.to] == V && store[i ^ 1].cap - store[i ^ 1].flow > 0) {
                     q.push(e.to), updh(e.to, h[v] + 1);
                 }
             }
@@ -51,8 +53,8 @@ class HLPP {
     void push(int v, int i) {
         auto& e = store[i];
         if (ex[e.to] == 0) lst[h[e.to]].push_back(e.to);
-        T_flow df = min(ex[v], e.cap - e.f);
-        e.f += df, store[i ^ 1].f -= df;
+        T_flow df = min(ex[v], e.cap - e.flow);
+        e.flow += df, store[i ^ 1].flow -= df;
         ex[v] -= df, ex[e.to] += df;
     }
 
@@ -60,7 +62,7 @@ class HLPP {
         int nh = V;
         for (int i : adj[v]) {
             edge& e = store[i];
-            if (e.cap - e.f > 0) {
+            if (e.cap - e.flow > 0) {
                 if (h[v] == h[e.to] + 1) {
                     push(v, i);
                     if (ex[v] <= 0) return;
@@ -79,19 +81,20 @@ class HLPP {
         }
     }
 
- public:
-    HLPP(int n, int ss, int tt): V(n), ss(ss), tt(tt), adj(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
-        assert(ss != tt);
+public:
+    HLPP(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), adj(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
     }
 
-    void add_edge(int x, int y, T_flow capacity, bool is_directed) {
+    void add_edge(int from, int to, T_flow capacity, bool is_directed) {
         assert(!flow_calculated);
         assert(capacity >= 0);
-        assert(0 <= min(x, y) && max(x, y) < V);
-        adj[x].push_back(store.size());
-        store.emplace_back(y, capacity);
-        adj[y].push_back(store.size());
-        store.emplace_back(x, is_directed ? 0 : capacity);
+        assert(0 <= min(from, to) && max(from, to) < V);
+        adj[from].push_back(store.size());
+        store.emplace_back(to, 0, capacity);
+        adj[to].push_back(store.size());
+        store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
     void clear() {
@@ -111,9 +114,9 @@ class HLPP {
     T_flow calc_max_flow(int heur_n = -1) {
         if (heur_n == -1) heur_n = V;
         fill(ex.begin(), ex.end(), 0);
-        ex[ss] = INF;
+        ex[source] = INF;
         global_relabel();
-        for (int i : adj[ss]) push(ss, i);
+        for (int i : adj[source]) push(source, i);
         for (; mxh >= 0; --mxh) {
             while (!lst[mxh].empty()) {
                 int v = lst[mxh].back();
@@ -123,17 +126,17 @@ class HLPP {
             }
         }
         flow_calculated = true;
-        return ex[tt];
+        return ex[sink];
     }
 
     //For every added edge returns the flow going through it.
     //If the flow on edge x->y is negative, then the flow goes from y to x (could only happen with undirected edges)
-    //Will work only if ex[ss] was set to max_flow at the beginning of calc_max_flow() since this push-relabel maintains preflow
+    //Will work only if ex[source] was set to max_flow at the beginning of calc_max_flow() since this push-relabel maintains preflow
     vector<tuple<int, int, T_flow>> get_flow_on_edges() const {
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {store[i ^ 1].to, e.to, e.f};
+            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
         }
         return res;
     }
