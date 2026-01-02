@@ -4,7 +4,7 @@ Complexity: At most O(V^2sqrt(E)), fast on practice
 */
 template<typename T_flow>
 class HLPP {
-    static constexpr T_flow INF = numeric_limits<T_flow>::max();
+    static constexpr T_flow INFFLOW = numeric_limits<T_flow>::max();
     struct edge {
         int to;
         T_flow flow, cap;
@@ -14,8 +14,7 @@ class HLPP {
     int V, source, sink;
     int mxh = 0, work = 0;
     vector<edge> store;
-    vector<vector<int>> adj;
-    vector<vector<int>> lst, gap;
+    vector<vector<int>> l, lst, gap;
     vector<T_flow> ex;
     vector<int> h, cnt;
     bool flow_calculated = false;
@@ -40,7 +39,7 @@ class HLPP {
         while (!q.empty()) {
             int v = q.front();
             q.pop();
-            for (int i : adj[v]) {
+            for (int i : l[v]) {
                 auto& e = store[i];
                 if (h[e.to] == V && store[i ^ 1].cap - store[i ^ 1].flow > 0) {
                     q.push(e.to), updh(e.to, h[v] + 1);
@@ -60,7 +59,7 @@ class HLPP {
 
     void discharge(int v) {
         int nh = V;
-        for (int i : adj[v]) {
+        for (int i : l[v]) {
             edge& e = store[i];
             if (e.cap - e.flow > 0) {
                 if (h[v] == h[e.to] + 1) {
@@ -82,7 +81,7 @@ class HLPP {
     }
 
 public:
-    HLPP(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), adj(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
+    HLPP(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
         assert(source != sink);
         assert(max(source, sink) < V);
     }
@@ -91,19 +90,17 @@ public:
         assert(!flow_calculated);
         assert(capacity >= 0);
         assert(0 <= min(from, to) && max(from, to) < V);
-        adj[from].push_back(store.size());
+        l[from].push_back(store.size());
         store.emplace_back(to, 0, capacity);
-        adj[to].push_back(store.size());
+        l[to].push_back(store.size());
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
     void clear() {
         store.clear();
-        for (int i = 0; i < V; ++i) {
-            adj[i].clear();
-            lst[i].clear();
-            gap[i].clear();
-        }
+        for (auto& i : l) i.clear();
+        for (auto& i : lst) i.clear();
+        for (auto& i : gap) i.clear();
         mxh = work = 0;
         fill(h.begin(), h.end(), 0);
         fill(cnt.begin(), cnt.end(), 0);
@@ -111,22 +108,39 @@ public:
         flow_calculated = false;
     }
 
-    T_flow calc_max_flow(int heur_n = -1) {
+    T_flow calc_max_flow(bool cancel_excessive_preflow, int heur_n = -1) {
+        assert(!flow_calculated);
         if (heur_n == -1) heur_n = V;
-        fill(ex.begin(), ex.end(), 0);
-        ex[source] = INF;
-        global_relabel();
-        for (int i : adj[source]) push(source, i);
-        for (; mxh >= 0; --mxh) {
-            while (!lst[mxh].empty()) {
-                int v = lst[mxh].back();
-                lst[mxh].pop_back();
-                discharge(v);
-                if (work > 4 * heur_n) global_relabel();
+        function<T_flow(T_flow)> go = [&](T_flow limit) -> T_flow {
+            fill(ex.begin(), ex.end(), 0);
+            ex[source] = limit;
+            global_relabel();
+            for (int i : l[source]) push(source, i);
+            for (; mxh >= 0; --mxh) {
+                while (!lst[mxh].empty()) {
+                    int v = lst[mxh].back();
+                    lst[mxh].pop_back();
+                    discharge(v);
+                    if (work > heur_n * 4) global_relabel();
+                }
             }
+            return ex[sink];
+        };
+        T_flow max_flow = go(INFFLOW);
+        if (cancel_excessive_preflow) {
+            mxh = work = 0;
+            fill(h.begin(), h.end(), 0);
+            fill(cnt.begin(), cnt.end(), 0);
+            for (auto& i : lst) i.clear();
+            for (auto& i : gap) i.clear();
+            for (size_t i = 0; i < store.size(); i += 2) {
+                store[i ^ 1].flow += store[i].flow;
+                store[i].flow = 0;
+            }
+            go(max_flow);
         }
         flow_calculated = true;
-        return ex[sink];
+        return max_flow;
     }
 
     //For every added edge returns the flow going through it.
@@ -137,6 +151,77 @@ public:
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
             res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
+        }
+        return res;
+    }
+
+    //Returns edges (their numbers) that form the min cut
+    vector<int> get_min_cut(const bool are_edges_directed) const {
+        assert(flow_calculated);
+        vector<char> us(V);
+        auto dfs = [&](auto&& dfs, int v) -> void {
+            us[v] = 1;
+            for (int i : l[v]) {
+                const auto& e = store[i];
+                if (us[e.to]) continue;
+                if (e.flow < e.cap) dfs(dfs, e.to);
+            }
+        };
+        dfs(dfs, source);
+        vector<int> res;
+        for (int v = 0; v < V; ++v) {
+            if (!us[v]) continue;
+            for (int i : l[v]) {
+                const auto& e = store[i];
+                if (!us[e.to] && (!are_edges_directed || (~i & 1))) {
+                    res.push_back(i / 2);
+                }
+            }
+        }
+        sort(res.begin(), res.end());
+        return res;
+    }
+
+    //Works for directed networks
+    //Returns vector of paths from source to sink
+    vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_nums) const {
+        assert(flow_calculated);
+        vector<pair<T_flow, vector<int>>> res;
+        vector<int> us(V), ptr(V), egs;
+        auto s = store;
+        int us_iter = 0;
+        auto dfs = [&](auto&& dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
+            if (v == sink) return min_flow;
+            if (us[v] == us_iter) return 0;
+            us[v] = us_iter;
+            ptr[v] = 0;
+            for (int cnt = 0; cnt < l[v].size(); ++cnt) {
+                int i = l[v][ptr[v]++];
+                if (ptr[v] == l[v].size()) ptr[v] = 0;
+                if (i & 1) continue;
+                auto& e = s[i];
+                if (e.flow == 0) continue;
+                T_flow res = dfs(dfs, e.to, min(min_flow, e.flow));
+                if (res > 0) {
+                    egs.push_back(i / 2);
+                    e.flow -= res;
+                    s[i ^ 1].flow += res;
+                    return res;
+                }
+            }
+            return 0;
+        };
+        while (true) {
+            ++us_iter;
+            egs.clear();
+            T_flow tyt = dfs(dfs, source);
+            if (!tyt) break;
+            reverse(egs.begin(), egs.end());
+            if (as_vertex_nums) {
+                for (int& i : egs) i = store[i * 2 ^ 1].to;
+                egs.push_back(sink);
+            }
+            res.emplace_back(tyt, egs);
         }
         return res;
     }

@@ -4,13 +4,18 @@ Idea: while there are augmenting path in residual graph, find it and push flow t
 Complexity: at most
 - O(EF) without scaling (F is max flow)
 - O(E^2log(C)) with scaling (C is max edge capacity)
+Problems:
+https://cses.fi/problemset/task/1694 (max flow)
+https://cses.fi/problemset/task/1695 (min cut)
+https://cses.fi/problemset/task/1696 (matching in bipartite graph)
+https://cses.fi/problemset/task/1711 (flow path decomposition)
 */
 template<typename T_flow>
 class ford_fulkerson {
     struct edge {
-        int from, to;
+        int to;
         T_flow flow, cap;
-        edge(int from, int to, T_flow flow, T_flow cap): from(from), to(to), flow(flow), cap(cap) {}
+        edge(int to, T_flow flow, T_flow cap): to(to), flow(flow), cap(cap) {}
     };
 
     int V, source, sink, us_iter = 0;
@@ -53,12 +58,13 @@ public:
         assert(capacity >= 0);
         assert(0 <= min(from, to) && max(from, to) < V);
         l[from].push_back(store.size());
-        store.emplace_back(from, to, 0, capacity);
+        store.emplace_back(to, 0, capacity);
         l[to].push_back(store.size());
-        store.emplace_back(to, from, 0, is_directed ? 0 : capacity);
+        store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
     T_flow calc_max_flow(bool do_scaling = true) {
+        assert(!flow_calculated);
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? numeric_limits<T_flow>::max() : 1; mxf > 0; mxf /= 2) {
             while (true) {
@@ -78,7 +84,7 @@ public:
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {e.from, e.to, e.flow};
+            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
         }
         return res;
     }
@@ -115,10 +121,9 @@ public:
     vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_nums) const {
         assert(flow_calculated);
         vector<pair<T_flow, vector<int>>> res;
+        vector<int> us(V), ptr(V), egs;
         auto s = store;
-        vector<int> us(V);
         int us_iter = 0;
-        vector<int> egs, ptr(V);
         auto dfs = [&](auto&& dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
             if (v == sink) return min_flow;
             if (us[v] == us_iter) return 0;
@@ -147,7 +152,7 @@ public:
             if (!tyt) break;
             reverse(egs.begin(), egs.end());
             if (as_vertex_nums) {
-                for (int& i : egs) i = store[i * 2].from;
+                for (int& i : egs) i = store[i * 2 ^ 1].to;
                 egs.push_back(sink);
             }
             res.emplace_back(tyt, egs);
