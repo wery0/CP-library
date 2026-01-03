@@ -14,9 +14,13 @@ template<typename T_flow>
 class ford_fulkerson {
     struct edge {
         int to;
-        T_flow flow, cap;
-        edge(int to, T_flow flow, T_flow cap): to(to), flow(flow), cap(cap) {}
+        T_flow cap;
+        edge(int to, T_flow cap): to(to), cap(cap) {}
     };
+
+    T_flow get_flow_on_edge(int i, bool is_directed) {
+        return is_directed ? store[i ^ 1].cap : (store[i ^ 1].cap - store[i].cap) / 2;
+    }
 
     int V, source, sink, us_iter = 0;
     vector<vector<int>> l;
@@ -30,11 +34,11 @@ class ford_fulkerson {
         us[v] = us_iter;
         for (int i : l[v]) {
             auto& e = store[i];
-            if (e.cap - e.flow < scl) continue;
-            T_flow res = dfs(e.to, scl, min(min_flow, e.cap - e.flow));
+            if (e.cap < scl) continue;
+            T_flow res = dfs(e.to, scl, min(min_flow, e.cap));
             if (res > 0) {
-                e.flow += res;
-                store[i ^ 1].flow -= res;
+                e.cap -= res;
+                store[i ^ 1].cap += res;
                 return res;
             }
         }
@@ -58,9 +62,9 @@ public:
         assert(capacity >= 0);
         assert(0 <= min(from, to) && max(from, to) < V);
         l[from].push_back(store.size());
-        store.emplace_back(to, 0, capacity);
+        store.emplace_back(to, capacity);
         l[to].push_back(store.size());
-        store.emplace_back(from, 0, is_directed ? 0 : capacity);
+        store.emplace_back(from, is_directed ? 0 : capacity);
     }
 
     T_flow calc_max_flow(bool do_scaling = true) {
@@ -80,17 +84,17 @@ public:
 
     //For every added edge returns the flow going through it.
     //If the flow on edge x->y is negative, then the flow goes from y to x (could only happen with undirected edges)
-    vector<tuple<int, int, T_flow>> get_flow_on_edges() const {
+    vector<tuple<int, int, T_flow>> get_flow_on_edges(bool are_edges_directed) const {
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
+            res[i / 2] = {store[i ^ 1].to, e.to, get_flow_on_edge(i, are_edges_directed)};
         }
         return res;
     }
 
     //Returns edges (their numbers) that form the min cut
-    vector<int> get_min_cut(const bool are_edges_directed) const {
+    vector<int> get_min_cut(bool are_edges_directed) const {
         assert(flow_calculated);
         vector<char> us(V);
         auto dfs = [&](auto&& dfs, int v) -> void {
@@ -98,7 +102,7 @@ public:
             for (int i : l[v]) {
                 const auto& e = store[i];
                 if (us[e.to]) continue;
-                if (e.flow < e.cap) dfs(dfs, e.to);
+                if (e.cap > 0) dfs(dfs, e.to);
             }
         };
         dfs(dfs, source);
@@ -134,12 +138,12 @@ public:
                 if (ptr[v] == l[v].size()) ptr[v] = 0;
                 if (i & 1) continue;
                 auto& e = s[i];
-                if (e.flow == 0) continue;
-                T_flow res = dfs(dfs, e.to, min(min_flow, e.flow));
+                if (s[i ^ 1].cap == 0) continue;
+                T_flow res = dfs(dfs, e.to, min(min_flow, s[i ^ 1].cap));
                 if (res > 0) {
                     egs.push_back(i / 2);
-                    e.flow -= res;
-                    s[i ^ 1].flow += res;
+                    e.cap += res;
+                    s[i ^ 1].cap -= res;
                     return res;
                 }
             }
