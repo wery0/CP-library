@@ -7,7 +7,7 @@ vector<int> get_min_cut(bool are_edges_directed) const {
         for (int i : l[v]) {
             const auto& e = store[i];
             if (us[e.to]) continue;
-            if (e.cap > 0) dfs(dfs, e.to);
+            if (e.cap - e.flow > 0) dfs(dfs, e.to);
         }
     };
     dfs(dfs, source);

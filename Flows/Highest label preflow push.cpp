@@ -7,13 +7,9 @@ class HLPP {
     static constexpr T_flow INFFLOW = numeric_limits<T_flow>::max();
     struct edge {
         int to;
-        T_flow cap;
-        edge(int to, T_flow cap): to(to), cap(cap) {}
+        T_flow flow, cap;
+        edge(int to, T_flow flow, T_flow cap): to(to), flow(flow), cap(cap) {}
     };
-
-    T_flow get_flow_on_edge(int i, bool is_directed) {
-        return is_directed ? store[i ^ 1].cap : (store[i ^ 1].cap - store[i].cap) / 2;
-    }
 
     int V, source, sink;
     int mxh = 0, work = 0;
@@ -45,7 +41,7 @@ class HLPP {
             q.pop();
             for (int i : l[v]) {
                 auto& e = store[i];
-                if (h[e.to] == V && store[i ^ 1].cap > 0) {
+                if (h[e.to] == V && store[i ^ 1].cap - store[i ^ 1].flow > 0) {
                     q.push(e.to), updh(e.to, h[v] + 1);
                 }
             }
@@ -56,8 +52,8 @@ class HLPP {
     void push(int v, int i) {
         auto& e = store[i];
         if (ex[e.to] == 0) lst[h[e.to]].push_back(e.to);
-        T_flow df = min(ex[v], e.cap);
-        e.cap -= df, store[i ^ 1].cap += df;
+        T_flow df = min(ex[v], e.cap - e.flow);
+        e.flow += df, store[i ^ 1].flow -= df;
         ex[v] -= df, ex[e.to] += df;
     }
 
@@ -65,7 +61,7 @@ class HLPP {
         int nh = V;
         for (int i : l[v]) {
             edge& e = store[i];
-            if (e.cap > 0) {
+            if (e.cap - e.flow > 0) {
                 if (h[v] == h[e.to] + 1) {
                     push(v, i);
                     if (ex[v] <= 0) return;
@@ -95,9 +91,9 @@ public:
         assert(capacity >= 0);
         assert(0 <= min(from, to) && max(from, to) < V);
         l[from].push_back(store.size());
-        store.emplace_back(to, capacity);
+        store.emplace_back(to, 0, capacity);
         l[to].push_back(store.size());
-        store.emplace_back(from, is_directed ? 0 : capacity);
+        store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
     void clear() {
@@ -138,8 +134,8 @@ public:
             for (auto& i : lst) i.clear();
             for (auto& i : gap) i.clear();
             for (size_t i = 0; i < store.size(); i += 2) {
-                store[i].cap += store[i ^ 1].cap;
-                store[i ^ 1].cap = 0;
+                store[i ^ 1].flow += store[i].flow;
+                store[i].flow = 0;
             }
             go(max_flow);
         }
@@ -149,12 +145,11 @@ public:
 
     //For every added edge returns the flow going through it.
     //If the flow on edge x->y is negative, then the flow goes from y to x (could only happen with undirected edges)
-    //Will work only if ex[source] was set to max_flow at the beginning of calc_max_flow() since this push-relabel maintains preflow
-    vector<tuple<int, int, T_flow>> get_flow_on_edges(bool are_edges_directed) const {
+    vector<tuple<int, int, T_flow>> get_flow_on_edges() const {
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {store[i ^ 1].to, e.to, get_flow_on_edge(i, are_edges_directed)};
+            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
         }
         return res;
     }

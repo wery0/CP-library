@@ -16,12 +16,12 @@ vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_num
             if (ptr[v] == l[v].size()) ptr[v] = 0;
             if (i & 1) continue;
             auto& e = s[i];
-            if (s[i ^ 1].cap == 0) continue;
-            T_flow res = dfs(dfs, e.to, min(min_flow, s[i ^ 1].cap));
+            if (e.flow == 0) continue;
+            T_flow res = dfs(dfs, e.to, min(min_flow, e.flow));
             if (res > 0) {
                 egs.push_back(i / 2);
-                e.cap += res;
-                s[i ^ 1].cap -= res;
+                e.flow -= res;
+                s[i ^ 1].flow += res;
                 return res;
             }
         }

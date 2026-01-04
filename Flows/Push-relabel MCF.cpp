@@ -9,14 +9,10 @@ class push_relabel_mcf {
     static constexpr T_cost INFCOST = numeric_limits<T_cost>::max();
     struct edge {
         int to;
-        T_flow cap;
+        T_flow flow, cap;
         T_cost cost;
-        edge(int to, T_flow cap, T_cost cost): to(to), cap(cap), cost(cost) {}
+        edge(int to, T_flow flow, T_flow cap, T_cost cost): to(to), flow(flow), cap(cap), cost(cost) {}
     };
-
-    T_flow get_flow_on_edge(int i) {
-        return store[i ^ 1].cap;
-    }
 
     T_cost eps = 0;
     int V, source, sink;
@@ -30,16 +26,16 @@ class push_relabel_mcf {
     T_flow max_flow(T_flow flow_limit) {
         int supersource = V++;
         l.push_back({int(store.size())});
-        store.emplace_back(source, flow_limit, 0);
+        store.emplace_back(source, 0, flow_limit, 0);
         l[source].emplace_back(store.size());
-        store.emplace_back(supersource, 0, 0);
+        store.emplace_back(supersource, 0, 0, 0);
         vector<vector<int>> hs(V * 2);
         function<void(int, T_flow)> add_flow = [&](int i, T_flow f) {
             edge& e = store[i];
             edge& back = store[i ^ 1];
             if (!ex[e.to] && f) hs[h[e.to]].push_back(e.to);
-            e.cap -= f; ex[e.to] += f;
-            back.cap += f; ex[back.to] -= f;
+            e.flow += f; ex[e.to] += f;
+            back.flow -= f; ex[back.to] -= f;
         };
         fill(ex.begin(), ex.end(), 0); ex.push_back(0);
         fill(cur.begin(), cur.end(), 0); cur.push_back(0);
@@ -48,7 +44,7 @@ class push_relabel_mcf {
         h[supersource] = V;
         ex[sink] = 1;
         co[0] = V - 1;
-        for (int i : l[supersource]) add_flow(i, store[i].cap);
+        for (int i : l[supersource]) add_flow(i, store[i].cap - store[i].flow);
         for (int hi = 0; hi >= 0 && hs[hi].size();) {
             int u = hs[hi].back();
             hs[hi].pop_back();
@@ -57,7 +53,7 @@ class push_relabel_mcf {
                     h[u] = 1e9;
                     for (size_t i = 0; i < l[u].size(); ++i) {
                         auto& e = store[l[u][i]];
-                        if (e.cap && h[u] > h[e.to] + 1) {
+                        if (e.cap - e.flow && h[u] > h[e.to] + 1) {
                             h[u] = h[e.to] + 1, cur[u] = i;
                         }
                     }
@@ -70,8 +66,8 @@ class push_relabel_mcf {
                         }
                     }
                     hi = h[u];
-                } else if (auto& e = store[l[u][cur[u]]]; e.cap && h[u] == h[e.to] + 1) {
-                    add_flow(l[u][cur[u]], min(ex[u], e.cap));
+                } else if (auto& e = store[l[u][cur[u]]]; e.cap - e.flow && h[u] == h[e.to] + 1) {
+                    add_flow(l[u][cur[u]], min(ex[u], e.cap - e.flow));
                 } else {
                     ++cur[u];
                 }
@@ -93,16 +89,16 @@ class push_relabel_mcf {
     void push(int i, T_flow amt) {
         edge& e = store[i];
         edge& r = store[i ^ 1];
-        if (e.cap < amt) amt = e.cap;
-        e.cap -= amt; ex[e.to] += amt;
-        r.cap += amt; ex[r.to] -= amt;
+        if (e.cap - e.flow < amt) amt = e.cap - e.flow;
+        e.flow += amt; ex[e.to] += amt;
+        r.flow -= amt; ex[r.to] -= amt;
     }
 
     void relabel(int v) {
         T_cost nh = -INFCOST / 2;
         for (size_t i = 0; i < l[v].size(); ++i) {
             const edge& e = store[l[v][i]];
-            if (e.cap && nh < h[e.to] - e.cost) {
+            if (e.cap - e.flow && nh < h[e.to] - e.cost) {
                 nh = h[e.to] - e.cost;
                 cur[v] = i;
             }
@@ -129,9 +125,9 @@ public:
         cost *= V;
         eps = max(eps, abs(cost));
         l[from].push_back(store.size());
-        store.emplace_back(to, capacity, cost);
+        store.emplace_back(to, 0, capacity, cost);
         l[to].push_back(store.size());
-        store.emplace_back(from, 0, -cost);
+        store.emplace_back(from, 0, 0, -cost);
         if (!is_directed) add_edge(to, from, capacity, cost, 1);
     }
 
@@ -150,7 +146,7 @@ public:
             for (int v = 0; v < V; ++v) {
                 for (int i : l[v]) {
                     edge& e = store[i];
-                    if (h[v] + e.cost - h[e.to] < 0 && e.cap) push(i, e.cap);
+                    if (h[v] + e.cost - h[e.to] < 0 && e.cap - e.flow) push(i, e.cap - e.flow);
                 }
             }
             for (int v = 0; v < V; ++v) {
@@ -179,7 +175,7 @@ public:
             }
             if (eps > 1 && eps >> scale == 0) eps = T_cost(1) << scale;
         }
-        for (const auto& e : store) cost -= e.cost * e.cap; 
+        for (const auto& e : store) cost -= e.cost * (e.cap - e.flow); 
         flow_calculated = true;
         return {flow, cost / (V * 2)};
     }
@@ -190,7 +186,7 @@ public:
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {store[i ^ 1].to, e.to, get_flow_on_edge(i)};
+            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
         }
         return res;
     }

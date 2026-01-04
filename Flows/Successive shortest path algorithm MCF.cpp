@@ -12,14 +12,10 @@ class sspa_mcf {
     static constexpr T_cost INFCOST = numeric_limits<T_cost>::max();
     struct edge {
         int to;
-        T_flow cap;
+        T_flow flow, cap;
         T_cost cost;
-        edge(int to, T_flow cap, T_cost cost): to(to), cap(cap), cost(cost) {}
+        edge(int to, T_flow flow, T_flow cap, T_cost cost): to(to), flow(flow), cap(cap), cost(cost) {}
     };
-
-    T_flow get_flow_on_edge(int i) {
-        return store[i ^ 1].cap;
-    }
 
     int V, source, sink;
     vector<vector<int>> l;
@@ -43,9 +39,9 @@ public:
         assert(0 <= min(from, to) && max(from, to) < V);
         if (from == to) {assert(cost >= 0); return;}
         l[from].push_back(store.size());
-        store.emplace_back(to, capacity, cost);
+        store.emplace_back(to, 0, capacity, cost);
         l[to].push_back(store.size());
-        store.emplace_back(from, 0, -cost);
+        store.emplace_back(from, 0, 0, -cost);
         if (!is_directed) add_edge(to, from, capacity, cost, 1);
     }
 
@@ -76,13 +72,13 @@ public:
                 inq[v] = 0;
                 for (int i : l[v]) {
                     const auto& e = store[i];
-                    if (e.cap == 0) continue;
+                    if (e.cap - e.flow == 0) continue;
                     T_cost tyt = dst[v] + e.cost;
                     int to = e.to;
                     if (tyt < dst[to]) {
                         dst[to] = tyt;
                         pr[to] = i;
-                        mn[to] = min(mn[v], e.cap);
+                        mn[to] = min(mn[v], e.cap - e.flow);
                         if (!inq[to]) {
                             inq[to] = 1;
                             dq.push_back(to);
@@ -96,8 +92,8 @@ public:
             cost += dst[sink] * tyt;
             for (int v = sink; v != source; ) {
                 const int i = pr[v];
-                store[i].cap -= tyt;
-                store[i ^ 1].cap += tyt;
+                store[i].flow += tyt;
+                store[i ^ 1].flow -= tyt;
                 v = store[i ^ 1].to;
             }
         }
@@ -111,7 +107,7 @@ public:
         vector<tuple<int, int, T_flow>> res(store.size() / 2);
         for (size_t i = 0; i < store.size(); i += 2) {
             const auto& e = store[i];
-            res[i / 2] = {store[i ^ 1].to, e.to, get_flow_on_edge(i)};
+            res[i / 2] = {store[i ^ 1].to, e.to, e.flow};
         }
         return res;
     }
