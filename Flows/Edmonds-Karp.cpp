@@ -1,17 +1,12 @@
 /*
-Ford-Fulkerson algorithm for finding max flow
-Idea: while there are augmenting path in residual graph, find it using dfs and push flow through it
+Edmonds-Karp algorithm for finding max flow
+Idea: same as Ford-Fulkerson but with bfs instead of dfs
 Complexity: at most
-- O(EF) without scaling (F is max flow)
+- min(VE^2, EF) without scaling (F is max flow)
 - O(E^2log(C)) with scaling (C is max edge capacity)
-Problems:
-https://cses.fi/problemset/task/1694 (max flow)
-https://cses.fi/problemset/task/1695 (min cut)
-https://cses.fi/problemset/task/1696 (matching in bipartite graph)
-https://cses.fi/problemset/task/1711 (flow path decomposition)
 */
 template<typename T_flow>
-class ford_fulkerson {
+class edmonds_karp {
     static constexpr T_flow INFFLOW = numeric_limits<T_flow>::max();
     struct edge {
         int to;
@@ -19,31 +14,42 @@ class ford_fulkerson {
         edge(int to, T_flow flow, T_flow cap): to(to), flow(flow), cap(cap) {}
     };
 
-    int V, source, sink, us_iter = 0;
+    int V, source, sink;
     vector<vector<int>> l;
     vector<edge> store;
-    vector<int> us;
+    vector<int> pr;
+    vector<T_flow> min_flow;
     bool flow_calculated = false;
 
-    T_flow dfs(int v, T_flow scl = 1, T_flow min_flow = INFFLOW) {
-        if (v == sink) return min_flow;
-        if (us[v] == us_iter) return 0;
-        us[v] = us_iter;
-        for (int i : l[v]) {
-            auto& e = store[i];
-            if (e.cap - e.flow < scl) continue;
-            T_flow res = dfs(e.to, scl, min(min_flow, e.cap - e.flow));
-            if (res > 0) {
-                e.flow += res;
-                store[i ^ 1].flow -= res;
-                return res;
+    T_flow bfs(int v, T_flow scl = 1) {
+        fill(pr.begin(), pr.end(), -1);
+        fill(min_flow.begin(), min_flow.end(), INFFLOW);
+        deque<int> dq = {source};
+        --min_flow[source];
+        while (dq.size()) {
+            int v = dq.front(); dq.pop_front();
+            for (int i : l[v]) {
+                auto& e = store[i];
+                if (e.cap - e.flow < scl) continue;
+                if (min_flow[e.to] == INFFLOW) {
+                    min_flow[e.to] = min(min_flow[v], e.cap - e.flow);
+                    pr[e.to] = i;
+                    dq.emplace_back(e.to);
+                }
             }
         }
-        return 0;
+        if (min_flow[sink] == INFFLOW) return 0;
+        for (int v = sink; v != source; ) {
+            int i = pr[v];
+            store[i].flow += min_flow[sink];
+            store[i ^ 1].flow -= min_flow[sink];
+            v = store[i ^ 1].to;
+        }
+        return min_flow[sink];
     }
 
 public:
-    ford_fulkerson(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), us(V) {
+    edmonds_karp(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), pr(V), min_flow(V) {
         assert(source != sink);
         assert(max(source, sink) < V);
     }
@@ -69,8 +75,7 @@ public:
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {
             while (true) {
-                ++us_iter;
-                T_flow res = dfs(source, mxf);
+                T_flow res = bfs(source, mxf);
                 if (!res) break;
                 ans += res;
             }
