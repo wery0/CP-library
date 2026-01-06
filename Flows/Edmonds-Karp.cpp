@@ -21,7 +21,7 @@ class edmonds_karp {
     vector<T_flow> min_flow;
     bool flow_calculated = false;
 
-    T_flow bfs(int v, T_flow scl = 1) {
+    T_flow bfs(int v, T_flow scl) {
         fill(pr.begin(), pr.end(), -1);
         fill(min_flow.begin(), min_flow.end(), INFFLOW);
         deque<int> dq = {source};
@@ -70,7 +70,7 @@ public:
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
-    T_flow calc_max_flow(bool do_scaling = true) {
+    T_flow calc_max_flow(bool do_scaling) {
         assert(!flow_calculated);
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {

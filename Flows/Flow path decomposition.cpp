@@ -6,7 +6,7 @@ vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_num
     vector<int> us(V), ptr(V), egs;
     auto s = store;
     int us_iter = 0;
-    auto dfs = [&](auto&& dfs, int v, T_flow min_flow = numeric_limits<T_flow>::max()) -> T_flow {
+    function<T_flow(int, T_flow)> dfs = [&](int v, T_flow min_flow) -> T_flow {
         if (v == sink) return min_flow;
         if (us[v] == us_iter) return 0;
         us[v] = us_iter;
@@ -17,7 +17,7 @@ vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_num
             if (i & 1) continue;
             auto& e = s[i];
             if (e.flow == 0) continue;
-            T_flow res = dfs(dfs, e.to, min(min_flow, e.flow));
+            T_flow res = dfs(e.to, min(min_flow, e.flow));
             if (res > 0) {
                 egs.push_back(i / 2);
                 e.flow -= res;
@@ -30,7 +30,7 @@ vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_num
     while (true) {
         ++us_iter;
         egs.clear();
-        T_flow tyt = dfs(dfs, source);
+        T_flow tyt = dfs(source, INFFLOW);
         if (!tyt) break;
         reverse(egs.begin(), egs.end());
         if (as_vertex_nums) {

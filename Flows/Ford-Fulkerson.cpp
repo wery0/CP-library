@@ -25,7 +25,7 @@ class ford_fulkerson {
     vector<int> us;
     bool flow_calculated = false;
 
-    T_flow dfs(int v, T_flow scl = 1, T_flow min_flow = INFFLOW) {
+    T_flow dfs(int v, T_flow scl, T_flow min_flow) {
         if (v == sink) return min_flow;
         if (us[v] == us_iter) return 0;
         us[v] = us_iter;
@@ -64,13 +64,13 @@ public:
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
-    T_flow calc_max_flow(bool do_scaling = true) {
+    T_flow calc_max_flow(bool do_scaling) {
         assert(!flow_calculated);
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {
             while (true) {
                 ++us_iter;
-                T_flow res = dfs(source, mxf);
+                T_flow res = dfs(source, mxf, mxf);
                 if (!res) break;
                 ans += res;
             }

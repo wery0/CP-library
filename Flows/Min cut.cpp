@@ -2,15 +2,15 @@
 vector<int> get_min_cut(bool are_edges_directed) const {
     assert(flow_calculated);
     vector<char> us(V);
-    auto dfs = [&](auto&& dfs, int v) -> void {
+    function<void(int)> dfs = [&](int v) {
         us[v] = 1;
         for (int i : l[v]) {
             const auto& e = store[i];
             if (us[e.to]) continue;
-            if (e.cap - e.flow > 0) dfs(dfs, e.to);
+            if (e.cap - e.flow > 0) dfs(e.to);
         }
     };
-    dfs(dfs, source);
+    dfs(source);
     vector<int> res;
     for (int v = 0; v < V; ++v) {
         if (!us[v]) continue;
