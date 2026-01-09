@@ -21,26 +21,26 @@ class dinic {
     int V, source, sink;
     vector<vector<int>> l;
     vector<edge> store;
-    vector<int> min_dist;
+    vector<int> layer;
     vector<int> ptr;
     vector<char> in_layered_network;
     bool flow_calculated = false;
 
     void build_layered_network(T_flow scl) {
-        fill(min_dist.begin(), min_dist.end(), V);
+        fill(layer.begin(), layer.end(), V);
         fill(in_layered_network.begin(), in_layered_network.end(), 0);
         deque<int> dq = {source};
-        min_dist[source] = 0;
+        layer[source] = 0;
         while (dq.size()) {
             int v = dq.front(); dq.pop_front();
             for (int i : l[v]) {
                 auto& e = store[i];
                 if (e.cap - e.flow < scl) continue;
-                if (min_dist[e.to] == V) {
-                    min_dist[e.to] = min_dist[v] + 1;
+                if (layer[e.to] == V) {
+                    layer[e.to] = layer[v] + 1;
                     dq.emplace_back(e.to);
                 }
-                if (min_dist[e.to] == min_dist[v] + 1) {
+                if (layer[e.to] == layer[v] + 1) {
                     in_layered_network[i] = 1;
                 }
             }
@@ -75,7 +75,7 @@ class dinic {
     }
 
 public:
-    dinic(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), min_dist(V), ptr(V) {
+    dinic(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), layer(V), ptr(V) {
         assert(source != sink);
         assert(max(source, sink) < V);
     }
@@ -103,7 +103,7 @@ public:
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {
             while (true) {
                 build_layered_network(mxf);
-                if (min_dist[sink] == V) break;
+                if (layer[sink] == V) break;
                 ans += find_blocking_flow(mxf);
             }
         }
