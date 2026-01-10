@@ -1,4 +1,4 @@
-class max_bipartite_matching_kyhn {
+class max_bipartite_matching_kuhn {
     int L, R, tim = 0, mt_size = 0;
     vector<vector<int>> l;
     vector<int> mtl, mtr, us;
@@ -16,7 +16,7 @@ class max_bipartite_matching_kyhn {
     }
 
 public:
-    max_bipartite_matching_kyhn(int _L, int _R): L(_L), R(_R) {
+    max_bipartite_matching_kuhn(int _L, int _R): L(_L), R(_R) {
         if (L > R) swap(L, R), sw = 1;
         l.resize(L);
         mtl.resize(L, -1);
@@ -33,11 +33,14 @@ public:
     }
 
     void add_edge(int x, int y) {
+        assert(!matching_calculated);
         if (sw) swap(x, y);
+        assert(0 <= x && x < L);
+        assert(0 <= y && y < R);
         l[x].push_back(y);
-        matching_calculated = false;
     }
 
+    //Complexity: at most O(nm), but fast on practice
     vector<array<int, 2>> calc_max_matching() {
         while (true) {
             ++tim;
@@ -48,16 +51,16 @@ public:
             if (was == mt_size) break;
         }
         vector<array<int, 2>> ans(mt_size);
-        for (int i = 0, j = 0; i < L; ++i) {
-            if (mtl[i] != -1) ans[j++] = {i, mtl[i]};
+        for (int v = 0, j = 0; v < L; ++v) {
+            if (mtl[v] != -1) ans[j++] = {v, mtl[v]};
         }
         if (sw) for (auto& [x, y] : ans) swap(x, y);
         matching_calculated = true;
         return ans;
     }
 
-    pair<vector<int>, vector<int>> calc_min_vertex_cover() {
-        if (!matching_calculated) calc_max_matching();
+    pair<vector<int>, vector<int>> get_min_vertex_cover() {
+        assert(matching_calculated);
         vector<vector<int>> nl(L + R);
         for (int v = 0; v < L; ++v) {
             for (int h : l[v]) {
@@ -66,14 +69,14 @@ public:
             }
         }
         vector<char> us(L + R);
-        auto dfs = [&](auto&& dfs, int v) -> void {
+        function<void(int)> dfs = [&](int v) -> void {
             us[v] = 1;
             for (int h : nl[v]) {
-                if (!us[h]) dfs(dfs, h);
+                if (!us[h]) dfs(h);
             }
         };
         for (int v = 0; v < L; ++v) {
-            if (mtl[v] == -1 && !us[v]) dfs(dfs, v);
+            if (mtl[v] == -1 && !us[v]) dfs(v);
         }
         vector<int> ml, mr;
         for (int v = 0; v < L; ++v) {

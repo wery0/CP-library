@@ -5,7 +5,7 @@ class directed_mst {
         dsu(int n): p(n, -1) {}
         int find(int i) {return p[i] < 0 ? i : p[i] = find(p[i]);}
         bool same(int i, int j) {return find(i) == find(j);}
-        int size(int i) { return -p[find(i)];}
+        int size(int i) {return -p[find(i)];}
         bool join(int i, int j) {
             i = find(i), j = find(j);
             if (i == j) return false;
@@ -95,10 +95,7 @@ public:
                 edge[v] = heap[v];
                 ans += nodes[edge[v]].weight;
                 apply(edge[v], nodes[edge[v]].weight);
-                if (dsu_cyc.join(v, dsu_contract.find(nodes[edge[v]].from))) {
-                    break;
-                }
-
+                if (dsu_cyc.join(v, dsu_contract.find(nodes[edge[v]].from))) break;
                 int vnext = dsu_contract.find(nodes[edge[v]].from), t = dsu_contract.time();
                 while (dsu_contract.join(v, vnext)) {
                     heap[dsu_contract.find(v)] = merge(heap[v], heap[vnext]);
@@ -106,20 +103,15 @@ public:
                     vnext = dsu_contract.find(nodes[edge[vnext]].from);
                 }
                 cycles.emplace_back(edge[v], t);
-
-                while (heap[v] != -1 && dsu_contract.same(nodes[heap[v]].from, v)) {
-                    pop(v);
-                }
+                while (heap[v] != -1 && dsu_contract.same(nodes[heap[v]].from, v)) pop(v);
             }
         }
-
         for (auto it = rbegin(cycles); it != rend(cycles); ++it) {
             int vrepr = dsu_contract.find(nodes[it->first].to);
             dsu_contract.rollback(it->second);
             int vinc = dsu_contract.find(nodes[edge[vrepr]].to);
             edge[vinc] = exchange(edge[vrepr], it->first);
         }
-
         for (size_t i = 0; i < n; ++i) {
             edge[i] = i == root ? -1 : nodes[edge[i]].from;
         }

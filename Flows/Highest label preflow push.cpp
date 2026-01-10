@@ -3,7 +3,7 @@ Highest label preflow push (HLPP) algorithm for finding max flow
 Complexity: At most O(V^2sqrt(E)), fast on practice
 */
 template<typename T_flow>
-class HLPP {
+class highest_label_preflow_push {
     static constexpr T_flow INFFLOW = numeric_limits<T_flow>::max();
     struct edge {
         int to;
@@ -81,7 +81,7 @@ class HLPP {
     }
 
 public:
-    HLPP(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
+    highest_label_preflow_push(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
         assert(source != sink);
         assert(max(source, sink) < V);
     }

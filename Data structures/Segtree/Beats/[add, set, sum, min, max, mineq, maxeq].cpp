@@ -61,7 +61,7 @@ class segtree {
         n.mx2 = calcmx2(l, r);
     }
 
-    void push_mineq(Node& n, T x) {
+    void push_chmin(Node& n, T x) {
         if (n.mx1 <= x) return;
         int fl = n.mn1 == n.mx1, fl2 = n.mn1 == n.mx2;
         n.sm -= n.cmx1 * (n.mx1 - x);
@@ -70,7 +70,7 @@ class segtree {
         else if (fl2) n.mn2 = x;
     }
 
-    void push_maxeq(Node& n, T x) {
+    void push_chmax(Node& n, T x) {
         if (n.mn1 >= x) return;
         int fl = n.mn1 == n.mx1, fl2 = n.mn1 == n.mx2;
         n.sm += n.cmn1 * (x - n.mn1);
@@ -98,10 +98,10 @@ class segtree {
             push_add(v << 1 | 1, n.ps_add);
             n.ps_add = 0;
         }
-        push_mineq(l, mx);
-        push_mineq(r, mx);
-        push_maxeq(l, mn);
-        push_maxeq(r, mn);
+        push_chmin(l, mx);
+        push_chmin(r, mx);
+        push_chmax(l, mn);
+        push_chmax(r, mn);
     }
 
     T seg_sum(size_t ql, size_t qr, size_t l, size_t r, size_t v) {
@@ -144,31 +144,31 @@ class segtree {
         upd(v);
     }
 
-    void seg_mineq(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
+    void seg_chmin(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
         Node& n = m[v];
         if (qr < l || r < ql || x >= n.mx1) return;
         push(v);
         if (ql <= l && r <= qr && (n.mn1 == n.mx1 || x > n.mx2)) {
-            push_mineq(n, x);
+            push_chmin(n, x);
             return;
         }
         size_t md = (l + r) >> 1;
-        seg_mineq(ql, qr, l, md, v << 1, x);
-        seg_mineq(ql, qr, md + 1, r, v << 1 | 1, x);
+        seg_chmin(ql, qr, l, md, v << 1, x);
+        seg_chmin(ql, qr, md + 1, r, v << 1 | 1, x);
         upd(v);
     }
 
-    void seg_maxeq(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
+    void seg_chmax(size_t ql, size_t qr, size_t l, size_t r, size_t v, T x) {
         Node& n = m[v];
         if (qr < l || r < ql || x <= n.mn1) return;
         push(v);
         if (ql <= l && r <= qr && (n.mn1 == n.mx1 || x < n.mn2)) {
-            push_maxeq(n, x);
+            push_chmax(n, x);
             return;
         }
         size_t md = (l + r) >> 1;
-        seg_maxeq(ql, qr, l, md, v << 1, x);
-        seg_maxeq(ql, qr, md + 1, r, v << 1 | 1, x);
+        seg_chmax(ql, qr, l, md, v << 1, x);
+        seg_chmax(ql, qr, md + 1, r, v << 1 | 1, x);
         upd(v);
     }
 
@@ -215,7 +215,7 @@ public:
     T seg_min(size_t l, size_t r) {return seg_min(l, r, 0, U - 1, 1);}
     T seg_max(size_t l, size_t r) {return seg_max(l, r, 0, U - 1, 1);}
     void seg_add(size_t l, size_t r, T x) {seg_add(l, r, 0, U - 1, 1, x);}
-    void seg_set(size_t l, size_t r, T x) {seg_mineq(l, r, x); seg_maxeq(l, r, x);}
-    void seg_mineq(size_t l, size_t r, T x) {seg_mineq(l, r, 0, U - 1, 1, x);}
-    void seg_maxeq(size_t l, size_t r, T x) {seg_maxeq(l, r, 0, U - 1, 1, x);}
+    void seg_set(size_t l, size_t r, T x) {seg_chmin(l, r, x); seg_chmax(l, r, x);}
+    void seg_chmin(size_t l, size_t r, T x) {seg_chmin(l, r, 0, U - 1, 1, x);}
+    void seg_chmax(size_t l, size_t r, T x) {seg_chmax(l, r, 0, U - 1, 1, x);}
 };

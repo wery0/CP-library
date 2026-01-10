@@ -1,6 +1,5 @@
-//Kyhn algorithm with optimizations and randomization.
-class max_general_matching_random_kyhn {
-
+//Kuhn algorithm with optimizations and randomization.
+class max_general_matching_random_kuhn {
     int n, tim = 0;
     vector<vector<int>> l;
     vector<int> mt, us;
@@ -23,8 +22,8 @@ class max_general_matching_random_kyhn {
     }
 
 public:
-    max_general_matching_random_kyhn() = default;
-    max_general_matching_random_kyhn(int n): n(n), l(n), mt(n + 1, n), us(n + 1) {}
+    max_general_matching_random_kuhn() = default;
+    max_general_matching_random_kuhn(int n): n(n), l(n), mt(n + 1, n), us(n + 1) {}
 
     void add_edge(int x, int y) {
         l[x].push_back(y);

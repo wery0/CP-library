@@ -1,4 +1,4 @@
-//Implementation of MaxCliqueDyn algorithm for finding max clique
+//Implementation of MaxCliqueDyn algorithm for finding max clique / max independent set
 template<const size_t N>
 struct MaxCliqueDyn {
     struct Vertex {int i, d = 0;};
@@ -66,8 +66,7 @@ public:
     }
 
     void invert() {
-        for (size_t i = 0; i < n; ++i) e[i] = ~e[i];
-        for (size_t i = 0; i < n; ++i) e[i][i] = 0;;
+        for (size_t i = 0; i < n; ++i) e[i] = ~e[i], e[i][i] = 0;
     }
 
     void clear() {

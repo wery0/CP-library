@@ -1,5 +1,6 @@
 //Works for directed networks
 //Returns vector of paths from source to sink
+//Complexity: at most O(E^2)
 vector<pair<T_flow, vector<int>>> get_flow_path_decomposition(bool as_vertex_nums) const {
     assert(flow_calculated);
     vector<pair<T_flow, vector<int>>> res;

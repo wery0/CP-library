@@ -1,4 +1,4 @@
-class max_bipartite_matching_kyhn {
+class max_bipartite_matching_kuhn {
     int L, R, tim = 0;
     graph<edge<void>> g;
     vector<int> mtl, mtr, us;
@@ -15,7 +15,7 @@ class max_bipartite_matching_kyhn {
     }
 
 public:
-    max_bipartite_matching_kyhn(int _L, int _R, int E = -1): L(_L), R(_R) {
+    max_bipartite_matching_kuhn(int _L, int _R, int E = -1): L(_L), R(_R) {
         if (L > R) swap(L, R), sw = 1;
         g = graph<edge<void>>(L, E);
         mtl.resize(L, -1);
