@@ -1,0 +1,37 @@
+-- PowerShell scripts to format all the contents of this library for printing
+$output = "all_code_for_printing.txt"
+Remove-Item -LiteralPath $output -ErrorAction SilentlyContinue
+
+$pageWidth = 80
+$pageBreak = "`n" + ("-" * $pageWidth) + "`n`n"
+
+$page = 2 # Title page is page 1
+$index = @()
+
+1).
+merge-code-files.ps1:
+   Get-Content filelist.txt | ForEach-Object {
+       $file = $_
+       $header = "File: $file"
+       $lines = Get-Content -LiteralPath $file
+       Add-Content -LiteralPath $output $pageBreak
+       Add-Content -LiteralPath $output $header
+       Add-Content -LiteralPath $output ("=" * $header.Length)
+       Add-Content -LiteralPath $output "`n"
+       Add-Content -LiteralPath $output $lines
+       $pages_used = [math]::Ceiling($lines.Count / 60) # estimate
+       $index += [PSCustomObject]@{File=$file;Page=$page}
+       $page += $pages_used
+   }
+
+   $indexStr = ("Source File Index (Page Numbers Approximate):" + "`n" +
+       ($index | ForEach-Object { "$($_.File) : page $($_.Page)" }) -join "`n") + "`n" + ("="*40) + "`n`n"
+
+   $temp = Get-Content -LiteralPath $output
+   Set-Content -LiteralPath $output $indexStr
+   Add-Content -LiteralPath $output $temp
+
+2). Get-ChildItem -Recurse -Include *.cpp,*.h,*.hpp -File | Select-Object -ExpandProperty FullName | Set-Content filelist.txt
+3). Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+4). .\merge-code-files.ps1
+5). Remove shit at the end if you not filtered by filetypes 
