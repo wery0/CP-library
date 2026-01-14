@@ -25,6 +25,11 @@ public:
         assert(V >= 2);
     }
 
+    void clear() {
+        store.clear();
+        for (auto& i : l) i.clear(); 
+    }
+
     //Edge is undirected
     void add_edge(int x, int y, T weight) {
         assert(0 <= min(x, y) && max(x, y) < V);
@@ -36,11 +41,11 @@ public:
 
     //Returns {weight of min cut, vector of edges in min cut in form {x, y, weight}}
     pair<T, vector<array<T, 3>>> calc_global_min_cut() {
-        T min_cut = numeric_limits<T>::max();
         vector<int> us(V, -1), pr(V); iota(pr.begin(), pr.end(), 0);
         function<int(int)> find = [&](int v) {return pr[v] = pr[v] == v ? v : find(pr[v]);};
         vector<T> sm(V);
         priority_queue<pair<T, int>, vector<pair<T, int>>> pq;
+        T min_cut = numeric_limits<T>::max();
         vector<array<T, 3>> ans;
         for (int it = 0, s, t; it < V - 1; ++it) {
             fill(sm.begin(), sm.end(), 0);
@@ -78,6 +83,7 @@ public:
             }
             l[t].clear(); l[t].shrink_to_fit();
         }
+        for (auto& e : store) e.x = e.sx, e.y = e.sy;
         return {min_cut, ans};
     }
 };
