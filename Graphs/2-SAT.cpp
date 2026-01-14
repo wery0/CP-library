@@ -1,5 +1,4 @@
 class two_sat {
-
     size_t V;
 
     size_t opp(size_t v) {
@@ -10,7 +9,6 @@ class two_sat {
 
 public:
     two_sat() = default;
-
     two_sat(size_t V, size_t D = 0): V(V), g(V * 2, D * 2) {}
 
     //Adds (x || y) restriction. If variable >= V, then it's negation of it.
