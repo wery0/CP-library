@@ -1,5 +1,3 @@
-# O(5^{d/3} * log_5{n}) arithmetic operations
-
 def binpow(x, pw, mod):
     o = 1
     for i in str(bin(pw)[2:])[::-1]:
@@ -9,7 +7,8 @@ def binpow(x, pw, mod):
     return o
 
 
-def calc(n, d):
+# O(5^{d/3} * log_5{n}) arithmetic operations
+def calc_last_d_nonzero_digits_of_factorial(n, d):
     pw = (d + 2) // 3
     MOD = 10 ** d
     k = 5 ** pw
@@ -35,6 +34,3 @@ def calc(n, d):
         while res and res % 10 == 0: res //= 10
         res %= MOD
     return res
-
-
-# print(calc(10 ** 12, 27))

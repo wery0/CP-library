@@ -27,6 +27,7 @@ public:
     }
 
     //Complexity: at most O(Esqrt(V))
+    //Idea: do what Dinic algorithm does, just remove unnecessary parts of it
     vector<array<int, 2>> calc_max_matching() {
         vector<int> layer(L);
         auto bfs = [&]() {

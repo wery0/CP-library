@@ -1,7 +1,7 @@
-//Constraints: k >= 0
 //Decreases sum(m) on k, minimizing max remaining element
 //Returns sorted array after decreasing
-//Sum of elements must fit into T
+//Constraints: k >= 0, sum of elements must fit into T
+//Complexity: O(nlog(n))
 template<typename T>
 vector<T> remove_k(vector<T> m, T k) {
     if (m.empty() || k < 0) return m;

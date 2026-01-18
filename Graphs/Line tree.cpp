@@ -11,6 +11,8 @@ pair<vector<int>, vector<T>> build_line_tree(vector<array<T, 3>> edges, bool is_
     vector<int> fir(n), lst(n), nxt(n, -1), p(n); iota(fir.begin(), fir.end(), 0); iota(lst.begin(), lst.end(), 0);
     vector<T> nw(n), w(n - 1);
     for (auto [x, y, w] : edges) {
+        assert(0 <= x && x < n);
+        assert(0 <= y && y < n);
         x = find(x), y = find(y);
         assert(x != y && "Input is not a tree u dumbass!");
         if (sz[x] > sz[y]) swap(x, y);

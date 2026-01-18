@@ -41,6 +41,7 @@ public:
     }
 
     //Complexity: at most O(nm), but fast on practice
+    //Idea: while augmenting path exists, find it using dfs and alternate edges in it
     vector<array<int, 2>> calc_max_matching() {
         while (true) {
             ++tim;

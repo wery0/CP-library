@@ -1,6 +1,6 @@
 /*
 Malhotra, Pramodh-Kumar and Maheshwari algorithm for finding max flow
-Idea: build layered network and find blocking flow in it by finding the vertex with minimum x = min(incoming, outgoing) capacity and pushing x flow through it
+Idea: build layered network and find blocking flow in it by finding the vertex with minimum x = min(incoming, outgoing) capacity and pushing x flow through it.
 Complexity: at most O(V^3)
 */
 template<typename T_flow>

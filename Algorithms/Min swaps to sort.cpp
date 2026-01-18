@@ -1,4 +1,5 @@
 //WARNING: elements of array must be distinct, otherwise it is NP-Complete!
+//Complexity: O(nlog(n))
 template<typename T>
 size_t min_swaps_to_sort(vector<T> m) {
     const size_t n = m.size();
