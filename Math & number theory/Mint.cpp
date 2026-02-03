@@ -43,7 +43,8 @@ public:
     Mint operator*(const Mint& rhs) const {return (LONG)1 * val * rhs.val % MOD;}
     Mint operator/(const Mint& rhs) const {return (LONG)1 * val * rhs.inv().val % MOD;}
     Mint operator-() const {return val ? MOD - val : val;}
-    template<typename T> friend Mint operator*(T lhs, const Mint& rhs) {return rhs * lhs;}
+    template<typename T> friend Mint operator*(T lhs, const Mint& rhs) {return Mint(lhs) * rhs;}
+    template<typename T> friend Mint operator-(T lhs, const Mint& rhs) {return Mint(lhs) - rhs;}
 
     void operator+=(const Mint& rhs) {val += rhs.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint& rhs) {val -= rhs.val; val += val < 0 ? MOD : 0;}
@@ -51,8 +52,8 @@ public:
     void operator/=(const Mint& rhs) {val = (LONG)1 * val * rhs.inv().val % MOD;}
 
     Mint& operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
-    Mint operator++(int) {Mint res = *this; ++*this; return res;}
     Mint& operator--() {val = val ? val - 1 : MOD - 1; return *this;}
+    Mint operator++(int) {Mint res = *this; ++*this; return res;}
     Mint operator--(int) {Mint res = *this; --*this; return res;}
 
     bool operator==(const Mint& rhs) const {return val == rhs.val;}

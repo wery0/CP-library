@@ -73,12 +73,13 @@ public:
     constexpr mint operator*(const mint& rhs) const {return mint(*this) *= rhs;}
     constexpr mint operator/(const mint& rhs) const {return mint(*this) /= rhs;}
     constexpr mint operator-() const {return mint() - mint(*this);}
-    template<typename T> friend mint operator*(T lhs, const mint& rhs) {return rhs * lhs;}
+    template<typename T> friend mint operator*(T lhs, const mint& rhs) {return mint(lhs) * rhs;}
+    template<typename T> friend mint operator-(T lhs, const mint& rhs) {return mint(lhs) - rhs;}
 
     static constexpr mint ONE = mint(1);
     mint& operator++() {*this += ONE; return *this;}
-    mint operator++(int) {mint res = *this; ++*this; return res;}
     mint& operator--() {*this -= ONE; return *this;}
+    mint operator++(int) {mint res = *this; ++*this; return res;}
     mint operator--(int) {mint res = *this; ++*this; return res;}
 
     constexpr bool operator==(const mint& rhs) const {return (a >= mod ? a - mod : a) == (rhs.a >= mod ? rhs.a - mod : rhs.a);}

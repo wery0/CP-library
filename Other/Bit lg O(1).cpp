@@ -1,4 +1,3 @@
-
 /*
 Counts position of highest set bit of n
 Idea:

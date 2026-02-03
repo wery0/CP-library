@@ -1,4 +1,4 @@
-template <uint32_t mod>
+template<uint32_t mod>
 struct LazyMontgomeryModInt {
     using mint = LazyMontgomeryModInt;
     using i32 = int32_t;
@@ -89,7 +89,7 @@ struct LazyMontgomeryModInt {
 
     static constexpr u32 get_mod() { return mod; }
 };
-template <typename mint>
+template<typename mint>
 struct NTT {
     static constexpr uint32_t get_pr() {
         uint32_t _mod = mint::get_mod();
@@ -104,7 +104,6 @@ struct NTT {
             }
         }
         if (m != 1) ds[idx++] = m;
-
         uint32_t _pr = 2;
         while (1) {
             int flg = 1;
@@ -311,7 +310,6 @@ struct NTT {
         copy(begin(b), end(b), back_inserter(a));
     }
 };
-
 namespace ArbitraryNTT {
     using i64 = int64_t;
     using u128 = __uint128_t;
@@ -328,7 +326,7 @@ namespace ArbitraryNTT {
     constexpr i64 w1 = m0;
     constexpr i64 w2 = i64(m0) * m1;
 
-    template <typename T, typename submint>
+    template<typename T, typename submint>
     vector<submint> mul(const vector<T>& a, const vector<T>& b) {
         static NTT<submint> ntt;
         vector<submint> s(a.size()), t(b.size());
@@ -337,7 +335,7 @@ namespace ArbitraryNTT {
         return ntt.multiply(s, t);
     }
 
-    template <typename T>
+    template<typename T>
     vector<int> multiply(const vector<T>& s, const vector<T>& t, int mod) {
         auto d0 = mul<T, mint0>(s, t);
         auto d1 = mul<T, mint1>(s, t);
@@ -355,7 +353,7 @@ namespace ArbitraryNTT {
         return ret;
     }
 
-    template <typename mint>
+    template<typename mint>
     vector<mint> multiply(const vector<mint>& a, const vector<mint>& b) {
         if (a.size() == 0 && b.size() == 0) return {};
         if (min<int>(a.size(), b.size()) < 128) {
@@ -373,7 +371,7 @@ namespace ArbitraryNTT {
         return ret;
     }
 
-    template <typename T>
+    template<typename T>
     vector<u128> multiply_u128(const vector<T>& s, const vector<T>& t) {
         if (s.size() == 0 && t.size() == 0) return {};
         if (min<int>(s.size(), t.size()) < 128) {
@@ -397,13 +395,12 @@ namespace ArbitraryNTT {
         return ret;
     }
 }
-
 namespace MultiPrecisionIntegerImpl {
     struct TENS {
         static constexpr int offset = 30;
-        constexpr TENS() : _tend() {
+        constexpr TENS(): _tend() {
             _tend[offset] = 1;
-            for (int i = 1; i <= offset; i++) {
+            for (int i = 1; i <= offset; ++i) {
                 _tend[offset + i] = _tend[offset + i - 1] * 10.0;
                 _tend[offset - i] = 1.0 / _tend[offset + i];
             }
@@ -417,174 +414,10 @@ namespace MultiPrecisionIntegerImpl {
         long double _tend[offset * 2 + 1];
     };
 }
-
-struct MultiPrecisionInteger {
+class MultiPrecisionInteger {
     using M = MultiPrecisionInteger;
-    inline constexpr static MultiPrecisionIntegerImpl::TENS tens = {};
-
-    static constexpr int D = 1000000000;
-    static constexpr int logD = 9;
-    bool neg;
-    vector<int> dat;
-
-    MultiPrecisionInteger() : neg(false), dat() {}
-
-    MultiPrecisionInteger(bool n, const vector<int>& d) : neg(n), dat(d) {}
-
-    template < typename I, enable_if_t < is_integral_v<I> ||
-                                         is_same_v<I, __int128_t >>* = nullptr >
-    MultiPrecisionInteger(I x) : neg(false) {
-        if constexpr (is_signed_v<I> || is_same_v<I, __int128_t>) {
-            if (x < 0) neg = true, x = -x;
-        }
-        while (x) dat.push_back(x % D), x /= D;
-    }
-
-    MultiPrecisionInteger(const string& S) : neg(false) {
-        assert(!S.empty());
-        if (S.size() == 1u && S[0] == '0') return;
-        int l = 0;
-        if (S[0] == '-') ++l, neg = true;
-        for (int ie = S.size(); l < ie; ie -= logD) {
-            int is = max(l, ie - logD);
-            long long x = 0;
-            for (int i = is; i < ie; i++) x = x * 10 + S[i] - '0';
-            dat.push_back(x);
-        }
-    }
-
-    friend M operator+(const M& lhs, const M& rhs) {
-        if (lhs.neg == rhs.neg) return {lhs.neg, _add(lhs.dat, rhs.dat)};
-        if (_leq(lhs.dat, rhs.dat)) {
-            // |l| <= |r|
-            auto c = _sub(rhs.dat, lhs.dat);
-            bool n = _is_zero(c) ? false : rhs.neg;
-            return {n, c};
-        }
-        auto c = _sub(lhs.dat, rhs.dat);
-        bool n = _is_zero(c) ? false : lhs.neg;
-        return {n, c};
-    }
-    friend M operator-(const M& lhs, const M& rhs) { return lhs + (-rhs); }
-
-    friend M operator*(const M& lhs, const M& rhs) {
-        auto c = _mul(lhs.dat, rhs.dat);
-        bool n = _is_zero(c) ? false : (lhs.neg ^ rhs.neg);
-        return {n, c};
-    }
-    friend pair<M, M> divmod(const M& lhs, const M& rhs) {
-        auto dm = _divmod_newton(lhs.dat, rhs.dat);
-        bool dn = _is_zero(dm.first) ? false : lhs.neg != rhs.neg;
-        bool mn = _is_zero(dm.second) ? false : lhs.neg;
-        return {M{dn, dm.first}, M{mn, dm.second}};
-    }
-    friend M operator/(const M& lhs, const M& rhs) {
-        return divmod(lhs, rhs).first;
-    }
-    friend M operator%(const M& lhs, const M& rhs) {
-        return divmod(lhs, rhs).second;
-    }
-
-    M& operator+=(const M& rhs) { return (*this) = (*this) + rhs; }
-    M& operator-=(const M& rhs) { return (*this) = (*this) - rhs; }
-    M& operator*=(const M& rhs) { return (*this) = (*this) * rhs; }
-    M& operator/=(const M& rhs) { return (*this) = (*this) / rhs; }
-    M& operator%=(const M& rhs) { return (*this) = (*this) % rhs; }
-
-    M operator-() const {
-        if (is_zero()) return *this;
-        return {!neg, dat};
-    }
-    M operator+() const { return *this; }
-    friend M abs(const M& m) { return {false, m.dat}; }
-    bool is_zero() const { return _is_zero(dat); }
-
-    friend bool operator==(const M& lhs, const M& rhs) {
-        return lhs.neg == rhs.neg && lhs.dat == rhs.dat;
-    }
-    friend bool operator!=(const M& lhs, const M& rhs) {
-        return lhs.neg != rhs.neg || lhs.dat != rhs.dat;
-    }
-    friend bool operator<(const M& lhs, const M& rhs) {
-        if (lhs == rhs) return false;
-        return _neq_lt(lhs, rhs);
-    }
-    friend bool operator<=(const M& lhs, const M& rhs) {
-        if (lhs == rhs) return true;
-        return _neq_lt(lhs, rhs);
-    }
-    friend bool operator>(const M& lhs, const M& rhs) {
-        if (lhs == rhs) return false;
-        return _neq_lt(rhs, lhs);
-    }
-    friend bool operator>=(const M& lhs, const M& rhs) {
-        if (lhs == rhs) return true;
-        return _neq_lt(rhs, lhs);
-    }
-
-    // a * 10^b (1 <= |a| < 10) の形で渡す
-    // 相対誤差：10^{-16} ~ 10^{-19} 程度 (処理系依存)
-    pair<long double, int> dfp() const {
-        if (is_zero()) return {0, 0};
-        int l = max<int>(0, _size() - 3);
-        int b = logD * l;
-        string prefix{};
-        for (int i = _size() - 1; i >= l; i--) {
-            prefix += _itos(dat[i], i != _size() - 1);
-        }
-        b += prefix.size() - 1;
-        long double a = 0;
-        for (auto& c : prefix) a = a * 10.0 + (c - '0');
-        a *= tens.ten_ld(-((int)prefix.size()) + 1);
-        a = clamp<long double>(a, 1.0, nextafterl(10.0, 1.0));
-        if (neg) a = -a;
-        return {a, b};
-    }
-    string to_string() const {
-        if (is_zero()) return "0";
-        string res;
-        if (neg) res.push_back('-');
-        for (int i = _size() - 1; i >= 0; i--) {
-            res += _itos(dat[i], i != _size() - 1);
-        }
-        return res;
-    }
-    long double to_ld() const {
-        auto [a, b] = dfp();
-        if (-tens.offset <= b and b <= tens.offset) {
-            return a * tens.ten_ld(b);
-        }
-        return a * powl(10, b);
-    }
-    long long to_ll() const {
-        long long res = _to_ll(dat);
-        return neg ? -res : res;
-    }
-    __int128_t to_i128() const {
-        __int128_t res = _to_i128(dat);
-        return neg ? -res : res;
-    }
-
-    friend istream& operator>>(istream& is, M& m) {
-        string s;
-        is >> s;
-        m = M{s};
-        return is;
-    }
-
-    friend ostream& operator<<(ostream& os, const M& m) {
-        return os << m.to_string();
-    }
-
-    // 内部の関数をテスト
-    static void _test_private_function(const M&, const M&);
-
-private:
-    // size
-    int _size() const { return dat.size(); }
-    // a == b
-    static bool _eq(const vector<int>& a, const vector<int>& b) { return a == b; }
-    // a < b
+    int _size() const {return dat.size();}
+    static bool _eq(const vector<int>& a, const vector<int>& b) {return a == b;}
     static bool _lt(const vector<int>& a, const vector<int>& b) {
         if (a.size() != b.size()) return a.size() < b.size();
         for (int i = a.size() - 1; i >= 0; i--) {
@@ -592,11 +425,7 @@ private:
         }
         return false;
     }
-    // a <= b
-    static bool _leq(const vector<int>& a, const vector<int>& b) {
-        return _eq(a, b) || _lt(a, b);
-    }
-    // a < b (s.t. a != b)
+    static bool _leq(const vector<int>& a, const vector<int>& b) {return _eq(a, b) || _lt(a, b);}
     static bool _neq_lt(const M& lhs, const M& rhs) {
         assert(lhs != rhs);
         if (lhs.neg != rhs.neg) return lhs.neg;
@@ -604,21 +433,10 @@ private:
         if (f) return !lhs.neg;
         return lhs.neg;
     }
-    // a == 0
-    static bool _is_zero(const vector<int>& a) { return a.empty(); }
-    // a == 1
-    static bool _is_one(const vector<int>& a) {
-        return (int)a.size() == 1 && a[0] == 1;
-    }
-    // 末尾 0 を削除
-    static void _shrink(vector<int>& a) {
-        while (a.size() && a.back() == 0) a.pop_back();
-    }
-    // 末尾 0 を削除
-    void _shrink() {
-        while (_size() && dat.back() == 0) dat.pop_back();
-    }
-    // a + b
+    static bool _is_zero(const vector<int>& a) {return a.empty();}
+    static bool _is_one(const vector<int>& a) {return a.size() == 1 && a[0] == 1;}
+    static void _shrink(vector<int>& a) {while (a.size() && a.back() == 0) a.pop_back();}
+    void _shrink() {while (_size() && dat.back() == 0) dat.pop_back();}
     static vector<int> _add(const vector<int>& a, const vector<int>& b) {
         vector<int> c(max(a.size(), b.size()) + 1);
         for (int i = 0; i < (int)a.size(); i++) c[i] += a[i];
@@ -629,7 +447,6 @@ private:
         _shrink(c);
         return c;
     }
-    // a - b
     static vector<int> _sub(const vector<int>& a, const vector<int>& b) {
         assert(_leq(b, a));
         vector<int> c{a};
@@ -644,7 +461,6 @@ private:
         _shrink(c);
         return c;
     }
-    // a * b (fft)
     static vector<int> _mul_fft(const vector<int>& a, const vector<int>& b) {
         if (a.empty() || b.empty()) return {};
         auto m = ArbitraryNTT::multiply_u128(a, b);
@@ -660,7 +476,6 @@ private:
         _shrink(c);
         return c;
     }
-    // a * b (naive)
     static vector<int> _mul_naive(const vector<int>& a, const vector<int>& b) {
         if (a.empty() || b.empty()) return {};
         vector<long long> prod(a.size() + b.size() - 1 + 1);
@@ -682,7 +497,6 @@ private:
         _shrink(c);
         return c;
     }
-    // a * b
     static vector<int> _mul(const vector<int>& a, const vector<int>& b) {
         if (_is_zero(a) || _is_zero(b)) return {};
         if (_is_one(a)) return b;
@@ -692,26 +506,23 @@ private:
         }
         return _mul_fft(a, b);
     }
-    // 0 <= A < 1e18, 1 <= B < 1e9
-    static pair<vector<int>, vector<int>> _divmod_li(const vector<int>& a,
-    const vector<int>& b) {
+    //0 <= A < 1e18, 1 <= B < 1e9
+    static pair<vector<int>, vector<int>> _divmod_li(const vector<int>& a, const vector<int>& b) {
         assert(0 <= (int)a.size() && (int)a.size() <= 2);
         assert((int)b.size() == 1);
         long long va = _to_ll(a);
         int vb = b[0];
         return {_integer_to_vec(va / vb), _integer_to_vec(va % vb)};
     }
-    // 0 <= A < 1e18, 1 <= B < 1e18
-    static pair<vector<int>, vector<int>> _divmod_ll(const vector<int>& a,
-    const vector<int>& b) {
+    //0 <= A < 1e18, 1 <= B < 1e18
+    static pair<vector<int>, vector<int>> _divmod_ll(const vector<int>& a, const vector<int>& b) {
         assert(0 <= (int)a.size() && (int)a.size() <= 2);
         assert(1 <= (int)b.size() && (int)b.size() <= 2);
         long long va = _to_ll(a), vb = _to_ll(b);
         return {_integer_to_vec(va / vb), _integer_to_vec(va % vb)};
     }
-    // 1 <= B < 1e9
-    static pair<vector<int>, vector<int>> _divmod_1e9(const vector<int>& a,
-    const vector<int>& b) {
+    //1 <= B < 1e9
+    static pair<vector<int>, vector<int>> _divmod_1e9(const vector<int>& a, const vector<int>& b) {
         assert((int)b.size() == 1);
         if (b[0] == 1) return {a, {}};
         if ((int)a.size() <= 2) return _divmod_li(a, b);
@@ -727,9 +538,8 @@ private:
         _shrink(quo);
         return {quo, d ? vector<int>{int(d)} : vector<int>{}};
     }
-    // 0 <= A, 1 <= B
-    static pair<vector<int>, vector<int>> _divmod_naive(const vector<int>& a,
-    const vector<int>& b) {
+    //0 <= A, 1 <= B
+    static pair<vector<int>, vector<int>> _divmod_naive(const vector<int>& a, const vector<int>& b) {
         if (_is_zero(b)) {
             cerr << "Divide by Zero Exception" << endl;
             exit(1);
@@ -738,7 +548,7 @@ private:
         if ((int)b.size() == 1) return _divmod_1e9(a, b);
         if (max<int>(a.size(), b.size()) <= 2) return _divmod_ll(a, b);
         if (_lt(a, b)) return {{}, a};
-        // B >= 1e9, A >= B
+        //B >= 1e9, A >= B
         int norm = D / (b.back() + 1);
         vector<int> x = _mul(a, {norm});
         vector<int> y = _mul(b, {norm});
@@ -747,7 +557,6 @@ private:
         vector<int> rem(x.end() - y.size(), x.end());
         for (int i = quo.size() - 1; i >= 0; i--) {
             if (rem.size() < y.size()) {
-                // do nothing
             } else if (rem.size() == y.size()) {
                 if (_leq(y, rem)) {
                     quo[i] = 1, rem = _sub(rem, y);
@@ -757,7 +566,7 @@ private:
                 long long rb = 1LL * rem[rem.size() - 1] * D + rem[rem.size() - 2];
                 int q = rb / yb;
                 vector<int> yq = _mul(y, {q});
-                // 真の商は q-2 以上 q+1 以下だが自信が無いので念のため while を回す
+                //Actual quotient is between q - 2 and q - 1 but we are not sure so just bruteforcing them
                 while (_lt(rem, yq)) q--, yq = _sub(yq, y);
                 rem = _sub(rem, yq);
                 while (_leq(y, rem)) q++, rem = _sub(rem, y);
@@ -771,11 +580,10 @@ private:
         return {quo, q2};
     }
 
-    // 0 <= A, 1 <= B
-    static pair<vector<int>, vector<int>> _divmod_dc(const vector<int>& a,
-                                       const vector<int>& b);
+    //0 <= A, 1 <= B
+    static pair<vector<int>, vector<int>> _divmod_dc(const vector<int>& a, const vector<int>& b);
 
-    // 1 / a を 絶対誤差 B^{-deg} で求める
+    //Calculates 1 / a with relative error B^{-deg}
     static vector<int> _calc_inv(const vector<int>& a, int deg) {
         assert(!a.empty() && D / 2 <= a.back() and a.back() < D);
         int k = deg, c = a.size();
@@ -799,14 +607,13 @@ private:
         return z;
     }
 
-    static pair<vector<int>, vector<int>> _divmod_newton(const vector<int>& a,
-    const vector<int>& b) {
+    static pair<vector<int>, vector<int>> _divmod_newton(const vector<int>& a, const vector<int>& b) {
         if (_is_zero(b)) {
             cerr << "Divide by Zero Exception" << endl;
             exit(1);
         }
-        if ((int)b.size() <= 64) return _divmod_naive(a, b);
-        if ((int)a.size() - (int)b.size() <= 64) return _divmod_naive(a, b);
+        if (int(b.size()) <= 64) return _divmod_naive(a, b);
+        if (int(a.size()) - int(b.size()) <= 64) return _divmod_naive(a, b);
         int norm = D / (b.back() + 1);
         vector<int> x = _mul(a, {norm});
         vector<int> y = _mul(b, {norm});
@@ -825,8 +632,6 @@ private:
         return {q, q2};
     }
 
-    // int -> string
-    // 先頭かどうかに応じて zero padding するかを決める
     static string _itos(int x, bool zero_padding) {
         assert(0 <= x && x < D);
         string res;
@@ -841,13 +646,9 @@ private:
         return res;
     }
 
-    // convert ll to vec
-    template < typename I, enable_if_t < is_integral_v<I> ||
-                                         is_same_v<I, __int128_t >>* = nullptr >
+    template<typename I, enable_if_t<is_integral_v<I> || is_same_v<I, __int128_t>>* = nullptr>
     static vector<int> _integer_to_vec(I x) {
-        if constexpr (is_signed_v<I> || is_same_v<I, __int128_t>) {
-            assert(x >= 0);
-        }
+        if constexpr (is_signed_v<I> || is_same_v<I, __int128_t>) assert(x >= 0);
         vector<int> res;
         while (x) res.push_back(x % D), x /= D;
         return res;
@@ -871,6 +672,126 @@ private:
         for (int i = 0; i < (int)a.size(); i++) cerr << a[i] << ", ";
         cerr << "}" << endl;
     }
-};
 
+public:
+    inline constexpr static MultiPrecisionIntegerImpl::TENS tens = {};
+
+    static constexpr int D = 1000000000;
+    static constexpr int logD = 9;
+    bool neg;
+    vector<int> dat;
+
+    MultiPrecisionInteger(): neg(false), dat() {}
+    MultiPrecisionInteger(bool n, const vector<int>& d) : neg(n), dat(d) {}
+    template<typename I, enable_if_t<is_integral_v<I> || is_same_v<I, __int128_t>>* = nullptr>
+    MultiPrecisionInteger(I x) : neg(false) {
+        if constexpr (is_signed_v<I> || is_same_v<I, __int128_t>) {
+            if (x < 0) neg = true, x = -x;
+        }
+        while (x) dat.push_back(x % D), x /= D;
+    }
+    MultiPrecisionInteger(const string& S): neg(false) {
+        assert(!S.empty());
+        if (S.size() == 1u && S[0] == '0') return;
+        int l = 0;
+        if (S[0] == '-') ++l, neg = true;
+        for (int ie = S.size(); l < ie; ie -= logD) {
+            int is = max(l, ie - logD);
+            long long x = 0;
+            for (int i = is; i < ie; i++) x = x * 10 + S[i] - '0';
+            dat.push_back(x);
+        }
+    }
+
+    friend M operator+(const M& lhs, const M& rhs) {
+        if (lhs.neg == rhs.neg) return {lhs.neg, _add(lhs.dat, rhs.dat)};
+        if (_leq(lhs.dat, rhs.dat)) {
+            auto c = _sub(rhs.dat, lhs.dat);
+            bool n = _is_zero(c) ? false : rhs.neg;
+            return {n, c};
+        }
+        auto c = _sub(lhs.dat, rhs.dat);
+        bool n = _is_zero(c) ? false : lhs.neg;
+        return {n, c};
+    }
+    friend M operator-(const M& lhs, const M& rhs) {return lhs + (-rhs);}
+
+    friend M operator*(const M& lhs, const M& rhs) {
+        auto c = _mul(lhs.dat, rhs.dat);
+        bool n = _is_zero(c) ? false : (lhs.neg ^ rhs.neg);
+        return {n, c};
+    }
+    friend pair<M, M> divmod(const M& lhs, const M& rhs) {
+        auto dm = _divmod_newton(lhs.dat, rhs.dat);
+        bool dn = _is_zero(dm.first) ? false : lhs.neg != rhs.neg;
+        bool mn = _is_zero(dm.second) ? false : lhs.neg;
+        return {M{dn, dm.first}, M{mn, dm.second}};
+    }
+    friend M operator/(const M& lhs, const M& rhs) {return divmod(lhs, rhs).first;}
+    friend M operator%(const M& lhs, const M& rhs) {return divmod(lhs, rhs).second;}
+
+    M& operator+=(const M& rhs) {return (*this) = (*this) + rhs;}
+    M& operator-=(const M& rhs) {return (*this) = (*this) - rhs;}
+    M& operator*=(const M& rhs) {return (*this) = (*this) * rhs;}
+    M& operator/=(const M& rhs) {return (*this) = (*this) / rhs;}
+    M& operator%=(const M& rhs) {return (*this) = (*this) % rhs;}
+
+    M operator-() const {if (is_zero()) return *this; return {!neg, dat};}
+    M operator+() const {return *this; }
+    friend M abs(const M& m) {return {false, m.dat};}
+    bool is_zero() const {return _is_zero(dat);}
+
+    friend bool operator==(const M& lhs, const M& rhs) {return lhs.neg == rhs.neg && lhs.dat == rhs.dat;}
+    friend bool operator!=(const M& lhs, const M& rhs) {return lhs.neg != rhs.neg || lhs.dat != rhs.dat;}
+    friend bool operator<(const M& lhs, const M& rhs) {return lhs == rhs ? false : _neq_lt(lhs, rhs);}
+    friend bool operator<=(const M& lhs, const M& rhs) {return lhs == rhs ? true : _neq_lt(lhs, rhs);}
+    friend bool operator>(const M& lhs, const M& rhs) {return lhs == rhs ? false : _neq_lt(rhs, lhs);}
+    friend bool operator>=(const M& lhs, const M& rhs) {return lhs == rhs ? true : _neq_lt(rhs, lhs);}
+
+    M& operator++() {(*this) += 1; return *this;}
+    M& operator--() {(*this) -= 1; return *this;}
+    M operator++(int) {M res = *this; ++*this; return res;}
+    M operator--(int) {M res = *this; --*this; return res;}
+
+    explicit operator bool() const {return !is_zero();}
+
+    //Represents number as a * 10^b (1 <= |a| < 10)
+    //Relative error: 10^{-16} ~ 10^{-19}
+    pair<long double, int> dfp() const {
+        if (is_zero()) return {0, 0};
+        int l = max<int>(0, _size() - 3);
+        int b = logD * l;
+        string prefix{};
+        for (int i = _size() - 1; i >= l; i--) {
+            prefix += _itos(dat[i], i != _size() - 1);
+        }
+        b += prefix.size() - 1;
+        long double a = 0;
+        for (auto& c : prefix) a = a * 10.0 + (c - '0');
+        a *= tens.ten_ld(-((int)prefix.size()) + 1);
+        a = clamp<long double>(a, 1.0, nextafterl(10.0, 1.0));
+        if (neg) a = -a;
+        return {a, b};
+    }
+
+    string to_string() const {
+        if (is_zero()) return "0";
+        string res;
+        if (neg) res.push_back('-');
+        for (int i = _size() - 1; i >= 0; --i) {
+            res += _itos(dat[i], i != _size() - 1);
+        }
+        return res;
+    }
+    long double to_ld() const {
+        auto [a, b] = dfp();
+        if (-tens.offset <= b and b <= tens.offset) return a * tens.ten_ld(b);
+        return a * powl(10, b);
+    }
+    long long to_ll() const {long long res = _to_ll(dat); return neg ? -res : res;}
+    __int128_t to_i128() const {__int128_t res = _to_i128(dat); return neg ? -res : res;}
+
+    friend istream& operator>>(istream& is, M& m) {string s; is >> s; m = M{s}; return is;}
+    friend ostream& operator<<(ostream& os, const M& m) {return os << m.to_string();}
+};
 using bigint = MultiPrecisionInteger;

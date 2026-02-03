@@ -1,18 +1,13 @@
 namespace compressor {
-    template<class T>
-    struct is_pair : std::false_type {};
-
-    template<class T1, class T2>
-    struct is_pair<std::pair<T1, T2> > : std::true_type {};
-
-    template<class T>
-    struct is_pair_d : is_pair<typename std::decay<T>::type> {};
+    template<class T> struct is_pair: std::false_type {};
+    template<class T1, class T2> struct is_pair<std::pair<T1, T2> >: std::true_type {};
+    template<class T> struct is_pair_d: is_pair<typename std::decay<T>::type> {};
 
     template<typename K, const K first_val, typename H>
     void unit_compress(H& h, vector<K>& store) {
         if constexpr(is_fundamental<H>::value) {
             h = first_val + lower_bound(store.begin(), store.end(), h) - store.begin();
-        } else if constexpr(is_pair_d<decltype(h)>::value) {
+        } else if constexpr(is_pair_d<H>::value) {
             unit_compress<K, first_val>(h.first, store);
             unit_compress<K, first_val>(h.second, store);
         } else {

@@ -22,8 +22,7 @@ public:
             w *= n;
         }
         vector<int> idx(n); iota(idx.begin(), idx.end(), 0);
-        int cs = partition(idx.begin(), idx.end(), [&](int i) {return weights[i] < avg;}) - idx.begin();
-        for (; cs && idx.size() > cs;) {
+        for (int cs = partition(idx.begin(), idx.end(), [&](int i) {return weights[i] < avg;}) - idx.begin(); cs && idx.size() > cs;) {
             int b = idx.back(), s = idx[cs - 1];
             swap(idx.back(), idx[cs - 1]); idx.pop_back();
             alias[s] = b; p[s] = D(weights[s]) / avg;
