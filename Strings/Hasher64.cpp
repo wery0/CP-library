@@ -21,7 +21,7 @@ struct hasher64 {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    static uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
+    static uint64_t mulmod(const uint64_t x, const uint64_t y) {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -33,8 +33,8 @@ struct hasher64 {
     static uint64_t binpow(uint64_t x, uint64_t k) {
         uint64_t o = 1;
         for (; k; k >>= 1) {
-            if (k & 1) o = big_prod_mod(o, x);
-            x = big_prod_mod(x, x);
+            if (k & 1) o = mulmod(o, x);
+            x = mulmod(x, x);
         }
         return o;
     }
@@ -48,15 +48,15 @@ public:
         if (!n) return;
         pref_hash[0] = hash_elem(*first); ++first;
         for (size_t i = 1; i < n; ++i, ++first) {
-            pows[i] = big_prod_mod(pows[i - 1], P);
-            pref_hash[i] = pref_hash[i - 1] + big_prod_mod(hash_elem(*first), pows[i]);
+            pows[i] = mulmod(pows[i - 1], P);
+            pref_hash[i] = pref_hash[i - 1] + mulmod(hash_elem(*first), pows[i]);
             pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
-        pows[n] = big_prod_mod(pows[n - 1], P);
+        pows[n] = mulmod(pows[n - 1], P);
         // ipows.resize(n + 1);
         // ipows[n] = binpow(pows[n], MOD - 2);
         // for (ssize_t i = n - 1; i >= 0; --i) {
-        //     ipows[i] = big_prod_mod(ipows[i + 1], P);
+        //     ipows[i] = mulmod(ipows[i + 1], P);
         // }
     }
 
@@ -64,7 +64,7 @@ public:
     //O(1) if len_l <= n, O(log(len_l)) otherwise
     uint64_t merge_hashes(uint64_t len_l, uint64_t hl, uint64_t hr) const {
         uint64_t pw = len_l < pows.size() ? pows[len_l] : binpow(P, len_l);
-        uint64_t hlr = hl + big_prod_mod(hr, pw);
+        uint64_t hlr = hl + mulmod(hr, pw);
         return hlr < MOD ? hlr : hlr - MOD;
     }
 
@@ -77,8 +77,8 @@ public:
             o += o < pref_hash[l - 1] ? MOD : 0;
             o -= pref_hash[l - 1];
         }
-        return big_prod_mod(o, pows[n - l]);
-        // return big_prod_mod(o, ipows[l]);
+        return mulmod(o, pows[n - l]);
+        // return mulmod(o, ipows[l]);
     }
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
@@ -88,13 +88,13 @@ public:
         uint64_t hs = seg_hash(l, r), hspw = pows[r - l + 1];
         for (; k; k >>= 1) {
             if (k & 1) {
-                ans += big_prod_mod(hs, anspw);
+                ans += mulmod(hs, anspw);
                 ans -= ans < MOD ? 0 : MOD;
-                anspw = big_prod_mod(anspw, hspw);
+                anspw = mulmod(anspw, hspw);
             }
-            hs += big_prod_mod(hs, hspw);
+            hs += mulmod(hs, hspw);
             hs -= hs < MOD ? 0 : MOD;
-            hspw = big_prod_mod(hspw, hspw);
+            hspw = mulmod(hspw, hspw);
         }
         return ans;
     }
@@ -104,9 +104,9 @@ public:
         uint64_t res = 0;
         for (uint64_t cpw = 1; auto [l, r] : borders) {
             if (l > r) continue;
-            res += big_prod_mod(seg_hash(l, r), cpw);
+            res += mulmod(seg_hash(l, r), cpw);
             res -= res < MOD ? 0 : MOD;
-            cpw = big_prod_mod(cpw, pows[r - l + 1]);
+            cpw = mulmod(cpw, pows[r - l + 1]);
         }
         return res;
     }

@@ -19,7 +19,7 @@ class segtree {
         hs[v] = smpows[rg];
         hs[v] += lf && smpows[lf - 1] > hs[v] ? MOD : 0;
         hs[v] -= lf ? smpows[lf - 1] : 0;
-        hs[v] = big_prod_mod(hs[v], val);
+        hs[v] = mulmod(hs[v], val);
     }
 
     void push(size_t v) {
@@ -60,7 +60,7 @@ class segtree {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    uint64_t big_prod_mod(const uint64_t x, const uint64_t y) const {
+    uint64_t mulmod(const uint64_t x, const uint64_t y) const {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -75,13 +75,13 @@ public:
         pows.resize(n + 1, 1);
         smpows.resize(n + 1, 1);
         for (size_t i = 1; i < n + 1; ++i) {
-            pows[i] = big_prod_mod(pows[i - 1], P);
+            pows[i] = mulmod(pows[i - 1], P);
             smpows[i] = smpows[i - 1] + pows[i];
             smpows[i] -= smpows[i] < MOD ? 0 : MOD;
         }
         hs.resize(U * 2);
         ps_set.resize(U * 2, NO_PUSH_SET);
-        for (size_t i = 0; i < n; ++i, ++first) hs[U + i] = big_prod_mod(*first, pows[i]);
+        for (size_t i = 0; i < n; ++i, ++first) hs[U + i] = mulmod(*first, pows[i]);
         for (size_t i = U; --i;) upd(i);
     }
 
@@ -95,7 +95,7 @@ public:
         }
     }
 
-    uint64_t seg_hash(size_t l, size_t r) {return big_prod_mod(seg_hash(l, r, 0, U - 1, 1), pows[n - l]);}
+    uint64_t seg_hash(size_t l, size_t r) {return mulmod(seg_hash(l, r, 0, U - 1, 1), pows[n - l]);}
     void seg_set(size_t l, size_t r, T val) {seg_set(l, r, 0, U - 1, 1, val);}
 };
 //segtree<T, 4000000000000000037, 666667> kek;

@@ -12,7 +12,7 @@ class segtree_point_upd {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    uint64_t big_prod_mod(const uint64_t x, const uint64_t y) const {
+    uint64_t mulmod(const uint64_t x, const uint64_t y) const {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -25,10 +25,10 @@ public:
     segtree_point_upd(I first, I last): n(std::distance(first, last)) {
         if (!n) return;
         pows.resize(n + 1, 1);
-        for (size_t i = 1; i < n + 1; ++i) pows[i] = big_prod_mod(pows[i - 1], P);
+        for (size_t i = 1; i < n + 1; ++i) pows[i] = mulmod(pows[i - 1], P);
         hs.resize(n * 2);
         for (size_t i = 0; i < n; ++i, ++first) {
-            hs[n + i] = big_prod_mod(*first, pows[i]);
+            hs[n + i] = mulmod(*first, pows[i]);
         }
         for (size_t i = n; --i;) upd(i);
     }
@@ -51,12 +51,12 @@ public:
             if (l & 1) ans += hs[l], ans -= ans < MOD ? 0 : MOD;
             if (~r & 1) ans += hs[r], ans -= ans < MOD ? 0 : MOD;
         }
-        return big_prod_mod(ans, pows[n - stl]);
+        return mulmod(ans, pows[n - stl]);
     }
 
     void point_change(size_t pos, T val) {
         pos += n;
-        hs[pos] = big_prod_mod(val, pows[pos - n]);
+        hs[pos] = mulmod(val, pows[pos - n]);
         for (pos >>= 1; pos; pos >>= 1) upd(pos);
     }
 };

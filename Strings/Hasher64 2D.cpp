@@ -17,7 +17,7 @@ struct hasher64_2d {
 
     //Works for <= 63 bit modulo
     //Change this function, if you need another way to multiply big numbers.
-    static uint64_t big_prod_mod(const uint64_t x, const uint64_t y) {
+    static uint64_t mulmod(const uint64_t x, const uint64_t y) {
         uint64_t c = (long double)x * y / MOD;
         int64_t ans = int64_t(x * y - c * MOD) % int64_t(MOD);
         return ans < 0 ? ans + MOD : ans;
@@ -34,18 +34,18 @@ public:
         pref_hash.resize(n, vector<uint64_t>(m));
         pows1[0] = pows2[0] = 1;
         if (!n || !m) return;
-        for (size_t i = 1; i <= n; ++i) pows1[i] = big_prod_mod(pows1[i - 1], P1);
-        for (size_t i = 1; i <= m; ++i) pows2[i] = big_prod_mod(pows2[i - 1], P2);
+        for (size_t i = 1; i <= n; ++i) pows1[i] = mulmod(pows1[i - 1], P1);
+        for (size_t i = 1; i <= m; ++i) pows2[i] = mulmod(pows2[i - 1], P2);
         pref_hash[0][0] = hash_elem(v[0][0]);
         for (size_t j = 1; j < m; ++j) {
-            pref_hash[0][j] = pref_hash[0][j - 1] + big_prod_mod(hash_elem(v[0][j]), pows2[j]);
+            pref_hash[0][j] = pref_hash[0][j - 1] + mulmod(hash_elem(v[0][j]), pows2[j]);
             pref_hash[0][j] -= pref_hash[0][j] < MOD ? 0 : MOD;
         }
         for (size_t i = 1; i < n; ++i) {
-            pref_hash[i][0] = pref_hash[i - 1][0] + big_prod_mod(hash_elem(v[i][0]), pows1[i]);
+            pref_hash[i][0] = pref_hash[i - 1][0] + mulmod(hash_elem(v[i][0]), pows1[i]);
             pref_hash[i][0] -= pref_hash[i][0] < MOD ? 0 : MOD;
             for (size_t j = 1; j < m; ++j) {
-                pref_hash[i][j] = big_prod_mod(big_prod_mod(hash_elem(v[i][j]), pows1[i]), pows2[j]) + pref_hash[i - 1][j];
+                pref_hash[i][j] = mulmod(mulmod(hash_elem(v[i][j]), pows1[i]), pows2[j]) + pref_hash[i - 1][j];
                 pref_hash[i][j] -= pref_hash[i][j] < MOD ? 0 : MOD;
                 pref_hash[i][j] += pref_hash[i][j - 1];
                 pref_hash[i][j] -= pref_hash[i][j] < MOD ? 0 : MOD;
@@ -62,6 +62,6 @@ public:
         if (x1) o += o < pref_hash[x1 - 1][y2] ? MOD : 0, o -= pref_hash[x1 - 1][y2];
         if (y1) o += o < pref_hash[x2][y1 - 1] ? MOD : 0, o -= pref_hash[x2][y1 - 1];
         if (x1 && y1) o += pref_hash[x1 - 1][y1 - 1], o -= o < MOD ? 0 : MOD;
-        return big_prod_mod(big_prod_mod(o, pows1[n - x1]), pows2[m - y1]);
+        return mulmod(mulmod(o, pows1[n - x1]), pows2[m - y1]);
     }
 };
