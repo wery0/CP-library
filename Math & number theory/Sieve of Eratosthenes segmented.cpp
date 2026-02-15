@@ -1,7 +1,8 @@
+//Segmented sieve of Eratosthenes with optimizations.
 //Returns vector of all primes in range [L, R].
-//<O(sqrt(R)loglog(sqrt(R)) + (R - L)loglog(R)), O((sqrt(R) + R - L)/log(R))>
+//Complexity: <O(sqrt(R)loglog(sqrt(R)) + (R - L)loglog(R)), O((sqrt(R) + R - L)/log(R))>
 template<typename T>
-vector<T> segmented_sieve_of_eratosthenes(T L, T R) {
+vector<T> sieve_of_eratosthenes_segmented(T L, T R) {
     L = max(L, (T)2);
     if (L > R) return {};
     if (R <= 62) {
@@ -15,9 +16,9 @@ vector<T> segmented_sieve_of_eratosthenes(T L, T R) {
     }
     T sqrtn = sqrtl(R);
     const T B = sqrtn + (sqrtn & 1);
-    vector<T> primes = segmented_sieve_of_eratosthenes<T>(1, B);
+    vector<T> primes = sieve_of_eratosthenes_segmented<T>(1, B);
     vector<T> ans(lower_bound(primes.begin(), primes.end(), L), primes.end());
-    ans.reserve((R - L) / log(R));
+    ans.reserve((R - L) * 1.08 / log(R));
     vector<char> block(B);
     for (T l = 1 + max(B, (L - 1) / B * B); l <= R; l += B) {
         fill(block.begin(), block.end(), 1);
