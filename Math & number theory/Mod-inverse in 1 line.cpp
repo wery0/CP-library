@@ -3,5 +3,6 @@
 //If doesn't - runtime error (division by zero)
 template<typename T>
 T inv(T x, T m) {
+    static_assert(is_signed_v<T>);
     return x == 1 ? x : (1 - inv(m % x, x) * m) / x + m;
 }

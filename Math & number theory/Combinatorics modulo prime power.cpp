@@ -48,6 +48,7 @@ public:
     //For a prime power p^a finds max t s. t. C(n, k) is divisiple by p^t and returns {(C(n, k) / p^t) mod p^a, t}
     //Complexity: O(log_p(n))
     pair<T, T> C(T n, T k) {
+        if (k < 0 || k > n) return {0, 0};
         auto [r1, k1] = factorial(n);
         auto [r2, k2] = factorial(k);
         auto [r3, k3] = factorial(n - k);

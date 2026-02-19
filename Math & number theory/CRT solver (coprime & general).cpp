@@ -5,18 +5,18 @@ template<typename T>
 T crt_solve_coprime(vector<T> mods, vector<T> remainders) {
     using TS = make_signed_t<T>;
     using TU = make_unsigned_t<T>;
-    auto gcd = [&](auto && gcd, TS a, TS b, TS & x, TS & y) {
+    function<TS(TS, TS, TS&, TS&)> gcd = [&](TS a, TS b, TS& x, TS& y) {
         if (!a) {
             x = 0, y = 1;
             return b;
         }
-        TS g = gcd(gcd, b % a, a, x, y);
+        TS g = gcd(b % a, a, x, y);
         TS nx = y - x * (b / a), ny = x;
         x = nx, y = ny;
         return g;
     };
     auto extended_inv = [&](TS a, TS md) -> TS {
-        TS x, y, g = gcd(gcd, a, md, x, y);
+        TS x, y, g = gcd(a, md, x, y);
         if (g != 1) return -1;
         if (x < 0) x += (-x + md - 1) / md * md;
         x %= md;
@@ -29,10 +29,11 @@ T crt_solve_coprime(vector<T> mods, vector<T> remainders) {
         assert(__gcd(P, p) == 1);
         P *= p;
     }
+    assert(numeric_limits<T>::max() / P > *max_element(mods.begin(), mods.end()) && "prod(mods) * max(mods) should fit into T!");
     for (size_t i = 0; i < n; ++i) {
         assert(mods[i] > 0);
         TU u = P / mods[i];
-        ans += remainders[i] * u % P * extended_inv(u, mods[i]);  //be careful with overflow, use binmul if need.
+        ans += remainders[i] * u % P * extended_inv(u, mods[i]);
         ans %= P;
     }
     return ans;

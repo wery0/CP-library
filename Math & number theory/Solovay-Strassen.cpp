@@ -10,10 +10,10 @@ namespace SolovayStrassen {
     }
 
     template<typename T>
-    bool check(T n, T a) {
-        T bp = binpow(a, (n - 1) / 2, n);
+    bool check(T n, T b) {
+        T bp = binpow(b, (n - 1) / 2, n);
         if (bp != n - 1 && bp != 0 && bp != 1) return 0;
-        T js = jacobi_symbol(a, n);
+        T js = jacobi_symbol(b, n);
         if (js == -1) js = n - 1;
         return bp == js;
     }
@@ -32,9 +32,9 @@ namespace SolovayStrassen {
         static mt19937 rnd(std::chrono::steady_clock::now().time_since_epoch().count());
         static uniform_int_distribution<T> gen(0, numeric_limits<T>::max());
         for (int i = 0; i < ITER; ++i) {
-            T a = 2 + gen(rnd) % (n - 2);
-            if (gcd(a, n) > 1) return false;
-            if (!check(n, a)) return false;
+            T b = 2 + gen(rnd) % (n - 2);
+            if (gcd(b, n) > 1) return false;
+            if (!check(n, b)) return false;
         }
         return true;
     }
