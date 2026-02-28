@@ -1,6 +1,10 @@
-constexpr uint64_t lowest_bitsll[] = {0ull, 1ull, 3ull, 7ull, 15ull, 31ull, 63ull, 127ull, 255ull, 511ull, 1023ull, 2047ull, 4095ull, 8191ull, 16383ull, 32767ull, 65535ull, 131071ull, 262143ull, 524287ull, 1048575ull, 2097151ull, 4194303ull, 8388607ull, 16777215ull, 33554431ull, 67108863ull, 134217727ull, 268435455ull, 536870911ull, 1073741823ull, 2147483647ull, 4294967295ull, 8589934591ull, 17179869183ull, 34359738367ull, 68719476735ull, 137438953471ull, 274877906943ull, 549755813887ull, 1099511627775ull, 2199023255551ull, 4398046511103ull, 8796093022207ull, 17592186044415ull, 35184372088831ull, 70368744177663ull, 140737488355327ull, 281474976710655ull, 562949953421311ull, 1125899906842623ull, 2251799813685247ull, 4503599627370495ull, 9007199254740991ull, 18014398509481983ull, 36028797018963967ull, 72057594037927935ull, 144115188075855871ull, 288230376151711743ull, 576460752303423487ull, 1152921504606846975ull, 2305843009213693951ull, 4611686018427387903ull, 9223372036854775807ull, 18446744073709551615ull};
-const uint32_t NO = UINT32_MAX;   //This value will be returned in lower_bound functions, if no answer exists. Change, if need.
-template<uint32_t MAXN>           //Can correctly work with numbers in range [0; MAXN]
+/*
+  Can correctly work with numbers in range [0; MAXN]
+  Supports std::set operations in O(1) on random queries / dense arrays, O(log_64(N)) in worst case (sparse array).
+  Memory usage: at most MAXN * 2.02 bits.
+  For lower_bound() queries will return NO if no answer exists.
+*/
+template<uint32_t MAXN, uint32_t NO = UINT32_MAX>
 class intset_faster {
     static const uint32_t PREF = (MAXN <= 64 ? 0 :
                                   MAXN <= 4096 ? 1 :
@@ -10,6 +14,8 @@ class intset_faster {
                                   1 + 64 + 4096 + 262144 + 16777216) + 1;
     static const uint32_t SZ = PREF + (MAXN + 63) / 64 + 1;
     uint64_t m[SZ] = {0};
+
+    static constexpr uint64_t lowest_bits(uint32_t i) {return i ? ~uint64_t(0) >> (64 - i) : 0;}
 
     inline void set(uint32_t v) {m[v >> 6] |= 1ull << (v & 63);}
     inline uint32_t left(uint32_t v) const {return (v - 62) * 64;}
@@ -21,11 +27,11 @@ class intset_faster {
     inline uint32_t left_go(uint32_t x, const uint32_t c) const {
         const uint64_t rem = x & 63;
         uint32_t bt = PREF * 64 + x;
-        uint64_t num = m[bt >> 6] & lowest_bitsll[rem + c];
+        uint64_t num = m[bt >> 6] & lowest_bits(rem + c);
         if (num) return (x ^ rem) | __lg(num);
         for (bt = parent(bt); bt > 62; bt = parent(bt)) {
             const uint64_t rem = bt & 63;
-            num = m[bt >> 6] & lowest_bitsll[rem];
+            num = m[bt >> 6] & lowest_bits(rem);
             if (num) {bt = (bt ^ rem) | __lg(num); break;}
         }
         if (bt == 62) return NO;
@@ -36,11 +42,11 @@ class intset_faster {
     inline uint32_t right_go(uint32_t x, const uint32_t c) const {
         const uint64_t rem = x & 63;
         uint32_t bt = PREF * 64 + x;
-        uint64_t num = m[bt >> 6] & ~lowest_bitsll[rem + c];
+        uint64_t num = m[bt >> 6] & ~lowest_bits(rem + c);
         if (num) return (x ^ rem) | __builtin_ctzll(num);
         for (bt = parent(bt); bt > 62; bt = parent(bt)) {
             const uint64_t rem = bt & 63;
-            num = m[bt >> 6] & ~lowest_bitsll[rem + 1];
+            num = m[bt >> 6] & ~lowest_bits(rem + 1);
             if (num) {bt = (bt ^ rem) | __builtin_ctzll(num); break;}
         }
         if (bt == 62) return NO;
@@ -70,6 +76,3 @@ public:
     uint32_t inverse_lower_bound(uint32_t x) const {return left_go(x, 1);}
     uint32_t inverse_upper_bound(uint32_t x) const {return left_go(x, 0);}
 };
-//Supports std::set operations in O(1) on random queries / dense arrays, O(log_64(N)) in worst case (sparse array).
-//Count operation works in O(1) always.
-//Memory usage: at most 2.02 * MAXN bits.
