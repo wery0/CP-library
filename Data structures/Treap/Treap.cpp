@@ -49,9 +49,6 @@ class treap {
     };
     Node* root = 0;
 
-    K last_erased_key;
-    V last_erased_val;
-
     K gmnk(Node* n) const {return n ? n->mnk : std::numeric_limits<K>::max();}
     K gmxk(Node* n) const {return n ? n->mxk : std::numeric_limits<K>::min();}
     K gsmk(Node* n) const {return n ? n->smk : 0;}
@@ -97,8 +94,6 @@ class treap {
 
     void _copy_from(const treap& rhs) {
         root = rhs.root ? new Node(rhs.root) : 0;
-        last_erased_key = rhs.last_erased_key;
-        last_erased_val = rhs.last_erased_val;
     }
 
     Node* merge(Node* l, Node* r) {
@@ -326,16 +321,16 @@ class treap {
         upd(n);
     }
 
-    void _erase_pos(Node*& n, size_t pos) {
+    pair<K, V> _erase_pos(Node*& n, size_t pos) {
         push(n);
         if (gsz(n->l) == pos) {
-            last_erased_key = n->key;
-            last_erased_val = n->val;
+            pair<K, V> res = {n->key, n->val};
             _bump(n);
-            return;
+            return res;
         }
-        (pos < gsz(n->l) ? _erase_pos(n->l, pos) : _erase_pos(n->r, pos - gsz(n->l) - 1));
+        pair<K, V> res = pos < gsz(n->l) ? _erase_pos(n->l, pos) : _erase_pos(n->r, pos - gsz(n->l) - 1);
         upd(n);
+        return res;
     }
 
     void _erase_one_key_occurrence(Node*& n, K key) {
@@ -363,7 +358,7 @@ class treap {
     }
 
     void _erase_seg(Node*& n, size_t l, size_t len) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, len); n = merge(lf, rg);}
-    void _erase_back(Node*& n) {_erase_pos(n, gsz(n) - 1);}
+    pair<K, V> _erase_back(Node*& n) {return _erase_pos(n, gsz(n) - 1);}
 
     template<typename I> void _insert_array_at_pos(Node* n, size_t pos, I first, I last) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(first, last)), rg);}
     template<typename T> void _insert_array_at_pos(Node* n, size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(il.begin(), il.end())), rg);}
@@ -416,15 +411,11 @@ public:
     void update_key_at_pos(size_t pos, K new_key) {_update_key_at_pos(root, pos, new_key);}
     void update_val_at_pos(size_t pos, V new_val) {_update_val_at_pos(root, pos, new_val);}
 
-    void erase_pos(size_t pos) {_erase_pos(root, pos);}
+    pair<K, V> erase_pos(size_t pos) {return _erase_pos(root, pos);}
     void erase_one_key_occurrence(K key) {_erase_one_key_occurrence(root, key);}
     void erase_all_key_occurrences(K key) {_erase_all_key_occurrences(root, key);}
     void erase_seg(size_t l, size_t len) {_erase_seg(root, l, len);}
-    void erase_back() {_erase_pos(root, size() - 1);}
-
-    K extract_pos_get_key(size_t pos) {erase_pos(pos); return last_erased_key;}
-    V extract_pos_get_val(size_t pos) {erase_pos(pos); return last_erased_val;}
-    pair<K, V> extract_pos(size_t pos) {erase_pos(pos); return {last_erased_key, last_erased_val};}
+    pair<K, V> erase_back() {return _erase_pos(root, size() - 1);}
 
     bool contains(K key) {return _contains(root, key);}
     size_t get_leftest_pos_of_key(K key) {return _get_leftest_pos_of_key(root, key);}
