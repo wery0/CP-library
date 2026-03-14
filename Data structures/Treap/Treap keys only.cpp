@@ -388,6 +388,10 @@ public:
     void seg_cyclic_shift_left(size_t l, size_t r, int shift) {_seg_cyclic_shift_left(root, l, r, shift);}
     void seg_cyclic_shift_right(size_t l, size_t r, int shift) {_seg_cyclic_shift_right(root, l, r, shift);}
 
+    void split_size(size_t k, treap<K>& rhs) {assert(k <= gsz(root)); auto [l, r] = split_size(root, k); root = l, rhs.root = r;}
+    void split_key(K k, treap<K>& rhs) {auto [l, r] = split_key(root, k); root = l, rhs.root = r;}
+    void merge(treap<K>& rhs) {root = merge(root, rhs.root); rhs.root = 0;}
+
     void print_keys(string end_string = "") {_print_keys(root); cout << end_string;}
     vector<K> get_keys_from_seg(size_t l, size_t len) {vector<K> res; _get_keys_from_seg(root, l, len, res); return res;}
 };
