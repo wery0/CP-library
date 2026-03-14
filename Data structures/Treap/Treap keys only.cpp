@@ -11,6 +11,9 @@ class treap {
         K mxk;
         K smk;
 
+        int is_sorted = 0;
+        bool rev = false;
+
         Node(const Node* rhs) {
             assert(rhs);
             l = rhs->l ? new Node(rhs->l) : 0;
@@ -22,6 +25,9 @@ class treap {
             mnk = rhs->mnk;
             mxk = rhs->mxk;
             smk = rhs->smk;
+
+            is_sorted = rhs->is_sorted;
+            rev = rhs->rev;
         }
 
         Node(K k): y(rnd()), sz(1) {
@@ -29,6 +35,8 @@ class treap {
             mnk = k;
             mxk = k;
             smk = k;
+
+            is_sorted = 3;
         }
     };
     Node* root = 0;
@@ -37,17 +45,24 @@ class treap {
     K gmxk(Node* n) const {return n ? n->mxk : std::numeric_limits<K>::min();}
     K gsmk(Node* n) const {return n ? n->smk : 0;}
 
+    int gsrt(Node* n) const {return n ? n->is_sorted : 3;}
+
     size_t gsz(Node* n) const {return n ? n->sz : 0;}
 
     //Write, if need
-    void apply_push(Node* n) {
+    void apply_reverse(Node* n) {
         if (!n) return;
+        n->is_sorted = (n->is_sorted >> 1) | (n->is_sorted << 1) & 2;
+        n->rev ^= 1;
+        swap(n->l, n->r);
     }
     void push(Node* n) {
-        // if (!n || !n->?) return;
-        // apply_push(n->l, n->?);
-        // apply_push(n->r, n->?);
-        // n->? = 0;
+        if (!n) return;
+        if (n->rev) {
+            apply_reverse(n->l);
+            apply_reverse(n->r);
+            n->rev = 0;
+        }
     }
 
     void upd(Node* n) {
@@ -57,6 +72,11 @@ class treap {
         n->smk = gsmk(n->l) + n->key + gsmk(n->r);
 
         n->sz = gsz(n->l) + 1 + gsz(n->r);
+
+        if (n->is_sorted = 0; gsrt(n->l) && gsrt(n->r)) {
+            if ((gsrt(n->l) & 1) && (gsrt(n->r) & 1) && gmxk(n->l) <= n->key && n->key <= gmnk(n->r)) n->is_sorted |= 1;
+            if ((gsrt(n->l) & 2) && (gsrt(n->r) & 2) && gmnk(n->l) >= n->key && n->key >= gmxk(n->r)) n->is_sorted |= 2;
+        }
     }
 
     void _bump(Node*& n) {
@@ -226,20 +246,20 @@ class treap {
 
     size_t _pos_of_leftest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return _pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n,
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
     size_t _pos_of_rightest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return _pos_of_rightest_good(n, 
+        return _pos_of_rightest_good(n,
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
     size_t _pos_of_leftest_key_leq(Node* n, K key) {
-        return _pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n,
             [&](Node* n){return gmnk(n) <= key;},
             [&](Node* n){return n->key <= key;});
     }
@@ -307,6 +327,34 @@ class treap {
         upd(n);
     }
 
+    Node* _merge_sorted(Node* l, Node* r) {
+        if (!l || !r) return l ? l : r;
+        push(l); push(r);
+        if (gmxk(l) <= gmnk(r)) return merge(l, r);
+        if (l->y < r->y) swap(l, r);
+        auto [tm, tg] = split_key(r, l->key);
+        auto L = l->l, R = l->r; l->l = 0, l->r = 0; upd(l);
+        return merge(_merge_sorted(L, tm), merge(l, _merge_sorted(R, tg)));
+    }
+
+    Node* _sort(Node* n) {
+        if (!n) return n;
+        push(n);
+        if (gsrt(n)) {
+            if (~gsrt(n) & 1) apply_reverse(n);
+            return n;
+        }
+        if (n->l) {
+            Node* L = n->l; n->l = 0; upd(n);
+            L = _sort(L), n = _sort(n);
+            return _merge_sorted(L, n);
+        } else {
+            Node* R = n->r; n->r = 0; upd(n);
+            n = _sort(n), R = _sort(R);
+            return _merge_sorted(n, R);
+        }
+    }
+
     void _erase_seg(Node*& n, size_t l, size_t len) {auto [lf, tmp] = split_size(n, l); auto [md, rg] = split_size(tmp, len); n = merge(lf, rg);}
     K _erase_back(Node*& n) {return _erase_pos(n, gsz(n) - 1);}
 
@@ -339,6 +387,7 @@ class treap {
 public:
     treap() = default;
     template<typename I> treap(I f_key, I l_key) {root = _build(f_key, l_key);}
+    template<typename U> treap(const initializer_list<U>& rhs) {root = _build(rhs.begin(), rhs.end());}
     treap(const treap& rhs) {_copy_from(rhs);}
     treap& operator=(const treap& rhs) {_delete_subtree(root); _copy_from(rhs); return *this;}
     ~treap() {_delete_subtree(root);}
@@ -391,6 +440,9 @@ public:
     void split_size(size_t k, treap<K>& rhs) {assert(k <= gsz(root)); auto [l, r] = split_size(root, k); root = l, rhs.root = r;}
     void split_key(K k, treap<K>& rhs) {auto [l, r] = split_key(root, k); root = l, rhs.root = r;}
     void merge(treap<K>& rhs) {root = merge(root, rhs.root); rhs.root = 0;}
+    void merge_sorted(treap<K>& rhs) {root = _merge_sorted(root, rhs.root); rhs.root = 0;}
+    void sort(bool is_reverse = false) {root = _sort(root); if (is_reverse) apply_reverse(root);}
+    void seg_sort(size_t l, size_t r, bool is_reverse = false) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, r - l + 1); md = _sort(md); if (is_reverse) apply_reverse(md); root = merge(merge(lf, md), rg);}
 
     void print_keys(string end_string = "") {_print_keys(root); cout << end_string;}
     vector<K> get_keys_from_seg(size_t l, size_t len) {vector<K> res; _get_keys_from_seg(root, l, len, res); return res;}
