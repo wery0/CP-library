@@ -1,5 +1,5 @@
 //Moves between all submatrixes a * b in matrix n * m
-//O((n - a) * (m - b) * min(a, b) + nm) calls of add() and rem()
+//O((n - a) * (m - b) * min(a, b) + nm) calls of add() and rem(), (n - a + 1)(m - b + 1) calls of query()
 template<typename T>
 vector<vector<T>> sliding_window_2d(vector<vector<T>>& t, size_t a, size_t b, auto add, auto rem, auto query) {
     size_t n = t.size(), m = n ? t[0].size() : 0;

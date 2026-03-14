@@ -7,7 +7,7 @@ class merge_sort_tree {
     struct pt {
         T x, y, w;
         pt(T x, T y, T w) : x(x), y(y), w(w) {}
-        bool operator<(const pt& rhs) const { return x < rhs.x || (x == rhs.x && y < rhs.y); }
+        bool operator<(const pt& rhs) const {return x < rhs.x || (x == rhs.x && y < rhs.y);}
     };
 
     size_t n, U, M;
@@ -121,10 +121,10 @@ class merge_sort_tree {
     }
 
 public:
-    merge_sort_tree(size_t N = 1) { points.reserve(N); }
+    merge_sort_tree(size_t N = 1) {points.reserve(N);}
 
     //O(nlog(n))
-    void prepare() { _prepare(); }
+    void prepare() {_prepare();}
 
     void add_point(T x, T y, T w = 1) {
         points.emplace_back(x, y, w);
@@ -143,8 +143,8 @@ public:
     //O(log(n)) with FC, O(log(n)^2) without
     size_t rect_count(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = size_t;
-        auto merge = [](const A& x, const A& y) { return x + y; };
-        auto f = [&](size_t v, size_t l, size_t r) { return r - l + 1; };
+        auto merge = [](const A& x, const A& y) {return x + y;};
+        auto f = [&](size_t v, size_t l, size_t r) {return r - l + 1;};
         return use_fractional_cascading ?
                fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) :
                straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);
@@ -154,8 +154,8 @@ public:
     //O(log(n)) with FC, O(log(n)^2) without
     C rect_sum(T x1, T y1, T x2, T y2, bool use_fractional_cascading = true) const {
         using A = C;
-        auto merge = [](const A& x, const A& y) { return x + y; };
-        auto f = [&](size_t v, size_t l, size_t r) { return store_w[r] - (l - st[v] ? store_w[l - 1] : 0); };
+        auto merge = [](const A& x, const A& y) {return x + y;};
+        auto f = [&](size_t v, size_t l, size_t r) {return store_w[r] - (l - st[v] ? store_w[l - 1] : 0);};
         return use_fractional_cascading ?
                fractional_cascading_query<A>(x1, y1, x2, y2, 0, merge, f) :
                straightforward_query<A>(x1, y1, x2, y2, 0, merge, f);

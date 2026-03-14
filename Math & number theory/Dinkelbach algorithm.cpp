@@ -1,5 +1,5 @@
-//Finds argmax(f(x) / g(x)) over x in X
 /*
+Finds argmax(f(x) / g(x)) over x in X
 Requirements:
   f(x) is continuous and concave
   g(x) is continuous and convex, g(x) > 0 for all x in X

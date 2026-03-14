@@ -6,7 +6,10 @@ Idea:
 - h(n) is multiplicative function s. t. h(p) = 0
 - sum_f(n) = sum(h(k) * sum_g(n / k) | k <= n)
 - h(p) = 0 => let's bruteforce only k where h(k) != 0. There are O(sqrt(n)) such k.
-Complexity: <O(sqrt(n) * O(sum_g)), O(1)>
+Complexity:
+  - <O(sqrt(n)), O(log(n))> if O(sum_g(n)) < O(sqrt(n))
+  - <O(sqrt(n)log(n)), O(log(n))> if O(sum_g(n)) = O(sqrt(n))
+  - <O(sum_g(n)), O(log(n))> if O(sum_g(n)) > O(sqrt(n))
 Example:
   - f(n) = rad(n)
   - g(n) = n
@@ -14,6 +17,7 @@ Example:
 */
 template<typename T, typename N>
 T powerful_number_sieve(const vector<int>& primes, auto h, auto sum_g, N n) {
+    assert(n / primes.back() < primes.back() && "You need to calculate primes up to sqrt(n)!");
     T res = 0;
     function<void(N, T, int)> go = [&](N k, T h_k, int i) {
         res += h_k * sum_g(T(n / k));
