@@ -33,17 +33,17 @@ class wavelet_tree {
             T vm = vl + (vr - vl) / 2;
             int c0 = bvs[layer].seg0(l, r);
             int cq0 = bvs[layer].seg0(ql, qr);
-            int cq1 = qr - ql + 1 - cq0;
+            int clq0 = ql ? bvs[layer].seg0(l, ql - 1) : 0;
             if (x <= vm) {
-                ql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0);
+                ql = l + clq0;
                 qr = ql + cq0 - 1;
                 r = l + c0 - 1;
                 vr = vm;
             } else {
                 cnt += cq0;
                 if constexpr (use_sum) sum += get_sum(layer, ql, qr);
-                ql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0);
-                qr = ql + cq1 - 1;
+                ql = ql + c0 - clq0;
+                qr = qr + c0 - clq0 - cq0;
                 l = l + c0;
                 vl = vm + 1;
             }
@@ -63,7 +63,7 @@ class wavelet_tree {
         }
         int cnt = 0;
         C sum = 0;
-        auto dfs = [&](auto && dfs, int layer, int l, int r, int ql, int qr, T vl, T vr) {
+        function<void(int, int, int, int, int, T, T)> dfs = [&](int layer, int l, int r, int ql, int qr, T vl, T vr) {
             if (vr < x || y < vl || ql > qr || l > r) return;
             if (x <= vl && vr <= y) {
                 cnt += qr - ql + 1;
@@ -73,13 +73,11 @@ class wavelet_tree {
             T vm = vl + (vr - vl) / 2;
             int c0 = bvs[layer].seg0(l, r);
             int cq0 = bvs[layer].seg0(ql, qr);
-            int cq1 = qr - ql + 1 - cq0;
-            int lfql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0), lfqr = lfql + cq0 - 1;
-            dfs(dfs, layer + 1, l, l + c0 - 1, lfql, lfqr, vl, vm);
-            int rgql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0), rgqr = rgql + cq1 - 1;
-            dfs(dfs, layer + 1, l + c0, r, rgql, rgqr, vm + 1, vr);
+            int clq0 = ql ? bvs[layer].seg0(l, ql - 1) : 0;
+            dfs(layer + 1, l, l + c0 - 1, l + clq0, l + clq0 + cq0 - 1, vl, vm);
+            dfs(layer + 1, l + c0, r, ql + c0 - clq0, qr + c0 - clq0 - cq0, vm + 1, vr);
         };
-        dfs(dfs, 0, 0, n - 1, ql, qr, mne, mxe);
+        dfs(0, 0, n - 1, ql, qr, mne, mxe);
         return {cnt, sum};
     }
 
@@ -107,17 +105,17 @@ class wavelet_tree {
             T vm = vl + (vr - vl) / 2;
             int c0 = bvs[layer].seg0(l, r);
             int cq0 = bvs[layer].seg0(ql, qr);
-            int cq1 = qr - ql + 1 - cq0;
+            int clq0 = ql ? bvs[layer].seg0(l, ql - 1) : 0;
             if (x <= vm || x > vm && k < cq0) {
-                ql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0);
+                ql = l + clq0;
                 qr = ql + cq0 - 1;
                 r = l + c0 - 1;
                 vr = vm;
             } else {
                 k -= cq0;
                 if constexpr (use_sum) sum += get_sum(layer, ql, qr);
-                ql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0);
-                qr = ql + cq1 - 1;
+                ql = ql + c0 - clq0;
+                qr = qr + c0 - clq0 - cq0;
                 l = l + c0;
                 vl = vm + 1;
             }
@@ -136,22 +134,46 @@ class wavelet_tree {
             T vm = vl + (vr - vl) / 2;
             int c0 = bvs[layer].seg0(l, r);
             int cq0 = bvs[layer].seg0(ql, qr);
-            int cq1 = qr - ql + 1 - cq0;
+            int clq0 = ql ? bvs[layer].seg0(l, ql - 1) : 0;
             if (k < cq0) {
-                ql = l + (ql ? bvs[layer].seg0(l, ql - 1) : 0);
+                ql = l + clq0;
                 qr = ql + cq0 - 1;
                 r = l + c0 - 1;
                 vr = vm;
             } else {
                 k -= cq0;
                 if constexpr (use_sum) sum += get_sum(layer, ql, qr);
-                ql = l + c0 + (ql ? bvs[layer].seg1(l, ql - 1) : 0);
-                qr = ql + cq1 - 1;
+                ql = ql + c0 - clq0;
+                qr = qr + c0 - clq0 - cq0;
                 l = l + c0;
                 vl = vm + 1;
             }
         }
         return {do_compress ? keys[vl] : vl, sum};
+    }
+
+    void seg_subseg_ordered_(int ql, int qr, int kl, int kr, bool only_distinct, vector<T>& res) {
+        assert(ql <= qr && qr < n);
+        assert(0 <= kl && kl <= kr && kr < qr - ql + 1);
+        res.reserve(kr - kl + 1);
+        function<void(int, int, int, int, int, int, int, T, T)> go = [&](int layer, int l, int r, int ql, int qr, int kl, int kr, T vl, T vr) {
+            if (kl > kr) return;
+            if (vl == vr) {
+                if (T k = do_compress ? keys[vl] : vl; only_distinct) {
+                    if (res.empty() || res.back() != k) res.push_back(k);
+                } else {
+                    for (; kl <= kr; ++kl) res.push_back(k);
+                }
+                return;
+            }
+            T vm = vl + (vr - vl) / 2;
+            int c0 = bvs[layer].seg0(l, r);
+            int cq0 = bvs[layer].seg0(ql, qr);
+            int clq0 = ql ? bvs[layer].seg0(l, ql - 1) : 0;
+            go(layer + 1, l, l + c0 - 1, l + clq0, l + clq0 + cq0 - 1, kl, min(kr, cq0 - 1), vl, vm);
+            go(layer + 1, l + c0, r, ql + c0 - clq0, qr + c0 - clq0 - cq0, max(0, kl - cq0), kr - cq0, vm + 1, vr);
+        };
+        go(0, 0, n - 1, ql, qr, kl, kr, mne, mxe);
     }
 
 public:
@@ -201,6 +223,10 @@ public:
         for (auto& bv : bvs) bv.prepare();
         for (auto& row : sums) partial_sum(row.begin(), row.end(), row.begin());
     }
+
+    //O(log(# distinct) + (kr - kl)) if do_compress == true, O(log(mxe - mne) + (kr - kl)) otherwise
+    //https://eolymp.com/en/compete/4pe1cne4r571j089budf65juq4/problem/4
+    void seg_subseg_ordered(int l, int r, int kl, int kr, bool only_distinct, vector<T>& res) {seg_subseg_ordered_(l, r, kl, kr, only_distinct, res);}
 
     //All functions below are O(log(# distinct)) if do_compress == true, O(log(mxe - mne)) otherwise
     int seg_leq(int l, int r, T x) {return seg_leq_(l, r, x).first;}
