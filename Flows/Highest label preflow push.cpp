@@ -96,6 +96,11 @@ public:
     void clear() {
         store.clear();
         for (auto& i : l) i.clear();
+        reset_flow();
+    }
+
+    void reset_flow() {
+        for (auto& e : store) e.flow = 0;
         for (auto& i : lst) i.clear();
         for (auto& i : gap) i.clear();
         mxh = work = 0;

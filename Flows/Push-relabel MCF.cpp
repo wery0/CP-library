@@ -111,7 +111,13 @@ public:
 
     void clear() {
         eps = 0;
+        store.clear();
         for (auto& i : l) i.clear();
+        reset_flow();
+    }
+
+    void reset_flow() {
+        for (auto& e : store) e.flow = 0; 
         flow_calculated = false;
     }
 
