@@ -75,10 +75,7 @@ class dinic {
     }
 
 public:
-    dinic(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), layer(V), ptr(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    dinic(size_t V): V(V), l(V), layer(V), ptr(V) {}
 
     void clear() {
         store.clear();
@@ -96,8 +93,11 @@ public:
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
-    T_flow calc_max_flow(bool do_scaling) {
+    T_flow calc_max_flow(size_t source, size_t sink, bool do_scaling) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         in_layered_network.resize(store.size());
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {

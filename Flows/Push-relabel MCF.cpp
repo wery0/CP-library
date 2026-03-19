@@ -107,10 +107,7 @@ class push_relabel_mcf {
     }
 
 public:
-    push_relabel_mcf(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), cur(V), ex(V), h(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    push_relabel_mcf(size_t V): V(V), l(V), cur(V), ex(V), h(V) {}
 
     void clear() {
         eps = 0;
@@ -131,8 +128,11 @@ public:
         if (!is_directed) add_edge(to, from, capacity, cost, 1);
     }
 
-    pair<T_flow, T_cost> calc_min_cost_flow(T_flow flow_limit = INFFLOW / 2, int scale = 1) {
+    pair<T_flow, T_cost> calc_min_cost_flow(size_t source, size_t sink, T_flow flow_limit = INFFLOW / 2, int scale = 1) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         T_cost cost = 0;
         for (const auto& e : store) cost += e.cost * e.cap; 
         T_flow flow = max_flow(flow_limit);

@@ -23,10 +23,7 @@ class sspa_mcf {
     bool flow_calculated = false;
 
 public:
-    sspa_mcf(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    sspa_mcf(size_t V): V(V), l(V) {}
 
     void clear() {
         store.clear();
@@ -45,8 +42,11 @@ public:
         if (!is_directed) add_edge(to, from, capacity, cost, 1);
     }
 
-    pair<T_flow, T_cost> calc_min_cost_flow(T_flow flow_limit = INFFLOW / 2) {
+    pair<T_flow, T_cost> calc_min_cost_flow(size_t source, size_t sink, T_flow flow_limit = INFFLOW / 2) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         T_flow flow = 0;
         T_cost cost = 0;
         vector<T_cost> dst(V);

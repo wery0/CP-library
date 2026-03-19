@@ -152,10 +152,7 @@ class malhotra_pramodh_maheshvari {
     }
 
 public:
-    malhotra_pramodh_maheshvari(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), layer(V), ptr(V), ptr2(V), pin(V), pout(V), to_push(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    malhotra_pramodh_maheshvari(size_t V): V(V), l(V), layer(V), ptr(V), ptr2(V), pin(V), pout(V), to_push(V) {}
 
     void clear() {
         store.clear();
@@ -173,8 +170,11 @@ public:
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
-    T_flow calc_max_flow() {
+    T_flow calc_max_flow(size_t source, size_t sink) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         T_flow ans = 0;
         while (true) {
             build_layered_network();

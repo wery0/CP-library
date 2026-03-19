@@ -81,10 +81,7 @@ class highest_label_preflow_push {
     }
 
 public:
-    highest_label_preflow_push(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    highest_label_preflow_push(size_t V): V(V), l(V), lst(V + 1), gap(V), ex(V), h(V), cnt(V) {}
 
     void add_edge(int from, int to, T_flow capacity, bool is_directed) {
         assert(!flow_calculated);
@@ -108,8 +105,11 @@ public:
         flow_calculated = false;
     }
 
-    T_flow calc_max_flow(bool cancel_excessive_preflow, int heur_n = -1) {
+    T_flow calc_max_flow(size_t source, size_t sink, bool cancel_excessive_preflow, int heur_n = -1) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         if (heur_n == -1) heur_n = V;
         function<T_flow(T_flow)> go = [&](T_flow limit) -> T_flow {
             fill(ex.begin(), ex.end(), 0);

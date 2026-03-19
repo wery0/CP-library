@@ -49,10 +49,7 @@ class edmonds_karp {
     }
 
 public:
-    edmonds_karp(size_t V, size_t source, size_t sink): V(V), source(source), sink(sink), l(V), pr(V), min_flow(V) {
-        assert(source != sink);
-        assert(max(source, sink) < V);
-    }
+    edmonds_karp(size_t V): V(V), l(V), pr(V), min_flow(V) {}
 
     void clear() {
         store.clear();
@@ -70,8 +67,11 @@ public:
         store.emplace_back(from, 0, is_directed ? 0 : capacity);
     }
 
-    T_flow calc_max_flow(bool do_scaling) {
+    T_flow calc_max_flow(size_t source, size_t sink, bool do_scaling) {
+        assert(source != sink);
+        assert(max(source, sink) < V);
         assert(!flow_calculated);
+        this->source = source, this->sink = sink;
         T_flow ans = 0;
         for (T_flow mxf = do_scaling ? INFFLOW : 1; mxf > 0; mxf /= 2) {
             while (true) {
