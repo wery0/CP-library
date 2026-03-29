@@ -1,6 +1,5 @@
 template<const int ALPHABET, const int FIRST_CHAR>
 class suffix_automaton {
-
     struct Node {
         Node* m[ALPHABET] = {0};
         Node* suf_link = 0;
@@ -9,7 +8,7 @@ class suffix_automaton {
         int64_t dep = 0;
 
         Node() = default;
-        Node(Node *parent): parent(parent), dep(parent->dep + 1) {}
+        Node(Node* parent): parent(parent), dep(parent->dep + 1) {}
     };
 
     int64_t distinct_substrings = 0;
@@ -17,13 +16,13 @@ class suffix_automaton {
     Node* lst;
 
 public:
-    suffix_automaton() = default;
-
     suffix_automaton() {
         lst = new Node();
         lst->cnt = 1;
         root = lst;
     }
+
+    int64_t get_distinct_substrings() const {return distinct_substrings;}
 
     void add_char(char c) {
         c -= FIRST_CHAR; assert(0 <= c && c < ALPHABET);
@@ -56,5 +55,10 @@ public:
             break;
         }
         lst = y->parent->m[c];
+    }
+
+    void add_string(const string& s) {
+        lst = root;
+        for (auto c : s) add_char(c); 
     }
 };
