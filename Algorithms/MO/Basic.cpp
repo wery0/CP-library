@@ -62,8 +62,8 @@ public:
         for (int cl = 0, cr = -1; const auto& [ql, qr, qn, sv] : qarr) {
             while (cr < qr) addR(++cr);
             while (cl > ql) addL(--cl);
-            while (cr > qr) remR(cr--);
-            while (cl < ql) remL(cl++);
+            while (cr > qr) remR(cr), --cr;
+            while (cl < ql) remL(cl), ++cl;
             ans[qn] = ?;
         }
         return ans;

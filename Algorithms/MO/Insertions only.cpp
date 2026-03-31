@@ -51,9 +51,9 @@ public:
                     for (int i = ql; i <= qr; ++i) remL(i);
                 } else {
                     while (rr < qr) addR(++rr);
-                    for (int i = br; i >= ql;) addL(i--);
+                    for (int i = br; i >= ql; --i) addL(i);
                     ans[qn] = qans;
-                    for (int i = ql; i <= br; ) remL(i++);
+                    for (int i = ql; i <= br; ++i) remL(i);
                 }
             }
             while (br < rr) remL(++br);

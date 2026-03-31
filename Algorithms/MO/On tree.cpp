@@ -111,8 +111,8 @@ public:
         for (int cl = 0, cr = -1; const auto& [ql, qr, qn, lc, sv] : qarr) {
             while (cr < qr) flip(++cr);
             while (cl > ql) flip(--cl);
-            while (cr > qr) flip(cr--);
-            while (cl < ql) flip(cl++);
+            while (cr > qr) flip(cr), --cr;
+            while (cl < ql) flip(cl), ++cl;
             if (lc != -1) add(tin[lc]);
             ans[qn] = ?;
             if (lc != -1) rem(tin[lc]);
