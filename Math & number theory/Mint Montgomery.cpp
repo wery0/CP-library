@@ -1,21 +1,24 @@
+template<typename T> inline constexpr bool montgomery_is_long_v = is_integral_v<T> || is_same_v<remove_cv_t<T>, __int128>;
+template<typename T> inline constexpr bool montgomery_is_signed_long_v = (is_integral_v<T> && is_signed_v<T>) || is_same_v<remove_cv_t<T>, __int128>;
+template<typename L> struct montgomery_unsigned_long {using type = make_unsigned_t<L>;};
+template<> struct montgomery_unsigned_long<__int128> {using type = unsigned __int128;};
 template<typename INT, typename LONG, typename std::make_unsigned<INT>::type mod>
 class MontgomeryMint {
-    static_assert(is_integral_v<INT> && is_integral_v<LONG>);
-    static_assert(is_signed_v<INT> && is_signed_v<LONG>);
+    static_assert(is_integral_v<INT> && montgomery_is_long_v<LONG>);
+    static_assert(is_signed_v<INT> && montgomery_is_signed_long_v<LONG>);
     static_assert(sizeof(INT) * 2 == sizeof(LONG));
     static_assert(mod & 1, "Modulo should be odd");
-    static_assert(mod < numeric_limits<INT>::max() / 2 && "Modulo * 2 should fit into INT");
+    static_assert(mod < numeric_limits<INT>::max() / 2 && "Modulo * 2 should fit into INT!");
 
     using mint = MontgomeryMint;
     using UINT = typename std::make_unsigned<INT>::type;
-    using ULONG = typename std::make_unsigned<LONG>::type;
+    using ULONG = typename montgomery_unsigned_long<LONG>::type;
+    static_assert(sizeof(UINT) * 2 == sizeof(ULONG));
 
     static constexpr UINT get_r() {
         UINT r = mod;
-        for (int i = 0; i < __lg(sizeof(UINT)) + 2; ++i) {
-            r *= UINT((INT)2 - ULONG(mod * r));
-        }
-        assert((UINT)(mod * r) == 1);
+        for (int i = 0; i < __lg(sizeof(UINT)) + 2; ++i) r *= UINT(INT(2) - ULONG(mod * r));
+        assert(UINT(mod * r) == 1);
         return r;
     }
 
@@ -87,7 +90,7 @@ public:
     constexpr bool operator<(const mint& rhs) const {return get_val() < rhs.get_val();}
     constexpr bool operator>(const mint& rhs) const {return get_val() > rhs.get_val();}
 
-    explicit operator bool() const {return a != 0;}
+    explicit operator bool() const {return a != 0 && a != mod;}
 
     friend istream& operator>>(istream& is, mint& rhs) {LONG t; is >> t; rhs = mint(t); return is;}
     friend ostream& operator<<(ostream& os, const mint& rhs) {return os << rhs.get_val();}
