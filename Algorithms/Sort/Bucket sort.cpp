@@ -36,9 +36,7 @@ void bucket_sort(I first, I last) {
         for (; ;) {
             int b = get_block(*it);
             if (b == nb - 1) break;
-            auto tmp = *it;
-            *it = *(first + cnt[b]);
-            *(first + cnt[b]) = tmp;
+            iter_swap(it, first + cnt[b]);
             ++cnt[b];
         }
     }
