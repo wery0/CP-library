@@ -1,4 +1,5 @@
 //Use for constant modulo that is unknown in compile time. Up to x5 speed up.
+//Requirements: mod ^ 2 should fit in T
 template<typename T = uint64_t>
 class fast_mod {
     using H =

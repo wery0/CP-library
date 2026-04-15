@@ -7,12 +7,9 @@ struct hpt {
     array<T, D> p;
 
     hpt() {p.fill(0);}
-    template<typename U>
-    hpt(const array<U, D>& _p) {for (size_t i = 0; i < D; ++i) p[i] = _p[i];}
-    template<typename U>
-    hpt(const hpt<U, D>& _p) {for (size_t i = 0; i < D; ++i) p[i] = _p[i];}
-    template<typename U>
-    hpt(const initializer_list<U>& il) {
+    template<typename U> hpt(const array<U, D>& _p) {for (size_t i = 0; i < D; ++i) p[i] = _p[i];}
+    template<typename U> hpt(const hpt<U, D>& _p) {for (size_t i = 0; i < D; ++i) p[i] = _p[i];}
+    template<typename U> hpt(const initializer_list<U>& il) {
         assert(il.end() - il.begin() == D);
         auto it = il.begin();
         for (size_t i = 0; i < D; ++i, ++it) p[i] = *it;
@@ -26,30 +23,20 @@ struct hpt {
     hpt<T, D> operator/(const T c) const {auto res = *this; res /= c; return res;}
     hpt<T, D> operator-() const {auto res = *this; res *= -1; return res;}
 
-    template<typename U>
-    hpt<T, D>& operator+=(const hpt<U, D>& rhs) {for (size_t i = 0; i < D; ++i) p[i] += rhs.p[i]; return *this;}
-    template<typename U>
-    hpt<T, D>& operator-=(const hpt<U, D>& rhs) {for (size_t i = 0; i < D; ++i) p[i] -= rhs.p[i]; return *this;}
+    template<typename U> hpt<T, D>& operator+=(const hpt<U, D>& rhs) {for (size_t i = 0; i < D; ++i) p[i] += rhs.p[i]; return *this;}
+    template<typename U> hpt<T, D>& operator-=(const hpt<U, D>& rhs) {for (size_t i = 0; i < D; ++i) p[i] -= rhs.p[i]; return *this;}
     hpt<T, D>& operator*=(const T c) {for (T& x : p) x *= c; return *this;}
     hpt<T, D>& operator/=(const T c) {for (T& x : p) x /= c; return *this;}
 
-    template<typename U>
-    auto dot(const hpt<U, D>& rhs) const {auto res = p[0] * rhs.p[0]; for (size_t i = 1; i < D; ++i) res += p[i] * rhs.p[i]; return res;}
-    template<typename U>
-    auto dist(const hpt<U, D>& rhs) const {auto res = (p[0] - rhs.p[0]) * (p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += (p[i] - rhs.p[i]) * (p[i] - rhs.p[i]); return sqrtl((R)res);}
-    template<typename U>
-    R dist2(const hpt<U, D>& rhs) const {auto res = (p[0] - rhs.p[0]) * (p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += (p[i] - rhs.p[i]) * (p[i] - rhs.p[i]); return res;}
-    template<typename U>
-    auto mdist(const hpt<U, D>& rhs) const {auto res = abs(p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += abs(p[i] - rhs.p[i]); return res;}
+    template<typename U> auto dot(const hpt<U, D>& rhs) const {auto res = p[0] * rhs.p[0]; for (size_t i = 1; i < D; ++i) res += p[i] * rhs.p[i]; return res;}
+    template<typename U> auto dist(const hpt<U, D>& rhs) const {auto res = (p[0] - rhs.p[0]) * (p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += (p[i] - rhs.p[i]) * (p[i] - rhs.p[i]); return sqrtl((R)res);}
+    template<typename U> R dist2(const hpt<U, D>& rhs) const {auto res = (p[0] - rhs.p[0]) * (p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += (p[i] - rhs.p[i]) * (p[i] - rhs.p[i]); return res;}
+    template<typename U>auto mdist(const hpt<U, D>& rhs) const {auto res = abs(p[0] - rhs.p[0]); for (size_t i = 1; i < D; ++i) res += abs(p[i] - rhs.p[i]); return res;}
 
-    template<typename U>
-    friend auto dot(const hpt& p1, const hpt<U, D>& p2) {return p1.dot(p2);}
-    template<typename U>
-    friend R dist(const hpt& p1, const hpt<U, D>& p2) {return p1.dist(p2);}
-    template<typename U>
-    friend auto dist2(const hpt& p1, const hpt<U, D>& p2) {return p1.dist2(p2);}
-    template<typename U>
-    friend auto mdist(const hpt& p1, const hpt<U, D>& p2) {return p1.mdist(p2);}
+    template<typename U> friend auto dot(const hpt& p1, const hpt<U, D>& p2) {return p1.dot(p2);}
+    template<typename U> friend R dist(const hpt& p1, const hpt<U, D>& p2) {return p1.dist(p2);}
+    template<typename U> friend auto dist2(const hpt& p1, const hpt<U, D>& p2) {return p1.dist2(p2);}
+    template<typename U> friend auto mdist(const hpt& p1, const hpt<U, D>& p2) {return p1.mdist(p2);}
 
     auto begin() {return p.begin();}
     const auto begin() const {return p.begin();}
@@ -61,10 +48,8 @@ struct hpt {
         if constexpr(is_integral_v<T> && is_integral_v<U>) return mdist(rhs) == 0;
         return mdist(rhs) < EPS;
     }
-    template<typename U, const size_t DD>
-    bool operator!=(const hpt<U, DD>& rhs) const {return !(*this == rhs);}
-    template<typename U, const size_t DD>
-    bool operator<(const hpt<U, DD>& rhs) const {
+    template<typename U, const size_t DD> bool operator!=(const hpt<U, DD>& rhs) const {return !(*this == rhs);}
+    template<typename U, const size_t DD> bool operator<(const hpt<U, DD>& rhs) const {
         static const auto eps = is_integral_v<T> && is_integral_v<U> ? 0 : EPS;
         for (size_t i = 0; i < D; ++i) {
             if (abs(p[0] - rhs[0]) > EPS) return p[0] < rhs[0];

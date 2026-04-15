@@ -3,7 +3,7 @@ template<typename T_arr>
 vector<int> lzw_encode(const T_arr& data, const T_arr& alphabet) {
     using T = T_arr::value_type;
     if (data.empty()) return {};
-    unordered_map<T_arr, int> mp; mp.reserve(alphabet.size() + data.size());
+    map<T_arr, int> mp;
     for (int i = 0; i < alphabet.size(); ++i) mp[{alphabet[i]}] = i;
     vector<int> encoded;
     T_arr word;

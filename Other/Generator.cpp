@@ -421,7 +421,7 @@ namespace Generator {
     }
 
     //Generates all O(n) pythagorean triplets with hypothenuse <= n
-    //O(n)
+    //O(n * O(gcd))
     template<typename T>
     vector<array<T, 3>> gen_all_pythagorean_triplets(T n) {
         vector<array<T, 3>> o;

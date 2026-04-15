@@ -17,6 +17,7 @@ vector<T> encode(T b, vector<T> bases, vector<vector<T>> a, T d = 1) {
     assert(d >= 1);
     assert(bases.size() == a.size());
     assert(numeric_limits<T>::max() / b > *max_element(bases.begin(), bases.end()));
+    for (int i = 0; i < a.size(); ++i) for (auto c : a[i]) assert(0 <= c && c < bases[i]);
     int n = bases.size();
     vector<T> code;
     vector<vector<T>> na(n);

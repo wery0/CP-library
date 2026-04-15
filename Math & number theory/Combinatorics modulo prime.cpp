@@ -13,6 +13,7 @@ public:
     }
 
     T factorial(int64_t n) {assert(n < N); fc[n];}
+    T inv_factorial(int64_t n) {assert(n < N); ifc[n];}
     T A(int64_t n, int64_t k) {assert(n < N); return k < 0 || k > n ? 0 : fc[n] * ifc[n - k];}
     T C(int64_t n, int64_t k) {assert(n < N); return k < 0 || k > n ? 0 : fc[n] * ifc[k] * ifc[n - k];}
 
