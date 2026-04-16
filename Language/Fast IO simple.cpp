@@ -20,23 +20,31 @@ inline void putChar(int c) {
     buf[pos++] = c;
 }
 
-inline int ni() {
+template<typename T>
+inline T ni() {
+    static_assert(is_signed_v<T>);
     char c = getChar();
     while (c <= 32) c = getChar();
-    int res = 0, sign = 1;
+    T res = 0, sign = 1;
     if (c == '-') sign = -1, c = getChar();
     for (; isdigit(c); c = getChar()) res = res * 10 + c - 48;
     return res * sign;
 }
 
-inline int64_t nl() {
+template<typename T>
+inline T nui() {
+    static_assert(is_unsigned_v<T>);
     char c = getChar();
     while (c <= 32) c = getChar();
-    int64_t o = 0, sign = 1;
-    if (c == '-') sign = -1, c = getChar();
-    for (; isdigit(c); c = getChar()) o = o * 10 + c - 48;
-    return o * sign;
+    T res = 0;
+    for (; isdigit(c); c = getChar()) res = res * 10 + c - 48;
+    return res;
 }
+
+inline int32_t ni32() {return ni<int32_t>();}
+inline int64_t ni64() {return ni<int64_t>();}
+inline uint32_t nui32() {return nui<uint32_t>();}
+inline uint64_t nui64() {return nui<uint64_t>();}
 
 inline string ns() {
 	char c = getChar();
