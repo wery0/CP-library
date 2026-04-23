@@ -26,9 +26,9 @@ namespace SolovayStrassen {
     */
     template<typename T>
     bool is_prime(T n, int ITER = 10) {
-        assert(numeric_limits<T>::max() / n > n && "n^2 should fit into T!");
         if (n < 3) return n == 2;
         if (n % 2 == 0) return false;
+        assert(numeric_limits<T>::max() / n > n && "n^2 should fit into T!");
         static mt19937 rnd(std::chrono::steady_clock::now().time_since_epoch().count());
         static uniform_int_distribution<T> gen(0, numeric_limits<T>::max());
         for (int i = 0; i < ITER; ++i) {
