@@ -81,7 +81,7 @@ class KD_tree {
     template<bool exclude_itself>
     void rec(const point& p, auto f, auto get_interesting_radius, auto ans, int cnt_exc_itself = 0) const {
         int cnt = 0;
-        auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
+        function<void(size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v) {
             if (l == r) {
                 if constexpr(exclude_itself) {
                     if (m[l] == p && ++cnt <= cnt_exc_itself) {return;}
@@ -90,8 +90,8 @@ class KD_tree {
                 return;
             }
             size_t md = (l + r) >> 1;
-            auto go_left = [&]() {go(go, l, md, v + 1);};
-            auto go_right = [&]() {go(go, md + 1, r, v + 2 * (md - l + 1));};
+            auto go_left = [&]() {go(l, md, v + 1);};
+            auto go_right = [&]() {go(md + 1, r, v + 2 * (md - l + 1));};
             T df = p[vaxis[v]] - mid_axis[v];
             (df < 0 ? go_left() : go_right());
             if constexpr(IS_SQUARED_METRIC) {
@@ -100,7 +100,7 @@ class KD_tree {
                 if (get_interesting_radius() >= abs(df) - EPS) (df < 0 ? go_right() : go_left());
             }
         };
-        go(go, 0, n - 1, 0);
+        go(0, n - 1, 0);
     }
 
     //Euclidean distance squared. If need, change this function and parameter IS_SQUARED_METRIC.
@@ -117,7 +117,7 @@ public:
     KD_tree(I first, I last): n(last - first), m(n), mid_axis(n * 2 - 1), bounding_box(n * 2 - 1), vaxis(n * 2 - 1) {
         if (!n) return;
         for (size_t i = 0; i < n; ++i) m[i] = *(first + i);
-        auto build = [&](auto&& build, size_t l, size_t r, size_t v, size_t axis1 = 0) {
+        function<void(size_t, size_t, size_t, size_t)> build = [&](size_t l, size_t r, size_t v, size_t axis1) {
             if (l == r) {
                 bounding_box[v] = {m[l], m[l]};
                 return;
@@ -143,14 +143,14 @@ public:
             [&](const point& a1, const point& a2) {return a1[axis] < a2[axis];});
             mid_axis[v] = m[md][axis];
             const size_t rn = v + 2 * (md - l + 1);
-            build(build, l, md, v + 1, axis1 + 1);
-            build(build, md + 1, r, rn, axis1 + 1);
+            build(l, md, v + 1, axis1 + 1);
+            build(md + 1, r, rn, axis1 + 1);
             for (size_t i = 0; i < D; ++i) {
                 bounding_box[v].lf[i] = min(bounding_box[v + 1].lf[i], bounding_box[rn].lf[i]);
                 bounding_box[v].rg[i] = max(bounding_box[v + 1].rg[i], bounding_box[rn].rg[i]);
             }
         };
-        build(build, 0, n - 1, 0);
+        build(0, n - 1, 0, 0);
         pnt = m[0];
         for (const point& p : m) {
             if (p != m[0]) {pnt = p; break;}
@@ -203,7 +203,7 @@ public:
         size_t ans = 0;
         //Manually edit this constant to achieve better time
         const size_t MAGIC = 32;
-        auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
+        function<void(size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v) {
             if (r - l < MAGIC) {
                 for (size_t i = l; i <= r; ++i) ans += metric(c, m[i]) <= rr + EPS;
                 return;
@@ -211,13 +211,13 @@ public:
             if (is_hr_inside_hypersphere(bounding_box[v], c, rr)) {ans += r - l + 1; return;}
             if (!is_rect_intersect_circle(c[0], c[1], radius, bounding_box[v])) return;
             size_t md = (l + r) >> 1;
-            auto go_left = [&]() {go(go, l, md, v + 1);};
-            auto go_right = [&]() {go(go, md + 1, r, v + 2 * (md - l + 1));};
+            auto go_left = [&]() {go(l, md, v + 1);};
+            auto go_right = [&]() {go(md + 1, r, v + 2 * (md - l + 1));};
             T df = c[vaxis[v]] - mid_axis[v];
             (df < 0 ? go_left() : go_right());
             if (radius >= abs(df) - EPS) (df < 0 ? go_right() : go_left());
         };
-        go(go, 0, n - 1, 0);
+        go(0, n - 1, 0);
         return ans;
     }
 
@@ -226,7 +226,7 @@ public:
         size_t ans = 0;
         //Manually edit this constant to achieve better time
         const size_t MAGIC = 32;
-        auto go = [&](auto&& go, size_t l, size_t r, size_t v) {
+        function<void(size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v) {
             if (r - l < MAGIC) {
                 for (size_t i = l; i <= r; ++i) ans += is_point_inside_hr(hr, m[i]);
                 return;
@@ -234,10 +234,10 @@ public:
             if (is_hr_inside_hr(bounding_box[v], hr)) {ans += r - l + 1; return;}
             if (!is_hr_intersect_hr(bounding_box[v], hr)) return;
             size_t md = (l + r) >> 1;
-            if (hr.lf[vaxis[v]] <= mid_axis[v] + EPS) go(go, l, md, v + 1);
-            if (mid_axis[v] <= hr.rg[vaxis[v]] + EPS) go(go, md + 1, r, v + 2 * (md - l + 1));
+            if (hr.lf[vaxis[v]] <= mid_axis[v] + EPS) go(l, md, v + 1);
+            if (mid_axis[v] <= hr.rg[vaxis[v]] + EPS) go(md + 1, r, v + 2 * (md - l + 1));
         };
-        go(go, 0, n - 1, 0);
+        go(0, n - 1, 0);
         return ans;
     }
 };

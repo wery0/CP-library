@@ -3,18 +3,18 @@ namespace PowerTowerEval {
     T crt_solve_coprime(vector<T> mods, vector<T> remainders) {
         using TS = make_signed_t<T>;
         using TU = make_unsigned_t<T>;
-        auto gcd = [&](auto&& gcd, TS a, TS b, TS& x, TS& y) {
+        function<TS(TS, TS, TS&, TS&)> gcd = [&](TS a, TS b, TS& x, TS& y) {
             if (!a) {
                 x = 0, y = 1;
                 return b;
             }
-            TS g = gcd(gcd, b % a, a, x, y);
+            TS g = gcd(b % a, a, x, y);
             TS nx = y - x * (b / a), ny = x;
             x = nx, y = ny;
             return g;
         };
         auto extended_inv = [&](TS a, TS md) -> TS {
-            TS x, y, g = gcd(gcd, a, md, x, y);
+            TS x, y, g = gcd(a, md, x, y);
             if (g != 1) return -1;
             if (x < 0) x += (-x + md - 1) / md * md;
             x %= md;

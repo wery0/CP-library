@@ -57,14 +57,14 @@ class merge_sort_tree {
         lp.resize(M + (n & (n - 1) ? n : 0));
         is_prepared = true;
         if (n == 0) return;
-        auto go = [&](auto&& go, size_t l, size_t r, size_t v, size_t dep = 0) -> void {
+        function<void(size_t, size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v, size_t dep) -> void {
             st[v] = n * dep + min(l, n);
             if (l == r) return;
             size_t md = (l + r) >> 1;
-            go(go, l, md, v << 1, dep + 1);
-            go(go, md + 1, r, v << 1 | 1, dep + 1);
+            go(l, md, v << 1, dep + 1);
+            go(md + 1, r, v << 1 | 1, dep + 1);
         };
-        go(go, 0, U - 1, 1);
+        go(0, U - 1, 1, 0);
         st.back() = M;
         sort(points.begin(), points.end());
         for (size_t i = 0; i < n; ++i) {
@@ -109,15 +109,15 @@ class merge_sort_tree {
         if (l >= r--) return neutral_element;
         size_t ly = lower_bound(store_y.begin(), store_y.begin() + n, y1) - store_y.begin();
         size_t ry = upper_bound(store_y.begin(), store_y.begin() + n, y2) - store_y.begin();
-        auto go = [&](auto&& go, size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) {
+        function<A(size_t, size_t, size_t, size_t, size_t, size_t, size_t)> go = [&](size_t ql, size_t qr, size_t l, size_t r, size_t v, size_t ly, size_t ry) {
             if (qr < l || r < ql || ly >= ry) return neutral_element;
             if (ql <= l && r <= qr) return f(v, st[v] + ly, st[v] + ry - 1);
             size_t md = (l + r) >> 1;
             auto pl = lp[st[v] + v + ly];
             auto pr = lp[st[v] + v + ry];
-            return merge(go(go, ql, qr, l, md, v << 1, pl, pr), go(go, ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr));
+            return merge(go(ql, qr, l, md, v << 1, pl, pr), go(ql, qr, md + 1, r, v << 1 | 1, ly - pl, ry - pr));
         };
-        return go(go, l, r, 0, U - 1, 1, ly, ry);
+        return go(l, r, 0, U - 1, 1, ly, ry);
     }
 
 public:

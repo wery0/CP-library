@@ -35,7 +35,7 @@ class VP_tree {
     template<bool exclude_itself>
     void rec(const point& p, auto f, auto get_interesting_radius, auto ans, int cnt_exc_itself = 0) const {
         int cnt = 0;
-        auto go = [&](auto && go, size_t l, size_t r, size_t v) {
+        function<void(size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v) {
             if (l == r) {
                 if constexpr(exclude_itself) {
                     if (m[l] == p && ++cnt <= cnt_exc_itself) {return;}
@@ -44,8 +44,8 @@ class VP_tree {
                 return;
             }
             size_t md = (l + r) >> 1;
-            auto go_left = [&]() {go(go, l, md, v + 1);};
-            auto go_right = [&]() {go(go, md + 1, r, v + 2 * (md - l + 1));};
+            auto go_left = [&]() {go(l, md, v + 1);};
+            auto go_right = [&]() {go(md + 1, r, v + 2 * (md - l + 1));};
             R df = metric(p, vps[v]), ir = get_interesting_radius();
             if (check(df, ir, vpr[v])) go_left();
             else if (check(vpr[v], ir, df)) go_right();
@@ -56,7 +56,7 @@ class VP_tree {
                 if (!check(df, ir, vpr[v])) (flag ? go_right() : go_left());
             }
         };
-        go(go, 0, n - 1, 0);
+        go(0, n - 1, 0);
     }
 
     //Euclidean distance. Change, if need.
@@ -78,7 +78,7 @@ public:
         vpr.resize(n * 2 - 1);
         mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
         const int MAGIC = 0;            //Try some small values, maybe it would help :)
-        auto build = [&](auto&& build, size_t l, size_t r, size_t v, size_t dep = 0) {
+        function<void(size_t, size_t, size_t, size_t)> build = [&](size_t l, size_t r, size_t v, size_t dep) {
             if (l == r) return;
             uniform_int_distribution<size_t> gen(l, r);
             size_t md = (l + r) / 2;
@@ -93,10 +93,10 @@ public:
             nth_element(m.begin() + l, m.begin() + md, m.begin() + r + 1,
             [&](const point& p1, const point& p2) {return metric(vps[v], p1) < metric(vps[v], p2);});
             vpr[v] = metric(vps[v], m[md]);
-            build(build, l, md, v + 1, dep + 1);
-            build(build, md + 1, r, v + 2 * (md - l + 1), dep + 1);
+            build(l, md, v + 1, dep + 1);
+            build(md + 1, r, v + 2 * (md - l + 1), dep + 1);
         };
-        build(build, 0, n - 1, 0);
+        build(0, n - 1, 0, 0);
         pnt = m[0];
         for (const point& p : m) {
             if (p != m[0]) {pnt = p; break;}

@@ -132,9 +132,8 @@ class functional_graph {
                 stack.push(v);
             }
         }
-        auto dfs = [&](auto&& dfs, int v, int r = -1) -> void {
+        function<void(int, int)> dfs = [&](int v, int r) -> void {
             static int tt = 0;
-            if (r == -1) r = v;
             root_of_tree[v] = r;
             depth_in_tree[v] = v == r ? 0 : depth_in_tree[next[v]] + 1;
             jump_sum[v] = val[v];
@@ -149,18 +148,18 @@ class functional_graph {
                 jump[v] = next[v];
             }
             for (int h : inv[v]) {
-                dfs(dfs, h, r);
+                dfs(h, r);
             }
             tout[v] = tt;
         };
         for (size_t v = 0; v < V; ++v) {
             if (dst_to_end[v] == 0) {
-                dfs(dfs, v);
+                dfs(v, v);
             } else {
                 if (!oncyc[v]) continue;
                 for (int h : inv[v]) {
                     if (oncyc[h]) continue;
-                    dfs(dfs, h);
+                    dfs(h, h);
                 }
             }
         }

@@ -30,14 +30,14 @@ public:
         M = (n ? __lg(n) + 1 : 0) * n + (n & (n - 1) ? n : 0);
         store.resize(M);
         st.resize(U * 2 + 1);
-        auto go = [&](auto&& go, size_t l, size_t r, size_t v, size_t dep = 0) -> void {
+        function<void(size_t, size_t, size_t, size_t)> go = [&](size_t l, size_t r, size_t v, size_t dep) -> void {
             st[v] = n * dep + min(l, n);
             if (l == r) return;
             size_t md = (l + r) >> 1;
-            go(go, l, md, v << 1, dep + 1);
-            go(go, md + 1, r, v << 1 | 1, dep + 1);
+            go(l, md, v << 1, dep + 1);
+            go(md + 1, r, v << 1 | 1, dep + 1);
         };
-        go(go, 0, U - 1, 1);
+        go(0, U - 1, 1, 0);
         st.back() = M;
         for (size_t i = 0; i < n; ++i, ++first) {
             store[st[U + i]] = *first;

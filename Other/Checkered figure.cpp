@@ -85,7 +85,7 @@ public:
         map<pair<T, T>, int> tin;
         map<pair<T, T>, int> fup;
         for (auto v : mp) ans[v] = mp.size() > 1;
-        auto dfs = [&](auto&& dfs, pair<T, T> v, pair<T, T> p) -> void {
+        function<void(pair<T, T>, pair<T, T>)> dfs = [&](pair<T, T> v, pair<T, T> p) -> void {
             static int t = 0;
             auto [x, y] = v;
             us.insert(v);
@@ -99,7 +99,7 @@ public:
                 if (h == p) continue;
                 if (!us.count(h)) {
                     ++chd;
-                    dfs(dfs, h, v);
+                    dfs(h, v);
                     fup[v] = min(fup[v], fup[h]);
                     ans[v] += p == v ? chd > 1 : fup[h] >= tin[v];
                 } else {
@@ -108,7 +108,7 @@ public:
             }
         };
         for (auto v : mp) {
-            if (!us.count(v)) dfs(dfs, v, v);
+            if (!us.count(v)) dfs(v, v);
         }
         set<pair<T, T>> res;
         for (auto [v, c] : ans) if (c <= 1) res.insert(v);

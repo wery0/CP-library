@@ -43,7 +43,7 @@ public:
 
     template<typename U>
     segtree(const vector<U>& m): n(m.size()) {
-        auto build = [&](auto&& build, Node*& n, int l, int r) -> void {
+        function<void(Node*&, int, int)> build = [&](Node*& n, int l, int r) -> void {
             if (l > r) return;
             n = new Node();
             if (l == r) {
@@ -51,8 +51,8 @@ public:
                 return;
             }
             int md = (l + r) / 2;
-            build(build, n->l, l, md);
-            build(build, n->r, md + 1, r);
+            build(n->l, l, md);
+            build(n->r, md + 1, r);
             upd(n);
         };
         vector<pair<int, T>> wwas(n);
@@ -69,7 +69,7 @@ public:
         wwas.erase(unique(wwas.begin(), wwas.end()), wwas.end());
         was.reserve(wwas.size());
         for (auto [nw, old] : wwas) was.push_back(old);
-        build(build, root, 0, n - 1);
+        build(root, 0, n - 1);
         store.push_back(root);
         for (size_t i = 0; i < n; ++i) {
             store.push_back(point_add(nm[i], 0, n - 1, store[i], 1));

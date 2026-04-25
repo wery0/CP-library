@@ -57,7 +57,7 @@ public:
 
     template<typename U>
     segtree(const vector<U>& arr) {
-        auto build = [&](auto&& build, Node*& n, int l, int r) -> void{
+        function<void(Node*&, int, int)> build = [&](Node*& n, int l, int r) -> void {
             if (l > r) return;
             n = new Node();
             if (l == r) {
@@ -65,12 +65,12 @@ public:
                 return;
             }
             int md = (l + r) / 2;
-            build(build, n->l, l, md);
-            build(build, n->r, md + 1, r);
+            build(n->l, l, md);
+            build(n->r, md + 1, r);
             upd(n);
         };
         n = arr.size();
-        build(build, root, 0, n - 1);
+        build(root, 0, n - 1);
         store.push_back(root);
         umap<U, int> mp;
         for (size_t i = 0; i < n; ++i) {

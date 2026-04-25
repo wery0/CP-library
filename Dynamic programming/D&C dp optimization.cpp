@@ -12,7 +12,7 @@ mincost_subsegment_partition_with_answer_restore_divide_and_conquer(const size_t
     vector opt(k, vector<int>(n, -1));
     for (size_t r = 0; r < n; ++r) dp[0][r] = seg_cost(0, r, 0), opt[0][r] = 0;
     for (size_t i = 1; i < k; ++i) {
-        auto go = [&](auto&& go, const size_t l, const size_t r, const size_t opt_l, const size_t opt_r) -> void {
+        function<void(size_t, size_t, size_t, size_t)> go = [&](const size_t l, const size_t r, const size_t opt_l, const size_t opt_r) -> void {
             const size_t md = (l + r) / 2;
             size_t opt_md;
             for (size_t t = opt_l; t <= min(opt_r, md); ++t) {
@@ -22,10 +22,10 @@ mincost_subsegment_partition_with_answer_restore_divide_and_conquer(const size_t
                     opt[i][md] = t;
                 }
             }
-            if (l < md) go(go, l, md - 1, opt_l, opt[i][md]);
-            if (r > md) go(go, md + 1, r, opt[i][md], opt_r);
+            if (l < md) go(l, md - 1, opt_l, opt[i][md]);
+            if (r > md) go(md + 1, r, opt[i][md], opt_r);
         };
-        go(go, i, n - 1, i, n - 1);
+        go(i, n - 1, i, n - 1);
     }
     if (dp[k - 1][n - 1] == inf) return {0, {}};
     vector<array<int, 2>> borders(k);
@@ -47,7 +47,7 @@ C mincost_subsegment_partition_without_answer_restore_divide_and_conquer(const s
     for (size_t i = 1; i < k; ++i) {
         const size_t ii = i & 1;
         fill(dp[ii].begin(), dp[ii].end(), inf);
-        auto go = [&](auto&& go, const size_t l, const size_t r, const size_t opt_l, const size_t opt_r) -> void {
+        function<void(size_t, size_t, size_t, size_t)> go = [&](const size_t l, const size_t r, const size_t opt_l, const size_t opt_r) -> void {
             const size_t md = (l + r) / 2;
             size_t opt_md;
             for (size_t t = opt_l; t <= min(opt_r, md); ++t) {
@@ -57,10 +57,10 @@ C mincost_subsegment_partition_without_answer_restore_divide_and_conquer(const s
                     opt_md = t;
                 }
             }
-            if (l < md) go(go, l, md - 1, opt_l, opt_md);
-            if (r > md) go(go, md + 1, r, opt_md, opt_r);
+            if (l < md) go(l, md - 1, opt_l, opt_md);
+            if (r > md) go(md + 1, r, opt_md, opt_r);
         };
-        go(go, i, n - 1, i, n - 1);
+        go(i, n - 1, i, n - 1);
     }
     if (dp[~k & 1][n - 1] == inf) return 0;
     return dp[~k & 1][n - 1];
