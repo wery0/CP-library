@@ -30,4 +30,3 @@ public:
         return l == r ? m[0][l] : merge(m[u][l], m[u][r]);
     }
 };
- 
