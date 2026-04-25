@@ -53,11 +53,8 @@ public:
             pref_hash[i] -= pref_hash[i] < MOD ? 0 : MOD;
         }
         pows[n] = mulmod(pows[n - 1], P);
-        // ipows.resize(n + 1);
-        // ipows[n] = binpow(pows[n], MOD - 2);
-        // for (ssize_t i = n - 1; i >= 0; --i) {
-        //     ipows[i] = mulmod(ipows[i + 1], P);
-        // }
+        // ipows.resize(n + 1), ipows[n] = binpow(pows[n], MOD - 2);
+        // for (ssize_t i = n - 1; i >= 0; --i) ipows[i] = mulmod(ipows[i + 1], P);
     }
 
     //Returns hash of string l + r, where hash(l) = hl, hash(r) = hr, len(l) = len_l
@@ -77,8 +74,8 @@ public:
             o += o < pref_hash[l - 1] ? MOD : 0;
             o -= pref_hash[l - 1];
         }
-        return mulmod(o, pows[n - l]);
         // return mulmod(o, ipows[l]);
+        return mulmod(o, pows[n - l]);
     }
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)
