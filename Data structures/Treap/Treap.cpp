@@ -139,38 +139,40 @@ class treap {
         return r;
     }
 
-    array<Node*, 2> split_size(Node* n, size_t k) {
+    template<typename P, typename L, typename R>
+    array<Node*, 2> _split(Node* n, P&& go_left, L&& rec_left, R&& rec_right) {
         if (!n) return {0, 0};
         push(n);
-        if (k <= gsz(n->l)) {
-            array<Node*, 2> p = split_size(n->l, k);
+        if (go_left(n)) {
+            array<Node*, 2> p = rec_left(n);
             n->l = p[1]; upd(n);
             p[1] = n;
             if constexpr (maintain_parent) _set_p(p[1]->l, p[1]), _set_p(p[1], 0);
             return p;
         }
-        array<Node*, 2> p = split_size(n->r, k - gsz(n->l) - 1);
+        array<Node*, 2> p = rec_right(n);
         n->r = p[0]; upd(n);
         p[0] = n;
         if constexpr (maintain_parent) _set_p(p[0]->r, p[0]), _set_p(p[0], 0);
         return p;
     }
 
+    array<Node*, 2> split_size(Node* n, size_t k) {
+        return _split(
+            n,
+            [&](Node* t) {return k <= gsz(t->l);},
+            [&](Node* t) {return split_size(t->l, k);},
+            [&](Node* t) {return split_size(t->r, k - gsz(t->l) - 1);}
+        );
+    }
+
     array<Node*, 2> split_key(Node* n, K key) {
-        if (!n) return {0, 0};
-        push(n);
-        if (key < n->key) {
-            array<Node*, 2> p = split_key(n->l, key);
-            n->l = p[1]; upd(n);
-            p[1] = n;
-            if constexpr (maintain_parent) _set_p(p[1]->l, p[1]), _set_p(p[1], 0);
-            return p;
-        }
-        array<Node*, 2> p = split_key(n->r, key);
-        n->r = p[0]; upd(n);
-        p[0] = n;
-        if constexpr (maintain_parent) _set_p(p[0]->r, p[0]), _set_p(p[0], 0);
-        return p;
+        return _split(
+            n,
+            [&](Node* t) {return key < t->key;},
+            [&](Node* t) {return split_key(t->l, key);},
+            [&](Node* t) {return split_key(t->r, key);}
+        );
     }
 
     template<typename I>
@@ -485,11 +487,11 @@ public:
     void update_key_at_pos(size_t pos, K new_key) {_update_key_at_pos(root, pos, new_key);}
     void update_val_at_pos(size_t pos, V new_val) {_update_val_at_pos(root, pos, new_val);}
 
-    pair<K, V> erase_pos(size_t pos) {return _erase_pos(root, pos);}
+    pair<K, V> erase_pos(size_t pos) {assert(pos < size()); return _erase_pos(root, pos);}
     void erase_one_key_occurrence(K key) {_erase_one_key_occurrence(root, key);}
     void erase_all_key_occurrences(K key) {_erase_all_key_occurrences(root, key);}
-    void erase_seg(size_t l, size_t len) {_erase_seg(root, l, len);}
-    pair<K, V> erase_back() {return _erase_pos(root, size() - 1);}
+    void erase_seg(size_t l, size_t len) {assert(l + len <= size()); _erase_seg(root, l, len);}
+    pair<K, V> erase_back() {assert(size()); return _erase_pos(root, size() - 1);}
 
     bool contains(K key) {return _contains(root, key);}
     size_t get_leftest_pos_of_key(K key) {return _get_leftest_pos_of_key(root, key);}
@@ -530,6 +532,7 @@ public:
     void merge_sorted(treap& rhs) {root = _merge_sorted(root, rhs.root); rhs.root = 0;}
     void sort(bool is_reverse = false) {root = _sort(root); if (is_reverse) apply_reverse(root);}
     void seg_sort(size_t l, size_t r, bool is_reverse = false) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, r - l + 1); md = _sort(md); if (is_reverse) apply_reverse(md); root = merge(merge(lf, md), rg);}
+    bool is_sorted(bool is_reverse = false) {return gsrt(root) >> is_reverse & 1;}
 
     void print_keys(string end_string = "") {_print_keys(root); cout << end_string;}
     void print_vals(string end_string = "") {_print_vals(root); cout << end_string;}
