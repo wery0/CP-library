@@ -6,7 +6,7 @@ class dsu_w_rollbacks {
     void rollback() {
         auto [px, prpx] = store.back(); store.pop_back();
         pr[pr[px]] -= prpx;
-        pr[px] = -1;
+        pr[px] = prpx;
     }
 
 public:
