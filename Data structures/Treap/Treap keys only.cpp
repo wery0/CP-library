@@ -382,8 +382,8 @@ class treap {
 
     template<typename I> void _insert_array_at_pos(Node* n, size_t pos, I first, I last) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(first, last)), rg);}
     template<typename T> void _insert_array_at_pos(Node* n, size_t pos, initializer_list<T> il) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, _build(il.begin(), il.end())), rg);}
-    void _insert_at_pos(Node*& n, size_t pos, K key) {auto [lf, rg] = split_size(n, pos); n = merge(merge(lf, new Node(key)), rg);}
-    void _insert_back(Node*& n, K key) {_insert_at_pos(n, gsz(n), key);}
+    Node* _insert_at_pos(Node*& n, size_t pos, K key) {auto [lf, rg] = split_size(n, pos); Node* nw = new Node(key); n = merge(merge(lf, nw), rg); return nw;}
+    Node* _insert_back(Node*& n, K key) {return _insert_at_pos(n, gsz(n), key);}
 
     bool _contains(Node* n, K key) {while (n) {push(n); if (key == n->key) return true; n = key < n->key ? n->l : n->r;} return false;}
     size_t _get_leftest_pos_of_key(Node* n, K key) {size_t pos = 0, o = size(); while (n) {push(n); if (key == n->key) o = min(o, pos + gsz(n->l)), n = n->l; else if (key < n->key) n = n->l; else pos += gsz(n->l) + 1, n = n->r;} assert(o < size() && "No such key"); return o;}
@@ -407,11 +407,14 @@ class treap {
     void _print_keys(Node* n) {if (!n) return; push(n); _print_keys(n->l); cout << n->key << ' '; _print_keys(n->r);}
     
 public:
+    using node = treap::Node;
     treap() = default;
     template<typename I> treap(I f_key, I l_key) {root = _build(f_key, l_key);}
     template<typename U> treap(const initializer_list<U>& rhs) {root = _build(rhs.begin(), rhs.end());}
     treap(const treap& rhs) {_copy_from(rhs);}
     treap& operator=(const treap& rhs) {_delete_subtree(root); _copy_from(rhs); return *this;}
+    treap(treap&& rhs) {_delete_subtree(root); root = rhs.root; rhs.root = 0;}
+    treap& operator=(treap&& rhs) {if (this != &rhs) {_delete_subtree(root); root = rhs.root; rhs.root = 0;} return *this;}
     ~treap() {_delete_subtree(root);}
 
     size_t size() const {return gsz(root);}
@@ -419,9 +422,9 @@ public:
 
     template<typename I> void insert_array_at_pos(size_t pos, I first, I last) {_insert_array_at_pos(root, pos, first, last);}
     template<typename T> void insert_array_at_pos(size_t pos, initializer_list<T> il) {_insert_array_at_pos(root, pos, il);}
-    void insert(K key) {_insert(root, new Node(key));}
-    void insert_at_pos(size_t pos, K key) {_insert_at_pos(root, pos, key);}
-    void insert_back(K key) {_insert_back(root, key);}
+    Node* insert(K key) {Node* n = new Node(key); _insert(root, n); return n;}
+    Node* insert_at_pos(size_t pos, K key) {return _insert_at_pos(root, pos, key);}
+    Node* insert_back(K key) {return _insert_back(root, key);}
 
     void update_key_at_pos(size_t pos, K new_key) {_update_key_at_pos(root, pos, new_key);}
 
