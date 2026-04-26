@@ -1,7 +1,8 @@
-template<typename K, typename V>
+template<typename K, typename V, bool maintain_parent>
 class treap {
     static constexpr V UNDEF = V();
     struct Node {
+        Node* p = 0;
         Node* l = 0;
         Node* r = 0;
         int y;
@@ -24,6 +25,7 @@ class treap {
             assert(rhs);
             l = rhs->l ? new Node(rhs->l) : 0;
             r = rhs->r ? new Node(rhs->r) : 0;
+            if constexpr (maintain_parent) {if (l) l->p = this; if (r) r->p = this;}
             y = rhs->y;
             sz = rhs->sz;
 
@@ -55,6 +57,7 @@ class treap {
             is_sorted = 3;
         }
     };
+    void _set_p(Node* c, Node* p) {if constexpr (maintain_parent) {if (c) c->p = p;}}
     Node* root = 0;
 
     K gmnk(Node* n) const {return n ? n->mnk : std::numeric_limits<K>::max();}
@@ -69,7 +72,6 @@ class treap {
 
     size_t gsz(Node* n) const {return n ? n->sz : 0;}
 
-    //Write, if need
     void apply_reverse(Node* n) {
         if (!n) return;
         n->is_sorted = (n->is_sorted >> 1) | (n->is_sorted << 1) & 2;
@@ -105,11 +107,18 @@ class treap {
 
     void _bump(Node*& n) {
         //Slower, but less memory
-        Node* l = n->l, *r = n->r;
-        delete n; n = merge(l, r);
+        if constexpr (maintain_parent) {
+            Node* l = n->l, *r = n->r, *p = n->p; delete n; n = merge(l, r); if (n) n->p = p;
+        } else {
+            Node* l = n->l, *r = n->r; delete n; n = merge(l, r);
+        }
 
         //Faster, but more memory
-        //n = merge(n->l, n->r);
+        // if constexpr (maintain_parent) {
+        //     Node* p = n->p; n = merge(n->l, n->r); if (n) n->p = p;
+        // } else {
+        //     n = merge(n->l, n->r);
+        // }
     }
 
     void _copy_from(const treap& rhs) {
@@ -121,10 +130,12 @@ class treap {
         if (l->y > r->y) {
             push(l);
             l->r = merge(l->r, r); upd(l);
+            if constexpr (maintain_parent) _set_p(l->r, l);
             return l;
         }
         push(r);
         r->l = merge(l, r->l); upd(r);
+        if constexpr (maintain_parent) _set_p(r->l, r);
         return r;
     }
 
@@ -135,11 +146,13 @@ class treap {
             array<Node*, 2> p = split_size(n->l, k);
             n->l = p[1]; upd(n);
             p[1] = n;
+            if constexpr (maintain_parent) _set_p(p[1]->l, p[1]), _set_p(p[1], 0);
             return p;
         }
         array<Node*, 2> p = split_size(n->r, k - gsz(n->l) - 1);
         n->r = p[0]; upd(n);
         p[0] = n;
+        if constexpr (maintain_parent) _set_p(p[0]->r, p[0]), _set_p(p[0], 0);
         return p;
     }
 
@@ -150,11 +163,13 @@ class treap {
             array<Node*, 2> p = split_key(n->l, key);
             n->l = p[1]; upd(n);
             p[1] = n;
+            if constexpr (maintain_parent) _set_p(p[1]->l, p[1]), _set_p(p[1], 0);
             return p;
         }
         array<Node*, 2> p = split_key(n->r, key);
         n->r = p[0]; upd(n);
         p[0] = n;
+        if constexpr (maintain_parent) _set_p(p[0]->r, p[0]), _set_p(p[0], 0);
         return p;
     }
 
@@ -166,6 +181,7 @@ class treap {
         n->l = _build(f_key, md);
         n->r = _build(md + 1, l_key);
         upd(n);
+        if constexpr (maintain_parent) _set_p(n->l, n), _set_p(n->r, n);
         return n;
     }
 
@@ -178,6 +194,7 @@ class treap {
         n->l = _build(f_key, md1, f_val, md2);
         n->r = _build(md1 + 1, l_key, md2 + 1, l_val);
         upd(n);
+        if constexpr (maintain_parent) _set_p(n->l, n), _set_p(n->r, n);
         return n;
     }
 
@@ -290,26 +307,26 @@ class treap {
 
     size_t _pos_of_leftest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return _pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n,
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
     size_t _pos_of_rightest_min_key(Node* n) {
         K mnk = gmnk(n);
-        return _pos_of_rightest_good(n, 
+        return _pos_of_rightest_good(n,
             [&](Node* n){return gmnk(n) == mnk;},
             [&](Node* n){return n->key == mnk;});
     }
 
     size_t _pos_of_leftest_key_leq(Node* n, K key) {
-        return _pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n,
             [&](Node* n){return gmnk(n) <= key;},
             [&](Node* n){return n->key <= key;});
     }
 
     size_t _pos_of_leftest_val_leq(Node* n, V val) {
-        return _pos_of_leftest_good(n, 
+        return _pos_of_leftest_good(n,
             [&](Node* n){return gmnv(n) <= val;},
             [&](Node* n){return n->val <= val;});
     }
@@ -333,11 +350,17 @@ class treap {
             nw->l = lf;
             nw->r = rg;
             upd(nw);
+            if constexpr (maintain_parent) _set_p(nw->l, nw), _set_p(nw->r, nw);
             n = nw;
             return;
         }
-        if (nw->key < n->key) _insert(n->l, nw);
-        else _insert(n->r, nw);
+        if (nw->key < n->key) {
+            _insert(n->l, nw);
+            if constexpr (maintain_parent) _set_p(n->l, n);
+        } else {
+            _insert(n->r, nw);
+            if constexpr (maintain_parent) _set_p(n->r, n);
+        }
         upd(n);
     }
 
@@ -498,10 +521,10 @@ public:
     void seg_cyclic_shift_left(size_t l, size_t r, int shift) {_seg_cyclic_shift_left(root, l, r, shift);}
     void seg_cyclic_shift_right(size_t l, size_t r, int shift) {_seg_cyclic_shift_right(root, l, r, shift);}
 
-    void split_size(size_t k, treap<K, V>& rhs) {assert(k <= gsz(root)); auto [l, r] = split_size(root, k); root = l, rhs.root = r;}
-    void split_key(K k, treap<K, V>& rhs) {auto [l, r] = split_key(root, k); root = l, rhs.root = r;}
-    void merge(treap<K, V>& rhs) {root = merge(root, rhs.root); rhs.root = 0;}
-    void merge_sorted(treap<K, V>& rhs) {root = _merge_sorted(root, rhs.root); rhs.root = 0;}
+    void split_size(size_t k, treap& rhs) {assert(k <= gsz(root)); auto [l, r] = split_size(root, k); root = l, rhs.root = r;}
+    void split_key(K k, treap& rhs) {auto [l, r] = split_key(root, k); root = l, rhs.root = r;}
+    void merge(treap& rhs) {root = merge(root, rhs.root); rhs.root = 0;}
+    void merge_sorted(treap& rhs) {root = _merge_sorted(root, rhs.root); rhs.root = 0;}
     void sort(bool is_reverse = false) {root = _sort(root); if (is_reverse) apply_reverse(root);}
     void seg_sort(size_t l, size_t r, bool is_reverse = false) {auto [lf, tmp] = split_size(root, l); auto [md, rg] = split_size(tmp, r - l + 1); md = _sort(md); if (is_reverse) apply_reverse(md); root = merge(merge(lf, md), rg);}
 
