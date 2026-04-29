@@ -10,7 +10,7 @@ struct hasher_pow2 {
               __uint128_t
               >>>>;
     static constexpr size_t uN = N & (N - 1) ? 2 << __lg(N) : N;
-    static constexpr T MASK = ((T)-1) >> (uN - N);
+    static constexpr T MASK = T(-1) >> (uN - N);
 
     size_t n;
     vector<T> pref_hash;
@@ -31,7 +31,6 @@ struct hasher_pow2 {
 
 public:
     hasher_pow2() = default;
-
     template<typename Iterator>
     hasher_pow2(Iterator first, Iterator last): n(std::distance(first, last)), pref_hash(n), pows(n + 1) {
         pows[0] = 1;
@@ -42,11 +41,8 @@ public:
             pref_hash[i] = pref_hash[i - 1] + hash_elem(*first) * pows[i];
         }
         pows[n] = pows[n - 1] * P;
-        // ipows.resize(n + 1);
-        // ipows[n] = binpow(pows[n], MASK / 4);
-        // for (ssize_t i = n - 1; i >= 0; --i) {
-        //     ipows[i] = ipows[i + 1] * P;
-        // }
+        // ipows.resize(n + 1), ipows[n] = binpow(pows[n], MASK / 4);
+        // for (ssize_t i = n - 1; i >= 0; --i) ipows[i] = mulmod(ipows[i + 1], P);
     }
 
     //Returns hash of string l + r, where hash(l) = hl, hash(r) = hr, len(l) = len_l
@@ -62,8 +58,8 @@ public:
         if (l > r) return 0;
         assert(r < n);
         T o = pref_hash[r] - (l ? pref_hash[l - 1] : 0);
-        return o * pows[n - l] & MASK;
         // return o * ipows[l] & MASK;
+        return o * pows[n - l] & MASK;
     }
 
     //Returns the hash of string s[l, r] * k = s[l, r] + ... + s[l, r] (k - 1 concatenations)

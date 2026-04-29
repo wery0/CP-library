@@ -41,7 +41,6 @@ struct hasher64 {
 
 public:
     hasher64() = default;
-
     template<typename Iterator>
     hasher64(Iterator first, Iterator last): n(std::distance(first, last)), pref_hash(n), pows(n + 1) {
         pows[0] = 1;
