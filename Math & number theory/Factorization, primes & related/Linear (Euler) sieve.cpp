@@ -14,7 +14,7 @@ array<vector<T>, 4> linear_sieve(int n) {
     vector<T> cnt_div(n + 1, 1);
     vector<T> sum_div(n + 1, 1);           //Be careful with overflow
     vector<T> eul_fun(n + 1, 1);
-    vector<T> pow_of_min_div(n + 1);
+    vector<uint8_t> pow_of_min_div(n + 1);
     cnt_div[0] = sum_div[0] = eul_fun[0] = 0;
     for (int i = 2; i <= n; ++i) {
         if (min_div[i] == 0) {
