@@ -35,21 +35,16 @@ public:
         return pow(MOD - 2);
     }
 
-    friend Mint pow(const Mint& m, LONG pw) {return m.pow(pw);}
-    friend Mint inv(const Mint& m) {return m.inv();}
-
     Mint operator+(const Mint& rhs) const {return val + rhs.val >= MOD ? val + rhs.val - MOD : val + rhs.val;}
     Mint operator-(const Mint& rhs) const {return val < rhs.val ? MOD - rhs.val + val : val - rhs.val;}
-    Mint operator*(const Mint& rhs) const {return (LONG)1 * val * rhs.val % MOD;}
-    Mint operator/(const Mint& rhs) const {return (LONG)1 * val * rhs.inv().val % MOD;}
+    Mint operator*(const Mint& rhs) const {return LONG(val) * rhs.val % MOD;}
+    Mint operator/(const Mint& rhs) const {return LONG(val) * rhs.inv().val % MOD;}
     Mint operator-() const {return val ? MOD - val : val;}
-    template<typename T> friend Mint operator*(T lhs, const Mint& rhs) {return Mint(lhs) * rhs;}
-    template<typename T> friend Mint operator-(T lhs, const Mint& rhs) {return Mint(lhs) - rhs;}
 
     void operator+=(const Mint& rhs) {val += rhs.val; val -= val < MOD ? 0 : MOD;}
     void operator-=(const Mint& rhs) {val -= rhs.val; val += val < 0 ? MOD : 0;}
-    void operator*=(const Mint& rhs) {val = (LONG)1 * val * rhs.val % MOD;}
-    void operator/=(const Mint& rhs) {val = (LONG)1 * val * rhs.inv().val % MOD;}
+    void operator*=(const Mint& rhs) {val = LONG(val) * rhs.val % MOD;}
+    void operator/=(const Mint& rhs) {val = LONG(val) * rhs.inv().val % MOD;}
 
     Mint& operator++() {val = val == MOD - 1 ? 0 : val + 1; return *this;}
     Mint& operator--() {val = val ? val - 1 : MOD - 1; return *this;}
@@ -63,6 +58,10 @@ public:
 
     explicit operator bool() const {return val != 0;}
 
+    template<typename T> friend Mint operator*(T lhs, const Mint& rhs) {return Mint(lhs) * rhs;}
+    template<typename T> friend Mint operator-(T lhs, const Mint& rhs) {return Mint(lhs) - rhs;}
+    friend Mint pow(const Mint& m, LONG pw) {return m.pow(pw);}
+    friend Mint inv(const Mint& m) {return m.inv();}
     friend istream& operator>>(istream& in, Mint& rhs) {return in >> rhs.val;}
     friend ostream& operator<<(ostream& out, const Mint& rhs) {return out << rhs.val;}
 };

@@ -62,36 +62,35 @@ public:
         }
         return mint{u};
     }
-
-    friend MontgomeryMint pow(const MontgomeryMint& m, LONG pw) {return m.pow(pw);}
-    friend MontgomeryMint inv(const MontgomeryMint& m) {return m.inv();}
-
+    
     constexpr mint& operator+=(const mint& rhs) {if (INT(a += rhs.a - 2 * mod) < 0) a += 2 * mod; return *this;}
     constexpr mint& operator-=(const mint& rhs) {if (INT(a -= rhs.a) < 0) a += 2 * mod; return *this;}
     constexpr mint& operator*=(const mint& rhs) {a = reduce(ULONG(a) * rhs.a); return *this;}
     constexpr mint& operator/=(const mint& rhs) {*this *= rhs.inv(); return *this;}
-
+    
     constexpr mint operator+(const mint& rhs) const {return mint(*this) += rhs;}
     constexpr mint operator-(const mint& rhs) const {return mint(*this) -= rhs;}
     constexpr mint operator*(const mint& rhs) const {return mint(*this) *= rhs;}
     constexpr mint operator/(const mint& rhs) const {return mint(*this) /= rhs;}
     constexpr mint operator-() const {return mint() - mint(*this);}
-    template<typename T> friend mint operator*(T lhs, const mint& rhs) {return mint(lhs) * rhs;}
-    template<typename T> friend mint operator-(T lhs, const mint& rhs) {return mint(lhs) - rhs;}
-
+    
     static constexpr mint ONE = mint(1);
     mint& operator++() {*this += ONE; return *this;}
     mint& operator--() {*this -= ONE; return *this;}
     mint operator++(int) {mint res = *this; ++*this; return res;}
     mint operator--(int) {mint res = *this; ++*this; return res;}
-
+    
     constexpr bool operator==(const mint& rhs) const {return (a >= mod ? a - mod : a) == (rhs.a >= mod ? rhs.a - mod : rhs.a);}
     constexpr bool operator!=(const mint& rhs) const {return (a >= mod ? a - mod : a) != (rhs.a >= mod ? rhs.a - mod : rhs.a);}
     constexpr bool operator<(const mint& rhs) const {return get_val() < rhs.get_val();}
     constexpr bool operator>(const mint& rhs) const {return get_val() > rhs.get_val();}
-
+    
     explicit operator bool() const {return a != 0 && a != mod;}
-
+    
+    template<typename T> friend mint operator*(T lhs, const mint& rhs) {return mint(lhs) * rhs;}
+    template<typename T> friend mint operator-(T lhs, const mint& rhs) {return mint(lhs) - rhs;}
+    friend MontgomeryMint pow(const MontgomeryMint& m, LONG pw) {return m.pow(pw);}
+    friend MontgomeryMint inv(const MontgomeryMint& m) {return m.inv();}
     friend istream& operator>>(istream& is, mint& rhs) {LONG t; is >> t; rhs = mint(t); return is;}
     friend ostream& operator<<(ostream& os, const mint& rhs) {return os << rhs.get_val();}
 };

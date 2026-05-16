@@ -16,25 +16,19 @@ class Fraction {
 
     void normalize() {
         assert(denominator_ != 0);
-        if (denominator_ < 0) {
-            denominator_ *= -1;
-            numerator_ *= -1;
-        }
-        T gcd = __gcd(abs(numerator_), denominator_);
-        numerator_ /= gcd;
-        denominator_ /= gcd;
+        if (denominator_ < 0) denominator_ *= -1, numerator_ *= -1;
+        T g = __gcd(abs(numerator_), denominator_);
+        numerator_ /= g, denominator_ /= g;
     }
 
 public:
     Fraction() = default;
-
     template<typename U>
-    Fraction(U value) : numerator_(value) {
+    Fraction(U value): numerator_(value) {
         static_assert(is_integral_v<U> && is_signed_v<U>, "Numeric type must be signed and integral");
     }
-
-    template <typename U>
-    Fraction(U numerator, U denominator) : numerator_(numerator), denominator_(denominator) {
+    template<typename U>
+    Fraction(U numerator, U denominator): numerator_(numerator), denominator_(denominator) {
         static_assert(is_integral_v<U> && is_signed_v<U>, "Numeric type must be signed and integral");
         assert(denominator_ && "Fraction can't have a zero denominator");
         normalize();
@@ -46,36 +40,21 @@ public:
         normalize();
         return *this;
     }
-    friend Fraction operator+(const Fraction& lhs, const Fraction& rhs) {
-        Fraction res = lhs;
-        res += rhs;
-        return res;
-    }
-
+    
     Fraction& operator-=(const Fraction& rhs) {
         numerator_ = numerator_ * rhs.denominator_ - rhs.numerator_ * denominator_;
         denominator_ *= rhs.denominator_;
         normalize();
         return *this;
     }
-    friend Fraction operator-(const Fraction& lhs, const Fraction& rhs) {
-        Fraction res = lhs;
-        res -= rhs;
-        return res;
-    }
-
+    
     Fraction& operator*=(const Fraction& rhs) {
         numerator_ *= rhs.numerator_;
         denominator_ *= rhs.denominator_;
         normalize();
         return *this;
     }
-    friend Fraction operator*(const Fraction& lhs, const Fraction& rhs) {
-        Fraction res = lhs;
-        res *= rhs;
-        return res;
-    }
-
+    
     Fraction& operator/=(const Fraction& rhs) {
         assert(rhs.numerator_ && "Division by zero!");
         numerator_ *= rhs.denominator_;
@@ -83,58 +62,50 @@ public:
         normalize();
         return *this;
     }
-    friend Fraction operator/(const Fraction& lhs, const Fraction& rhs) {
-        Fraction res = lhs;
-        res /= rhs;
-        return res;
-    }
 
-    Fraction operator-() const { return {-numerator_, denominator_}; }
+    Fraction operator-() const {return {-numerator_, denominator_};}
 
-    bool operator==(const Fraction& rhs) const { return numerator_ == rhs.numerator_ && denominator_ == rhs.denominator_; }
-    friend bool operator!=(const Fraction& lhs, const Fraction& rhs) { return !(lhs == rhs); }
-    bool operator<(const Fraction& rhs) const { return numerator_ * rhs.denominator_ < rhs.numerator_ * denominator_; }
-    friend bool operator>(const Fraction& lhs, const Fraction& rhs) { return rhs < lhs; }
-    friend bool operator<=(const Fraction& lhs, const Fraction& rhs) { return !(rhs < lhs); }
-    friend bool operator>=(const Fraction& lhs, const Fraction& rhs) { return !(lhs < rhs); }
+    bool operator==(const Fraction& rhs) const {return numerator_ == rhs.numerator_ && denominator_ == rhs.denominator_;}
+    bool operator<(const Fraction& rhs) const {return numerator_ * rhs.denominator_ < rhs.numerator_ * denominator_;}
 
-    void pow(T power) {
-        if (numerator_ == 0) return;
+    Fraction pow(T power) {
+        Fraction res = *this;
+        if (numerator_ == 0) return res;
         T sign = numerator_ > 0 ? 1 : -1;
-        numerator_ *= sign;
+        res.numerator_ *= sign;
         if (power < 0) {
-            swap(numerator_, denominator_);
+            swap(res.numerator_, res.denominator_);
             power *= -1;
         }
-        numerator_ = binpow(numerator_, power);
-        denominator_ = binpow(denominator_, power);
-        if ((power & 1) && sign == -1) numerator_ *= -1;
-    }
-    friend Fraction pow(const Fraction& rhs, T power) {
-        Fraction res = rhs;
-        res.pow(power);
+        res.numerator_ = binpow(res.numerator_, power);
+        res.denominator_ = binpow(res.denominator_, power);
+        if ((power & 1) && sign == -1) res.numerator_ *= -1;
         return res;
     }
 
-    void invert() {
+    Fraction inv() {
         assert(numerator_ != 0 && "Can't invert 0");
-        swap(numerator_, denominator_);
-    }
-    friend Fraction invert(const Fraction& rhs) {
-        Fraction res = rhs;
-        res.invert();
-        return res;
+        return Fraction(denominator_, numerator_);
     }
 
-    friend Fraction mediant(const Fraction& lhs, const Fraction& rhs) { return {lhs.numerator_ + rhs.numerator_, lhs.denominator_ + rhs.denominator_}; }
+    bool is_zero() const {return numerator_ == 0;}
+    bool is_integer() const {return denominator_ == 1;}
+    int get_sign() const {return numerator_ < 0 ? -1 : numerator_ == 0 ? 0 : 1;}
+    T get_numerator() const {return numerator_;}
+    T get_denominator() const {return denominator_;}
 
-    bool is_zero() const { return numerator_ == 0; }
-    bool is_integer() const { return denominator_ == 1; }
-    int get_sign() const { return numerator_ < 0 ? -1 : numerator_ == 0 ? 0 : 1; }
-    T get_numerator() const { return numerator_; }
-    T get_denominator() const { return denominator_; }
-    friend Fraction abs(const Fraction& rhs) { return rhs.numerator_ > 0 ? rhs : -rhs; }
-
+    friend Fraction operator+(const Fraction& lhs, const Fraction& rhs) {Fraction res = lhs; res += rhs; return res;}
+    friend Fraction operator-(const Fraction& lhs, const Fraction& rhs) {Fraction res = lhs; res -= rhs; return res;}
+    friend Fraction operator*(const Fraction& lhs, const Fraction& rhs) {Fraction res = lhs; res *= rhs; return res;}
+    friend Fraction operator/(const Fraction& lhs, const Fraction& rhs) {Fraction res = lhs; res /= rhs; return res;}
+    friend bool operator!=(const Fraction& lhs, const Fraction& rhs) {return !(lhs == rhs);}
+    friend bool operator>(const Fraction& lhs, const Fraction& rhs) {return rhs < lhs;}
+    friend bool operator<=(const Fraction& lhs, const Fraction& rhs) {return !(rhs < lhs);}
+    friend bool operator>=(const Fraction& lhs, const Fraction& rhs) {return !(lhs < rhs);}
+    friend Fraction pow(const Fraction& rhs, T power) {return rhs.pow(power);}
+    friend Fraction inv(const Fraction& rhs) {return rhs.inv();}
+    friend Fraction mediant(const Fraction& lhs, const Fraction& rhs) {return {lhs.numerator_ + rhs.numerator_, lhs.denominator_ + rhs.denominator_};}
+    friend Fraction abs(const Fraction& rhs) {return rhs.numerator_ > 0 ? rhs : -rhs;}
     friend ostream& operator<<(ostream& os, const Fraction& rhs) {
         if (rhs.is_integer()) return os << rhs.numerator_;
         return os << string("\\frac{") << rhs.numerator_ << "}{" << rhs.denominator_ << "}";
